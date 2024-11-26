@@ -35,7 +35,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 
 # Application definition
-
+ACCOUNT_ADAPTER = 'tracelan.adapters.NoSignupAccountAdapter'
 INSTALLED_APPS = [
     'django.contrib.gis',
     'django.contrib.admin',
