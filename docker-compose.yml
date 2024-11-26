@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   traceagriweb:
     build:
@@ -61,3 +59,8 @@ services:
     depends_on:
       - redis
       - db
+
+volumes:
+  static_volume:
+  staticfiles_volume:
+  media_volume:
