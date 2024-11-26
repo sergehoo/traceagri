@@ -17,17 +17,15 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      - agridb
       - redis
 
-  db:
+  agridb:
     image: postgis/postgis:13-3.1
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
 
   redis:
     image: redis:6
@@ -45,7 +43,7 @@ services:
       - .env
     depends_on:
       - redis
-      - db
+      - agridb
 
   celery-beat:
     build:
@@ -58,7 +56,7 @@ services:
       - .env
     depends_on:
       - redis
-      - db
+      - agridb
 
 volumes:
   static_volume:
