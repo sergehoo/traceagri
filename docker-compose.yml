@@ -1,3 +1,68 @@
+#services:
+#  traceagriweb:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: >
+#      sh -c "python manage.py migrate &&
+#             python manage.py collectstatic --noinput &&
+#             gunicorn traceagri.wsgi:application --bind 0.0.0.0:8000"
+#    ports:
+#      - "2610:8000"
+#    volumes:
+#      - .:/app
+#      - static_volume:/traceagri-app/static
+#      - staticfiles_volume:/traceagri-app/staticfiles
+#      - media_volume:/traceagri-app/media
+#    env_file:
+#      - .env
+#    depends_on:
+#      - agridb
+#      - redis
+#
+#  agridb:
+#    image: postgis/postgis:13-3.1
+#    environment:
+#      POSTGRES_DB: ${DB_NAME}
+#      POSTGRES_USER: ${DB_USER}
+#      POSTGRES_PASSWORD: ${DB_PASSWORD}
+#
+#  redis:
+#    image: redis:6
+#    ports:
+#      - "2624:6379"
+#
+#  celery:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: celery -A traceagri worker --loglevel=info
+#    volumes:
+#      - .:/app
+#    env_file:
+#      - .env
+#    depends_on:
+#      - redis
+#      - agridb
+#
+#  celery-beat:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: celery -A traceagri beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+#    volumes:
+#      - .:/app
+#    env_file:
+#      - .env
+#    depends_on:
+#      - redis
+#      - agridb
+#
+#volumes:
+#  static_volume:
+#  staticfiles_volume:
+#  media_volume:
+
 services:
   traceagriweb:
     build:
@@ -19,6 +84,7 @@ services:
     depends_on:
       - agridb
       - redis
+    restart: always
 
   agridb:
     image: postgis/postgis:13-3.1
@@ -27,10 +93,13 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
+    restart: always
+
   redis:
     image: redis:6
     ports:
-      - "2624:6379"
+      - "6379:6379"  # Redirection directe pour éviter la confusion
+    restart: always
 
   celery:
     build:
@@ -44,6 +113,9 @@ services:
     depends_on:
       - redis
       - agridb
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0  # Utilisation du nom du service Docker
+    restart: always
 
   celery-beat:
     build:
@@ -57,6 +129,9 @@ services:
     depends_on:
       - redis
       - agridb
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0  # Utilisation du nom du service Docker
+    restart: always
 
 volumes:
   static_volume:
