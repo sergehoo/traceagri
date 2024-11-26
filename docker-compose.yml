@@ -80,7 +80,7 @@ services:
       - staticfiles_volume:/traceagri-app/staticfiles
       - media_volume:/traceagri-app/media
     env_file:
-      - .env
+      - ./.env
     depends_on:
       - agridb
       - redis
@@ -93,7 +93,18 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
     restart: always
+
+  agriadminer:
+    image: adminer
+    restart: always
+    ports:
+      - 2611:8080  # Port mapping for Adminer
+    environment:
+      - ADMINER_DEFAULT_SERVER=agridb  # Default DB server in Adminer
 
   redis:
     image: redis:6
@@ -134,6 +145,8 @@ services:
     restart: always
 
 volumes:
+  pgdata:
+    driver: local
   static_volume:
   staticfiles_volume:
   media_volume:
