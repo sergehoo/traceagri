@@ -1,0 +1,153 @@
+{% load static %}
+<div>
+
+
+
+<div class="d-flex flex-column-fluid">
+    <div class="container">
+        <!-- Barre de recherche -->
+        <div class="input-group mb-3">
+            <div class="col-lg-10"><input type="text" class="form-control" placeholder="Rechercher un producteur..."
+                                          unicorn:model.debounce.300ms="search"></div>
+            <div class="col-lg-2 card">
+                <div class="dropdown dropdown-inline ml-2">
+                    <a href="#" class="btn btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="navi-icon"> <i class="flaticon2-list-1 text-success"></i></span> Filtre</a>
+                    <div class="dropdown-menu p-0 m-0 dropdown-menu-md dropdown-menu-right">
+                        <!--begin::Naviigation-->
+                        <ul class="navi">
+                            <li class="navi-header font-weight-bold py-5">
+                                <span class="font-size-lg">Filtrer par :</span>
+                            </li>
+                            <li class="navi-separator mb-3 opacity-70"></li>
+                            <li class="navi-item">
+                                <a href="#" class="navi-link">
+                                    <span class="navi-icon"><i class="flaticon2-group"></i></span>
+                                    <span class="navi-text">Coopérative</span>
+                                    <span class="label label-light-danger label-rounded font-weight-bold">3</span>
+                                </a>
+                            </li>
+                            <li class="navi-item">
+                                <a href="#" class="navi-link">
+                                    <span class="navi-icon"><i class="navi-icon flaticon2-map"></i></span>
+                                    <span class="navi-text">Regions</span>
+                                    <span class="navi-label">
+
+            </span>
+                                </a>
+                            </li>
+                            <li class="navi-item">
+                                <a href="#" class="navi-link">
+                                    <span class="navi-icon"><i class="navi-icon flaticon2-pin"></i></span>
+                                    <span class="navi-text">District</span>
+                                </a>
+                            </li>
+
+
+                        </ul>
+                        <!--end::Naviigation-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Liste des producteurs -->
+        <div class="row">
+          {% if producteurs_liste %}
+            {% for producteur in producteurs_liste %}
+                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+                    <div class="card card-custom gutter-b card-stretch">
+                        <div class="card-body pt-4">
+                            <!-- Toolbar -->
+                            <div class="d-flex justify-content-end">
+                                <div class="dropdown dropdown-inline" data-toggle="tooltip" title="Actions rapides">
+                                    <a href="#" class="btn btn-clean btn-hover-light-primary btn-sm btn-icon"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="ki ki-bold-more-hor"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+                                        <ul class="navi navi-hover">
+                                            <li class="navi-item">
+                                                <a href="{% url 'producteurs-details' producteur.id %}" class="navi-link">
+                                                    <span class="navi-text">Voir détails</span>
+                                                </a>
+                                            </li>
+                                            <li class="navi-item">
+                                                <a href="#" class="navi-link">
+                                                    <span class="navi-text">Modifier</span>
+                                                </a>
+                                            </li>
+                                            <li class="navi-item">
+                                                <a href="#" class="navi-link">
+                                                    <span class="navi-text">Supprimer</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- User Info -->
+                            <div class="d-flex align-items-end mb-7">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 mr-4 mt-lg-0 mt-3">
+                                        <div class="symbol symbol-circle symbol-lg-75">
+                                            {% if producteur.photo %}
+                                                <img src="{{ producteur.photo }}" alt="image"/>
+                                            	{% else %}
+                                                <img src="{% static 'assets/media/users/default.jpg' %}" alt="image"/>
+                                            {% endif %}
+
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <a href="#" class="text-dark font-weight-bold text-hover-primary font-size-h4 mb-0">
+                                            {{ producteur.nom|upper }} {{ producteur.prenom|upper|truncatewords:1 }}
+                                        </a>
+                                        <span class="text-muted font-weight-bold">{{ producteur.cooperative_nom }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Parcelles Info -->
+                            <p class="mb-7">
+                                <strong>Nombre Parcelles:</strong>
+                                <span class="badge badge-primary float-right">{{ producteur.parcelle_count }}</span>
+                            </p>
+                            <p>
+                                <strong>Dimensions cumulées:</strong>
+                                <span class="badge badge-primary float-right">
+                                    {{ producteur.parcelle_total_dimension|floatformat:0 }} ha
+                                </span>
+                            </p>
+                            <!-- Téléphone et Localité -->
+                            <div class="mb-7">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-dark-75 font-weight-bolder mr-2">Téléphone:</span>
+                                    <a href="#" class="text-muted text-hover-primary">{{ producteur.telephone }}</a>
+                                </div>
+
+                            </div>
+                            <a href="#"
+                               class="btn btn-block btn-sm btn-light-warning font-weight-bolder text-uppercase py-4">Contacter</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            {% if page > 1 %}
+                <button class="btn btn-sm btn-primary" unicorn:click="change_page({{ page|add:-1 }})">Précédent</button>
+            {% endif %}
+            <span class="text-white">Page {{ page }} sur {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <button class="btn btn-sm btn-primary" unicorn:click="change_page({{ page|add:1 }})">Suivant</button>
+            {% endif %}
+        </div>
+    </div>
+  {% else %}
+                <!-- Message lorsque aucun producteur n'est trouvé -->
+                <div class="col-12 text-center mt-5">
+                    <h5 class="text-muted">Aucun producteur trouvé pour cette recherche.</h5>
+                </div>
+            {% endif %}
+</div>
+</div>

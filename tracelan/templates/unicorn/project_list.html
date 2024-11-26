@@ -1,0 +1,194 @@
+{% load static %}
+{% load humanize %}
+<div>
+<style>
+    .card-header {
+    height: 100px;
+}
+</style>
+ <!--begin::Content-->
+                <div class="content  d-flex flex-column flex-column-fluid" id="kt_content">
+                    <!--begin::Entry-->
+                    <div class="d-flex flex-column-fluid">
+    <div class="container">
+    <div class="input-group mb-3">
+            <div class="col-lg-10"><input type="text" class="form-control" placeholder="Rechercher un producteur..." unicorn:model.debounce.300ms="search"></div>
+            <div class="col-lg-2 card">
+                <div class="dropdown dropdown-inline ml-2">
+                    <a href="#" class="btn btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="navi-icon"> <i class="flaticon2-list-1 text-success"></i></span> Filtre</a>
+                    <div class="dropdown-menu p-0 m-0 dropdown-menu-md dropdown-menu-right">
+                        <!--begin::Naviigation-->
+                        <ul class="navi">
+                            <li class="navi-header font-weight-bold py-5">
+                                <span class="font-size-lg">Filtrer par :</span>
+                            </li>
+                            <li class="navi-separator mb-3 opacity-70"></li>
+                            <li class="navi-item">
+                                <a href="#" class="navi-link">
+                                    <span class="navi-icon"><i class="flaticon2-group"></i></span>
+                                    <span class="navi-text">Coopérative</span>
+                                    <span class="label label-light-danger label-rounded font-weight-bold">3</span>
+                                </a>
+                            </li>
+                            <li class="navi-item">
+                                <a href="#" class="navi-link">
+                                    <span class="navi-icon"><i class="navi-icon flaticon2-map"></i></span>
+                                    <span class="navi-text">Regions</span>
+                                    <span class="navi-label">
+
+            </span>
+                                </a>
+                            </li>
+                            <li class="navi-item">
+                                <a href="#" class="navi-link">
+                                    <span class="navi-icon"><i class="navi-icon flaticon2-pin"></i></span>
+                                    <span class="navi-text">District</span>
+                                </a>
+                            </li>
+
+
+                        </ul>
+                        <!--end::Naviigation-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Début de la liste des projets -->
+
+                {% for project in projects %}
+                <div class="col-xl-4">
+                    <div class="card card-custom gutter-b card-stretch">
+
+                        <div class="card-header"  style=" background-image: url({% static 'assets/media/bg/bgprojetjaune.png' %}); background-position: center;background-repeat: no-repeat;background-size: cover; height: 150px;" >
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+
+                                <div class="d-flex flex-column mr-auto">
+                                    <div class="d-flex flex-column mr-auto">
+                                        <a href="{% url 'project_details' project.pk %}"
+                                           class="text-dark text-hover-primary font-size-h4 font-weight-bolder mb-1">
+                                            {{ project.name }}
+
+                                        </a>
+
+                                        <span class="text-muted font-weight-bold mb-3">
+                                            {{ project.description|truncatechars:100 }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex mb-5">
+                                <div class="d-flex align-items-center mr-7">
+                                    <span class="font-weight-bold mr-4">Début</span>
+                                    <span class="btn btn-light-primary btn-sm font-weight-bold btn-upper btn-text">
+                                        {{ project.start_date|naturalday }}
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="font-weight-bold mr-4">Fin</span>
+                                    <span class="btn btn-light-danger btn-sm font-weight-bold btn-upper btn-text">
+                                        {{ project.end_date|naturalday  }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex mb-5 align-items-cente">
+                                <span class="d-block font-weight-bold mr-5">Progress</span>
+                                <div class="d-flex flex-row-fluid align-items-center">
+                                    <div class="progress progress-xs mt-2 mb-2 w-100">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress }}%;" aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="ml-3 font-weight-bolder">{{ project.progress }}%</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer d-flex align-items-center">
+                            <div class="d-flex">
+                                <span class="svg-icon svg-icon-gray-500">
+                                    <i class="flaticon-list"></i>
+                                </span>
+                                <a href="{{ project.tasks_url }}" class="font-weight-bolder text-primary ml-2">
+                                    {{ project.tasks_count }} Tasks
+                                </a>
+
+                            </div>
+                            <div class="d-flex ml-40">
+                                <div class="dropdown dropdown-inline align-right" data-toggle="tooltip"
+                                     title="Quick actions" data-placement="left">
+                                    <a href="#" class="btn btn-clean btn-hover-light-primary btn-sm btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ki ki-bold-more-hor"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+                                        <ul class="navi navi-hover">
+                                            <li class="navi-header pb-1">
+                                                <span class="text-primary text-uppercase font-weight-bold font-size-sm">Actions:</span>
+                                            </li>
+                                            <li class="navi-item">
+                                                <a href="{% url 'project_details' project.pk %}" class="navi-link">
+                                                    <span class="navi-icon"><i class="flaticon2-list-2"></i></span>
+                                                    <span class="navi-text">Details</span>
+                                                </a>
+                                            </li>
+                                            <li class="navi-item">
+                                                <a href="{{ project.edit_url }}" class="navi-link">
+                                                    <span class="navi-icon"><i class="flaticon2-writing"></i></span>
+                                                    <span class="navi-text">Modifier</span>
+                                                </a>
+                                            </li>
+                                            <li class="navi-item">
+                                                <a href="{{ project.delete_url }}" class="navi-link">
+                                                    <span class="navi-icon"><i class="flaticon-delete"></i></span>
+                                                    <span class="navi-text">Supprimer</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            <!-- Pagination -->
+            <div class="col-12 d-flex justify-content-center mt-5">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        {% if projects.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="#" wire:click="gotoPage({{ projects.previous_page_number }})">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% for page in projects.paginator.page_range %}
+                        <li class="page-item {% if page == projects.number %}active{% endif %}">
+                            <a class="page-link" href="#" wire:click="gotoPage({{ page }})">
+                                {{ page }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        {% if projects.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="#" wire:click="gotoPage({{ projects.next_page_number }})">
+                                Next
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+                    <!--end::Entry-->
+                </div>
+                <!--end::Content-->
+</div>

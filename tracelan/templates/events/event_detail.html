@@ -1,0 +1,508 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<style>
+    .tagify__tag--custom {
+        background-color: #007bff;
+        color: white;
+        border-radius: 20px;
+        padding: 5px 10px;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .tagify__tag--custom .tagify__tag-text {
+        margin-right: 8px;
+    }
+
+    .tagify__tag--custom .tagify__tag__removeBtn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
+
+    <div class="d-flex flex-column-fluid mt-20">
+        <!--begin::Container-->
+        <div class=" container-fluid ">
+            <!--begin::Card-->
+            <div class="card card-custom gutter-b">
+             <div class="card-header" style="background-image: url({{ events.banner.url }}); background-position: center; background-repeat: no-repeat; background-size: cover; height: 250px;"></div>
+                <div class="card-body text-center">
+                    <h1 class="text-dark font-weight-bold">{{ events.name|upper }}</h1>
+                <p class="text-muted">{{ events.description }}</p>
+                    <div class="d-flex flex-wrap align-items-center py-2">
+                    <div class="d-flex align-items-center mr-10">
+                        <div class="mr-10">
+                            <div class="font-weight-bold mb-2"> Date & heure de début</div>
+                            <span class="btn btn-sm btn-text btn-light-primary text-uppercase font-weight-bold"> {{ events.start_date|date:"d M Y, H:i" }} </span>
+                        </div>
+                        <div class="">
+                            <div class="font-weight-bold mb-2">Date & heure de fin</div>
+                            <span class="btn btn-sm btn-text btn-light-danger text-uppercase font-weight-bold">{{ events.end_date|date:"d M Y, H:i" }}</span>
+                        </div>
+
+
+                    </div>
+
+                    <div class="d-flex align-items-center mr-10">
+                        <div class="mr-10">
+                            <div class="font-weight-bold mb-2"> Lieu :</div>
+                            <span class="btn btn-sm btn-text btn-light-dark text-uppercase font-weight-bold"> {{ events.location }}</span>
+                        </div>
+
+
+                    </div>
+                </div>
+                </div>
+            </div>
+            <!--end::Card-->
+
+            <!--begin::Row-->
+            <div class="row">
+                <div class="col-lg-7">
+                    <!--begin::Advance Table Widget 3-->
+                    <div class="card card-custom card-stretch gutter-b">
+                        <!--begin::Header-->
+                        <div class="card-header border-0 py-5">
+                            <h3 class="card-title align-items-start flex-column">
+                                <span class="card-label font-weight-bolder text-dark">Liste des Invités</span>
+                                <span class="text-muted mt-3 font-weight-bold font-size-sm">Liste des Invités à cet evenement</span>
+
+                            </h3>
+                            <div class="card-toolbar">
+                                <a href="#" data-toggle="modal" data-target="#addmembers"
+                                   class="btn btn-success font-weight-bolder font-size-sm"><span
+                                        class="svg-icon svg-icon-md svg-icon-white"><!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Add-user.svg--><svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+                                        viewBox="0 0 24 24" version="1.1">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon points="0 0 24 0 24 24 0 24"/>
+        <path d="M18,8 L16,8 C15.4477153,8 15,7.55228475 15,7 C15,6.44771525 15.4477153,6 16,6 L18,6 L18,4 C18,3.44771525 18.4477153,3 19,3 C19.5522847,3 20,3.44771525 20,4 L20,6 L22,6 C22.5522847,6 23,6.44771525 23,7 C23,7.55228475 22.5522847,8 22,8 L20,8 L20,10 C20,10.5522847 19.5522847,11 19,11 C18.4477153,11 18,10.5522847 18,10 L18,8 Z M9,11 C6.790861,11 5,9.209139 5,7 C5,4.790861 6.790861,3 9,3 C11.209139,3 13,4.790861 13,7 C13,9.209139 11.209139,11 9,11 Z"
+              fill="#000000" fill-rule="nonzero" opacity="0.3"/>
+        <path d="M0.00065168429,20.1992055 C0.388258525,15.4265159 4.26191235,13 8.98334134,13 C13.7712164,13 17.7048837,15.2931929 17.9979143,20.2 C18.0095879,20.3954741 17.9979143,21 17.2466999,21 C13.541124,21 8.03472472,21 0.727502227,21 C0.476712155,21 -0.0204617505,20.45918 0.00065168429,20.1992055 Z"
+              fill="#000000" fill-rule="nonzero"/>
+    </g>
+</svg><!--end::Svg Icon--></span>Ajout de nouveaux Invités</a>
+                                <div class="modal fade" id="addmembers" data-backdrop="static" tabindex="-1"
+                                     role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Ajouter des Invités</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <i aria-hidden="true" class="ki ki-close"></i>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+
+                                                <form method="post" action="{% url 'add_invites_and_send_emails' events.id %}"
+                                                      enctype="multipart/form-data">
+                                                    {% csrf_token %}
+
+                                                    <!-- Sélection du type d'invité -->
+                                                    <div class="form-group">
+                                                        <label for="id_invite_type">Type d'invité :</label>
+                                                        <select name="invite_type" id="id_invite_type"
+                                                                class="form-control">
+                                                            <option value="">-- Sélectionnez un type --</option>
+                                                            {% for choice, display in addinviteForm.fields.invite_type.choices %}
+                                                                <option value="{{ choice }}">{{ display }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Liste des entités selon le type -->
+                                                    <div class="form-group">
+                                                        <label for="id_invite_list">Liste des Invités :</label>
+                                                        <select id="id_invite_list" class="form-control" multiple>
+                                                            <!-- Les options seront chargées dynamiquement -->
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Zone de texte pour afficher les noms sélectionnés sous forme de tags -->
+                                                    <div class="form-group">
+                                                        <label for="id_selected_invites">Invités sélectionnés :</label>
+                                                        <input type="text" id="id_selected_invites" class="form-control"
+                                                               name="invite_names"
+                                                               placeholder="Invités sélectionnés"/>
+                                                    </div>
+
+                                                    <input type="hidden" name="invite_ids" id="id_invite_ids"/>
+
+                                                    <button type="submit" class="btn btn-primary btn-block"
+                                                            name="add_member">Ajouter
+                                                    </button>
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 pb-3" >
+
+                            <table class="table table-head-custom table-head-bg">
+                                <thead>
+                                    <tr class="text-uppercase">
+                                        <th style="min-width: auto">Nom de l'Invité</th>
+                                        <th style="min-width: auto">Type</th>
+                                        <th style="min-width: auto">Date</th>
+                                        <th style="min-width: auto">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for invite in invites %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="symbol symbol-50 flex-shrink-0 mr-4">
+                                                    <div class="symbol-label" style="background-image: url('{% static 'assets/media/users/default.jpg' %}')"></div>
+                                                </div>
+                                                <div>
+                                                    <span class="text-dark-75 font-weight-bolder text-hover-primary font-size-lg">{{ invite.get_invite }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ invite.get_invite_type_display }}</td>
+                                        <td>{{ invite.created_at|naturaltime}}</td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-clean btn-icon" title="Supprimer">
+                                                <i class="flaticon2-cancel text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!--end::Body-->
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <!--begin::Charts Widget 3-->
+                    <div class="card card-custom card-stretch gutter-b">
+                        <!--begin::Header-->
+                        <div class="card-header h-auto border-0">
+                            <div class="card-title py-5">
+                                <h3 class="card-label">
+                                    <span class="d-block text-dark font-weight-bolder">Présence confirmées:</span>
+                                </h3>
+                            </div>
+
+                        </div>
+                        <!--end::Header-->
+
+                        <!--begin::Body-->
+                        <div class="card-body">
+                           <table class="table table-head-custom table-head-bg table-responsive">
+    <thead>
+        <tr class="text-uppercase">
+            <th style="min-width: 250px">Nom de l'Invité</th>
+            <th style="min-width: 150px">Coopérative</th>
+            <th style="min-width: 120px">Date de Confirmation</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invite in invites_confirmes %}
+        <tr>
+            <td>
+                {% with invite.get_invite as entity %}
+                    {% if invite.invite_type == 'producteur' %}
+                        {{ entity.nom }} {{ entity.prenom }}
+                    {% elif invite.invite_type == 'cooperative' or invite.invite_type == 'region' or invite.invite_type == 'district' or invite.invite_type == 'ville' %}
+                        {{ entity.name }}
+                    {% endif %}
+                {% endwith %}
+            </td>
+            <td>
+                {% if invite.invite_type == 'producteur' %}
+                    {{ entity.cooperative.nom }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {{ invite.confirmation_date|naturaltime }}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">Aucun invité n'a confirmé sa présence.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+                        </div>
+                        <!--end::Body-->
+                    </div>
+                    <!--end::Charts Widget 3-->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+
+                    <div class="card card-custom card-stretch gutter-b">
+                        <!--begin::Header-->
+                        <div class="card-header border-0">
+                            <h3 class="card-title font-weight-bolder text-dark">Programme des activites</h3>
+                            <div class="card-toolbar">
+                                <div class="dropdown dropdown-inline">
+                                    <a href="#" class="btn btn-clean btn-hover-light-primary btn-sm btn-icon"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="ki ki-bold-more-ver"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+                                        <!--begin::Navigation-->
+                                        <ul class="navi navi-hover">
+
+                                            <li class="navi-separator mb-3 opacity-70"></li>
+                                            <li class="navi-item">
+                                                <a href="#" class="navi-link">
+            <span class="navi-text">
+                <span class="label label-xl label-inline label-light-dark">Voir les tâches du projet</span>
+            </span>
+                                                </a>
+                                            </li>
+                                            <li class="navi-item">
+                                                <a href="#" class="navi-link">
+            <span class="navi-text">
+                <span class="label label-xl label-inline label-light-dark">Voir toutes les tâches</span>
+            </span>
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                        <!--end::Navigation-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end::Header-->
+
+                        <!--begin::Body-->
+                        <div class="card-body pt-2">
+                            {% for task in latest_tasks %}
+                                <!--begin::Item-->
+                                <div class="d-flex flex-wrap align-items-center mb-10">
+
+                                    <!--begin::Title-->
+                                    <div class="d-flex flex-column flex-grow-1 my-lg-0 my-2 pr-3">
+                                        <a href="#"
+                                           class="text-dark-75 font-weight-bolder text-hover-primary font-size-lg">
+                                            {{ task.name|upper }}
+                                        </a>
+                                        <span class="text-muted font-weight-bold font-size-sm my-1">{{ task.description|truncatechars:60 }}</span>
+                                        <span class="text-muted font-weight-bold font-size-sm">Assigner à: <span
+                                                class="text-primary font-weight-bold">{{ task.assigned_to }}</span></span>
+                                        <span class="text-muted font-weight-bold font-size-sm">Assigner par: <span
+                                                class="text-primary font-weight-bold">{{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</span></span>
+                                    </div>
+                                    <!--end::Title-->
+
+                                    <!--begin::Info-->
+                                    <div class="d-flex align-items-center py-lg-0 py-2">
+                                        <div class="d-flex flex-column text-right">
+                    <span class="badge badge-light text-dark-75 font-weight-bolder font-size-h4">
+                        {{ task.get_priority_display|upper }}
+                    </span>
+                                            <span class="text-muted font-size-sm font-weight-bolder">
+                         {{ task.get_status_display|upper }}
+                    </span>
+                                        </div>
+                                    </div>
+                                    <!--end::Info-->
+                                </div>
+                                <!--end::Item-->
+                            {% endfor %}
+                        </div>
+                        <!--end::Body-->
+                    </div>
+
+                </div>
+                <div class="col-lg-4">
+                    <!--begin::Charts Widget 1-->
+                    <div class="card card-custom card-stretch gutter-b">
+                        <!--begin::Header-->
+                        <div class="card-header h-auto border-0">
+                            <!--begin::Title-->
+                            <div class="card-title py-5">
+                                <h3 class="card-label">
+                                    <span class="d-block text-dark font-weight-bolder">Taux d'Interet</span>
+                                    <span class="d-block text-muted mt-2 font-size-sm">Evaluation des interet sur l'evenement</span>
+                                </h3>
+                            </div>
+                            <!--end::Title-->
+                        </div>
+                        <!--end::Header-->
+
+                        <!--begin::Body-->
+                        <div class="card-body">
+                            <!--begin::Chart-->
+                            <div id="taskStatusChart"></div>
+                            <!--end::Chart-->
+                        </div>
+                        <!--end::Body-->
+                    </div>
+                    <!--end::Charts Widget 1-->
+                </div>
+                <div class="col-lg-4">
+                    <!--begin::List Widget 8-->
+                    <div class="card card-custom card-stretch gutter-b">
+                        <!--begin::Header-->
+                        <div class="card-header border-0">
+                            <h3 class="card-title font-weight-bolder text-dark">5 derniers depenses déclarées </h3>
+                        </div>
+                        <!--end::Header-->
+
+                        <!--begin::Body-->
+                        <div class="card-body pt-0">
+                            <!--begin::Item-->
+                            <div class="mb-10">
+                                <!--begin::Section-->
+                                {% for depense in latest_depenses %}
+                                    <div class="d-flex align-items-center">
+
+                                        <!--begin::Text-->
+                                        <div class="d-flex flex-column flex-grow-1">
+                                            <a href="#"
+                                               class="font-weight-bold text-dark-75 text-hover-primary font-size-lg mb-1">Cathégorie
+                                                de la dépense</a>
+                                            <span class="text-muted font-weight-bold">{{ depense.categorie }}</span>
+                                        </div>
+                                        <div class="d-flex flex-column flex-grow-1 mt-5">
+                                            <a href="#"
+                                               class="font-weight-bold text-dark-75 text-hover-primary font-size-lg mb-1">Montant</a>
+                                            <span class="text-muted font-weight-bold">{{ depense.montant|intcomma }} F CFA</span>
+                                        </div>
+
+                                        <!--end::Text-->
+                                    </div>
+                                {% endfor %}
+                                <!--end::Section-->
+
+                            </div>
+                            <!--end::Item-->
+                        </div>
+                        <!--end::Body-->
+                    </div>
+                    <!--end: Card-->
+                    <!--end::List Widget 8-->
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script>
+    document.getElementById('id_invite_type').addEventListener('change', function () {
+        const inviteType = this.value;
+        const inviteList = document.getElementById('id_invite_list');
+
+        if (inviteType) {
+            // Effectuer une requête AJAX pour récupérer les entités
+            fetch(`/get-invite-list/?invite_type=${inviteType}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Effacer les options existantes
+                    inviteList.innerHTML = '';
+
+                    // Ajouter les nouvelles options
+                    data.entities.forEach(entity => {
+                        const option = document.createElement('option');
+                        option.value = entity.id;
+
+                        // Déterminer le nom à afficher
+                        if (entity.nom && entity.prenom) {
+                            option.textContent = `${entity.nom} ${entity.prenom}`;
+                        } else if (entity.nom) {
+                            option.textContent = entity.nom;
+                        } else {
+                            option.textContent = entity.name;
+                        }
+
+                        option.dataset.name = option.textContent; // Ajouter le nom en tant qu'attribut de données
+                        inviteList.appendChild(option);
+                    });
+                });
+        } else {
+            inviteList.innerHTML = '';
+        }
+    });
+
+    // Activer Tagify sur le champ des invités sélectionnés
+    const input = document.querySelector('#id_selected_invites');
+    const tagify = new Tagify(input);
+
+    // Ajouter les noms sélectionnés en tant que tags
+    document.getElementById('id_invite_list').addEventListener('change', function () {
+        const selectedOptions = Array.from(this.selectedOptions).map(option => {
+            return {
+                value: option.value, // ID de l'entité
+                name: option.dataset.name || option.textContent, // Nom de l'entité
+            };
+        });
+
+        tagify.removeAllTags(); // Supprimer les anciens tags
+        tagify.addTags(selectedOptions.map(item => ({
+            value: item.name, // Nom affiché dans les tags
+            title: item.value, // ID de l'entité (stocké en interne)
+        }))); // Ajouter les nouveaux tags avec les noms
+
+        // Mettre à jour le champ masqué avec les IDs sélectionnés
+        document.getElementById('id_invite_ids').value = selectedOptions.map(option => option.value).join(',');
+    });
+</script>
+{#    <script>#}
+{#        document.getElementById('id_invite_type').addEventListener('change', function () {#}
+{#            const inviteType = this.value;#}
+{#            const inviteList = document.getElementById('id_invite_list');#}
+{##}
+{#            if (inviteType) {#}
+{#                fetch(`/get-invite-list/?invite_type=${inviteType}`)#}
+{#                    .then(response => response.json())#}
+{#                    .then(data => {#}
+{#                        // Effacer les options existantes#}
+{#                        inviteList.innerHTML = '';#}
+{##}
+{#                        // Ajouter les nouvelles options#}
+{#                        data.entities.forEach(entity => {#}
+{#                            const option = document.createElement('option');#}
+{#                            option.value = entity.id;#}
+{#                            if (entity.nom && entity.prenom) {#}
+{#                                option.textContent = `${entity.nom} ${entity.prenom}`;#}
+{#                            } else if (entity.nom) {#}
+{#                                option.textContent = entity.nom;#}
+{#                            } else {#}
+{#                                option.textContent = entity.name;#}
+{#                            }#}
+{#                            inviteList.appendChild(option);#}
+{#                        });#}
+{#                    });#}
+{#            } else {#}
+{#                inviteList.innerHTML = '';#}
+{#            }#}
+{#        });#}
+{##}
+{#        // Ajouter les IDs sélectionnés dans la zone de texte#}
+{#        document.getElementById('id_invite_list').addEventListener('change', function () {#}
+{#            const selectedOptions = Array.from(this.selectedOptions).map(option => option.value);#}
+{#            document.getElementById('id_invite_ids').value = selectedOptions.join(',');#}
+{#        });#}
+{#    </script>#}
+{% endblock %}

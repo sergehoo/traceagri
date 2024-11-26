@@ -1,0 +1,117 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+   <div class="container-fluid mt-20">
+    <!--begin::Card-->
+    <div class="card card-custom gutter-b">
+        <div class="card-body">
+            <div class="d-flex">
+                <!--begin: Pic-->
+                <div class="flex-shrink-0 mr-7 mt-lg-0 mt-3">
+                    <div class="symbol symbol-50 symbol-lg-120">
+                        <img alt="Pic" src="{% static 'assets/media/bg/cooperative.jpg' %}"/>
+                    </div>
+                </div>
+                <!--end: Pic-->
+
+                <!--begin: Info-->
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div class="mr-3">
+                            <a href="#" class="d-flex align-items-center text-dark text-hover-primary font-size-h5 font-weight-bold mr-3">
+                                {{ cooperative.nom }} <i class="flaticon2-correct text-success icon-md ml-2"></i>
+                            </a>
+                            <div class="d-flex flex-wrap my-2">
+                                <span class="text-muted font-weight-bold">Code : {{ cooperative.code }}</span>
+                                <span class="text-muted font-weight-bold ml-4">Ville : {{ cooperative.ville.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap justify-content-between">
+                        <div class="flex-grow-1 font-weight-bold text-dark-50 py-5 py-lg-2">
+                            Président : {{ cooperative.president.nom }}
+                        </div>
+                    </div>
+                </div>
+                <!--end: Info-->
+            </div>
+        </div>
+    </div>
+    <!--end::Card-->
+
+    <!--begin::Membres-->
+    <div class="card card-custom gutter-b mt-10">
+        <div class="card-header border-0">
+            <h3 class="card-title font-weight-bolder text-dark">Membres de la Coopérative</h3>
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-borderless table-vertical-center">
+                    <thead>
+                    <tr>
+                        <th class="pl-0">Nom</th>
+                        <th>Téléphone</th>
+                        <th>Date de Naissance</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for member in members %}
+                        <tr>
+                            <td>{{ member.nom }} {{ member.prenom }}</td>
+                            <td>{{ member.telephone }}</td>
+                            <td>{{ member.date_naissance|date:"d/m/Y" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">Aucun membre trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--end::Membres-->
+
+    <!--begin::Evénements-->
+    <div class="card card-custom gutter-b mt-10">
+        <div class="card-header border-0">
+            <h3 class="card-title font-weight-bolder text-dark">Événements associés</h3>
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table table-borderless table-vertical-center">
+                    <thead>
+                    <tr>
+                        <th class="pl-0">Nom de l'Événement</th>
+                        <th>Date de Début</th>
+                        <th>Date de Fin</th>
+                        <th>Lieu</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td>{{ event.name }}</td>
+                            <td>{{ event.start_date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ event.end_date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ event.location }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Aucun événement trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--end::Evénements-->
+</div>
+
+
+{% endblock %}

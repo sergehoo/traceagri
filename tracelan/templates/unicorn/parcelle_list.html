@@ -1,0 +1,108 @@
+{% load humanize %}
+<div>
+    <div class="mb-7">
+        <div class="row align-items-center">
+            <div class="col-md-4 my-2">
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Rechercher..."
+                    unicorn:model.debounce.500ms="search_query"
+                />
+            </div>
+            <div class="col-md-2 my-2">
+                <select class="form-control" unicorn:model="cooperative_id">
+                    <option value="">Coopératives</option>
+                    {% for coop in cooperatives %}
+                        <option value="{{ coop.id }}">{{ coop.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 my-2">
+                <select class="form-control" unicorn:model="district_id">
+                    <option value="">Districts</option>
+                    {% for district in districts %}
+                        <option value="{{ district.id }}">{{ district.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 my-2">
+                <select class="form-control"  unicorn:model="region_id">
+                    <option value="">Régions</option>
+                    {% for region in regions %}
+                        <option value="{{ region.id }}">{{ region.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 my-2">
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Culture"
+                    unicorn:model="culture"
+                />
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead style="background-color: #14532D; color: white">
+            <tr class="align-center">
+                <th>Code</th>
+                <th>Nom</th>
+                <th>Producteur</th>
+                <th>Localité</th>
+                <th>Dimension (ha)</th>
+                <th>Date de Création</th>
+                <th>Cultures</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for parcelle in parcelles %}
+                <tr>
+                    <td>{{ parcelle.code|truncatechars:6 }}</td>
+                    <td>{{ parcelle.nom }}</td>
+                    <td>{{ parcelle.producteur.nom }} {{ parcelle.producteur.prenom }}</td>
+                    <td>{{ parcelle.localite.name }}</td>
+                    <td>{{ parcelle.dimension_ha|floatformat:0 }} hectar(s)</td>
+                    <td>{{ parcelle.created_at|naturalday }}</td>
+                    <td>
+{#                        {% for culture in parcelle.culture %}#}
+
+                            <span class="label label-secondary label-inline font-weight-normal mr-2">{{ parcelle.culture }}</span>
+
+{#                        {% endfor %}#}
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-icon btn-secondary btn-xs mr-2"><i class="flaticon2-list-2"></i></a>
+                        <a href="#" class="btn btn-icon btn-secondary btn-xs mr-2"><i class="flaticon2-edit"></i></a>
+                        <a href="#" class="btn btn-icon btn-secondary btn-xs mr-0"><i class="flaticon2-trash"></i></a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Aucune parcelle trouvée</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                <button class="page-link" unicorn:click="previous_page">Précédent</button>
+            </li>
+            {% for i in page_numbers %}
+                <li class="page-item {% if page == i %}active{% endif %}">
+                    <button class="page-link" unicorn:click="change_page({{ i }})">{{ i }}</button>
+                </li>
+            {% endfor %}
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                <button class="page-link" unicorn:click="next_page">Suivant</button>
+            </li>
+        </ul>
+    </nav>
+</div>
+

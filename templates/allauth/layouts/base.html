@@ -1,59 +1,179 @@
-{% load static %}
+{% load  static %}
+{% load i18n %}
+<!DOCTYPE html>
 
-
-<html lang="fr-FR" class="js">
-
+<html lang="fr">
+<!--begin::Head-->
 <head>
-    <title>SMIT | KENEYA- Hospital Ressources Management</title>
-    <meta charset="utf-8">
-    <meta name="author" content="AfriqConsulting">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="SMIT | KENEYA, Systeme de Gestion des Services des Maladies Infestueuses et Tropicals">
-    <!-- Fav Icon  -->
-    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
-    <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+    <base href="">
+    <meta charset="utf-8"/>
+    <title>AQ| Agriculture Tracer</title>
+    <meta name="description" content="Updates and statistics"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <!--begin::Fonts-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700"/>
+    <!--end::Fonts-->
+
+    <!--begin::Page Vendors Styles(used by this page)-->
+    <link href="{% static 'assets/plugins/custom/fullcalendar/fullcalendar.bundle.css' %}" rel="stylesheet"
+          type="text/css"/>
+    <!--end::Page Vendors Styles-->
+
+
+    <!--begin::Global Theme Styles(used by all pages)-->
+    {#       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>#}
+    <link href="{% static  'assets/plugins/global/plugins.bundle.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static  'assets/plugins/custom/prismjs/prismjs.bundle.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css"/>
+{#    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">#}
+
+    <!--end::Global Theme Styles-->
+
+    <!--begin::Layout Themes(used by all pages)-->
+    <!--end::Layout Themes-->
+
+    <link rel="shortcut icon" href="{% static 'assets/media/logos/favicon.ico' %}"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
+    <style>
+        .drone {
+            position: absolute;
+            width: 150px; /* Taille du drone */
+            height: auto;
+            z-index: 1000; /* Toujours au-dessus */
+            transition: transform 2s ease-in-out; /* Animation fluide des mouvements */
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 10; /* Place le formulaire au-dessus du drone */
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    </style>
+
 </head>
+<!--end::Head-->
 
-<body class="nk-body bg-white npc-general pg-auth">
-    <div class="nk-app-root">
-        <!-- main @s -->
-        <div class="nk-main ">
-            <!-- wrap @s -->
-            <div class="nk-wrap nk-wrap-nosidebar">
-                <!-- content @s -->
-                <div class="nk-content ">
-                    <div class="nk-block nk-block-middle nk-auth-body  wide-xs">
-                        <div class="brand-logo pb-4 text-center">
-                            <a href="{% url 'home' %}" class="logo-link">
-                                <img class="logo-light logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
-                                <img class="logo-dark logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
-                            </a>
-                        </div>
-                        <div class="card card-bordered">
-                            <div class="card-inner card-inner-lg">
-                            
-                                	{% block content %}
+<!--begin::Body-->
+<body id="kt_body" class="header-fixed header-mobile-fixed subheader-enabled page-loading">
+    <img src="{% static 'assets/media/bg/drone.png' %}" class="drone" id="drone" alt="Drone"/>
 
-                {% endblock %}
-                            
-                              
-                            
-                            </div>
-                        </div>
-                    </div>
-                    
+<!--begin::Main-->
+<div class="d-flex flex-column flex-root">
+    <!--begin::Login-->
+    <div class="login login-3 login-signin-on d-flex flex-row-fluid" id="kt_login">
+        <div class="d-flex flex-center bgi-size-cover bgi-no-repeat flex-row-fluid"
+             style="background-image: url({% static 'assets/media/bg/login1.jpg' %});">
+            <div class="login-form text-center text-white p-7 position-relative overflow-hidden">
+                <!--begin::Login Header-->
+                <div class="d-flex flex-center mb-15">
+                    <a href="#">
+                        <img src="{% static 'assets/media/logos/logo-trace-agri-new-white.png' %}" class="max-h-100px" alt=""/>
+                    </a>
                 </div>
-                <!-- wrap @e -->
+                <!--end::Login Header-->
+
+                <!--begin::Login Sign in form-->
+            <form action="{% url 'set_language' %}" method="post">
+    {% csrf_token %}
+    <select name="language" onchange="this.form.submit()">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% for lang_code, lang_name in LANGUAGES %}
+            <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+                {{ lang_name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+                {% block content %}
+                {% endblock content %}
+                <!--end::Login Sign in form-->
+
             </div>
-            <!-- content @e -->
         </div>
-        <!-- main @e -->
     </div>
-    <!-- app-root @e -->
-    <!-- JavaScript -->
-    <script src="{% static 'assets/js/bundle.js' %}"></script>
-    <script src="{% static 'assets/js/scripts.js' %}"></script>
+    <!--end::Login-->
+</div>
+<!--end::Main-->
+
+
+<script>var HOST_URL = "https://preview.keenthemes.com/metronic/theme/html/tools/preview";</script>
+<!--begin::Global Config(global config for global JS scripts)-->
+<script>
+    var KTAppSettings = {
+        "breakpoints": {
+            "sm": 576,
+            "md": 768,
+            "lg": 992,
+            "xl": 1200,
+            "xxl": 1200
+        },
+        "colors": {
+            "theme": {
+                "base": {
+                    "white": "#ffffff",
+                    "primary": "#0BB783",
+                    "secondary": "#E5EAEE",
+                    "success": "#1BC5BD",
+                    "info": "#8950FC",
+                    "warning": "#FFA800",
+                    "danger": "#F64E60",
+                    "light": "#F3F6F9",
+                    "dark": "#212121"
+                },
+                "light": {
+                    "white": "#ffffff",
+                    "primary": "#D7F9EF",
+                    "secondary": "#ECF0F3",
+                    "success": "#C9F7F5",
+                    "info": "#EEE5FF",
+                    "warning": "#FFF4DE",
+                    "danger": "#FFE2E5",
+                    "light": "#F3F6F9",
+                    "dark": "#D6D6E0"
+                },
+                "inverse": {
+                    "white": "#ffffff",
+                    "primary": "#ffffff",
+                    "secondary": "#212121",
+                    "success": "#ffffff",
+                    "info": "#ffffff",
+                    "warning": "#ffffff",
+                    "danger": "#ffffff",
+                    "light": "#464E5F",
+                    "dark": "#ffffff"
+                }
+            },
+            "gray": {
+                "gray-100": "#F3F6F9",
+                "gray-200": "#ECF0F3",
+                "gray-300": "#E5EAEE",
+                "gray-400": "#D6D6E0",
+                "gray-500": "#B5B5C3",
+                "gray-600": "#80808F",
+                "gray-700": "#464E5F",
+                "gray-800": "#1B283F",
+                "gray-900": "#212121"
+            }
+        },
+        "font-family": "Poppins"
+    };
+</script>
+<!--end::Global Config-->
+
+<!--begin::Global Theme Bundle(used by all pages)-->
+<script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
+<script src="{% static 'assets/plugins/custom/prismjs/prismjs.bundle.js' %}"></script>
+<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+<script src="{% static 'assets/js/pages/custom/login/login-general.js' %}"></script>
 <script>
         //according to loftblog tut
         $('input').addClass('form-control')
@@ -102,8 +222,37 @@
           checkSection();
         });
     </script>
+<!--end::Page Scripts-->
+ <script>
+        const drone = document.getElementById("drone");
 
+        function getRandomPosition() {
+            // Obtenez la largeur et la hauteur de la fenêtre
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Génère des positions aléatoires dans la fenêtre
+            const randomX = Math.floor(Math.random() * (width - 100)); // Ajuste avec la taille du drone
+            const randomY = Math.floor(Math.random() * (height - 100));
+
+            return { x: randomX, y: randomY };
+        }
+
+        function moveDrone() {
+            // Obtenez une nouvelle position aléatoire
+            const { x, y } = getRandomPosition();
+
+            // Déplacez le drone en utilisant transform
+            drone.style.transform = `translate(${x}px, ${y}px)`;
+
+            // Définit un délai aléatoire pour le prochain mouvement
+            const randomDelay = Math.random() * 2000 + 2000; // Entre 2 et 4 secondes
+            setTimeout(moveDrone, randomDelay);
+        }
+
+        // Démarre le mouvement
+        moveDrone();
+    </script>
+</body>
+<!--end::Body-->
 </html>
-
-
-

@@ -9,44 +9,66 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
+from decouple import config
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ybn(nwdu%dw3fw0%ewx$7!em))oc82@qa502s$c%*1)@ve=n75'
+# SECRET_KEY = 'django-insecure-ybn(nwdu%dw3fw0%ewx$7!em))oc82@qa502s$c%*1)@ve=n75'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 
+# Django settings
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.humanize',
+    'allauth',
+    'allauth.account',
     'django.contrib.staticfiles',
+    'django_unicorn',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'simple_history',
+    'tracelan',
+    'djgeojson',
+    'leaflet',
+    'django_celery_beat',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # Ajoutez LocaleMiddleware après SessionMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'traceagri.urls'
@@ -54,8 +76,7 @@ ROOT_URLCONF = 'traceagri.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,24 +84,69 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'traceagri.wsgi.application'
+UNICORN = {
+    "DEBUG": True,
+}
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+# Database settings
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default=5432, cast=int),
     }
 }
 
+# Redis settings
+CELERY_BROKER_URL = config('REDIS_URL')
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+#         'NAME': 'traceagri3',
+#         'USER': 'postgres',
+#         'PASSWORD': 'weddingLIFE18',
+#         'HOST': 'localhost',
+#         'PORT': '5433',
+#     }
+# }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+
+    ],
+}
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # this is default
+    # 'guardian.backends.ObjectPermissionBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -100,11 +166,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGES = [
+    ('fr', _('Français')),
+    ('en', _('Anglais')),
+    ('es', _('Espagnol')),
+    ('de', _('Allemand')),
+    ('zh-hans', _('Chinois Simplifié')),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale/',
+]
+
+
+LANGUAGE_CODE = 'fr'
 
 TIME_ZONE = 'UTC'
 
@@ -112,13 +190,87 @@ USE_I18N = True
 
 USE_TZ = True
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 Mo
 
+LEAFLET_CONFIG = {
+    'DEFAULT_CENTER': (7.539989, -5.54708),  # Latitude et longitude approximatives du centre de la Côte d'Ivoire
+    'DEFAULT_ZOOM': 7,  # Niveau de zoom par défaut pour voir tout le pays
+    'MAX_ZOOM': 18,  # Niveau de zoom maximal
+    'MIN_ZOOM': 5,  # Niveau de zoom minimal
+}
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_ID = 1
+USE_L10N = True
+# USE_THOUSAND_SEPARATOR = True
+
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'
+#
+# # Backend pour stocker les résultats des tâches
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+#
+# # Liste des modules de tâches à découvrir
+# CELERY_IMPORTS = ('dash.tasks',)
+#
+# # Autres configurations recommandées
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'Africa/Abidjan'
+#
+# # Concurrence (nombre de workers)
+# CELERY_WORKER_CONCURRENCY = 4
+#
+# # CRISPY_TEMPLATE_PACK = 'uni_form'
+#
+# CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+# CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+# ACCOUNT_FORMS = {
+#     "login": "dash.forms.UserLoginForm",
+#     "signup": "dash.forms.UserRegistrationForm",
+#     "change_password": "dash.forms.PasswordChangeForm",
+#     "set_password": "dash.forms.PasswordSetForm",
+#     "reset_password": "dash.forms.PasswordResetForm",
+#     "reset_password_from_key": "dash.forms.PasswordResetKeyForm",
+# }
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+ACCOUNT_LOGOUT_REDIRECT = "account_login"
+ACCOUNT_SIGNUP_REDIRECT_URL = "account_login"
+
+# Configuration de Redis
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'
+#
+# Configuration de Celery
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+#
+#
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.yourdomain.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your-email@yourdomain.com'
+# EMAIL_HOST_PASSWORD = 'your-email-password'

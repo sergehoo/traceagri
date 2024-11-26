@@ -1,0 +1,257 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load unicorn %}
+{% csrf_token %}
+
+{% block content %}
+
+    <div style="
+    background-color: #1f371a;
+    background-image: url({% static 'assets/media/bg/projectback.png' %});
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    {#height: 100vh; #}
+" class="content d-flex flex-column flex-column-fluid" id="kt_content">
+
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4  subheader-transparent " id="kt_subheader">
+            <div class=" container  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                <!--begin::Details-->
+                <div class="d-flex align-items-center flex-wrap mr-2">
+
+                    <!--begin::Title-->
+                    <h5 class=" text-primary font-weight-bold mt-2 mb-2 mr-5">Producteur(s) </h5>
+                    <!--end::Title-->
+
+                    <!--begin::Separator-->
+                    <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-5 bg-gray-200"></div>
+                    <!--end::Separator-->
+
+                    <!--begin::Search Form-->
+                    <div class="d-flex align-items-center" id="kt_subheader_search">
+                <span class="text-white font-weight-bold" id="kt_subheader_total">{{ nombreproducteur }} Total                                    </span>
+
+                    </div>
+                    <!--end::Search Form-->
+
+                    <!--begin::Group Actions-->
+                    <div class="d-flex- align-items-center flex-wrap mr-2 d-none" id="kt_subheader_group_actions">
+                        <div class="text-dark-50 font-weight-bold">
+                            <span id="kt_subheader_group_selected_rows">23</span> Selected:
+                        </div>
+                        <div class="d-flex ml-6">
+                            <div class="dropdown mr-2" id="kt_subheader_group_actions_status_change">
+                                <button type="button"
+                                        class="btn btn-light-primary font-weight-bolder btn-sm dropdown-toggle"
+                                        data-toggle="dropdown">
+                                    Update Status
+                                </button>
+                                <div class="dropdown-menu p-0 m-0 dropdown-menu-sm">
+                                    <ul class="navi navi-hover pt-3 pb-4">
+                                        <li class="navi-header font-weight-bolder text-uppercase text-primary font-size-lg pb-0">
+                                            Change status to:
+                                        </li>
+                                        <li class="navi-item">
+                                            <a href="#" class="navi-link" data-toggle="status-change" data-status="1">
+                                                  <span class="navi-text"><span
+                                                          class="label label-light-success label-inline font-weight-bold">Approved</span></span>
+                                            </a>
+                                        </li>
+                                        <li class="navi-item">
+                                            <a href="#" class="navi-link" data-toggle="status-change" data-status="2">
+                                                  <span class="navi-text"><span
+                                                          class="label label-light-danger label-inline font-weight-bold">Rejected</span></span>
+                                            </a>
+                                        </li>
+                                        <li class="navi-item">
+                                            <a href="#" class="navi-link" data-toggle="status-change" data-status="3">
+                                                  <span class="navi-text"><span
+                                                          class="label label-light-warning label-inline font-weight-bold">Pending</span></span>
+                                            </a>
+                                        </li>
+                                        <li class="navi-item">
+                                            <a href="#" class="navi-link" data-toggle="status-change" data-status="4">
+                                                  <span class="navi-text"><span
+                                                          class="label label-light-info label-inline font-weight-bold">On Hold</span></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="btn btn-light-success font-weight-bolder btn-sm mr-2"
+                                    id="kt_subheader_group_actions_fetch" data-toggle="modal"
+                                    data-target="#kt_datatable_records_fetch_modal">
+                                Fetch Selected
+                            </button>
+                            <button class="btn btn-light-danger font-weight-bolder btn-sm mr-2"
+                                    id="kt_subheader_group_actions_delete_all">
+                                Delete All
+                            </button>
+                        </div>
+                    </div>
+                    <!--end::Group Actions-->
+                </div>
+                <!--end::Details-->
+
+                <!--begin::Toolbar-->
+                <div class="d-flex align-items-center">
+                    <!--begin::Button-->
+                    <a href="#" class="">
+
+                    </a>
+                    <!--end::Button-->
+
+                    <!--begin::Button-->
+                    <a href="{% url 'project_create' %}" class="btn btn-light-primary font-weight-bold ml-2">Ajouter </a>
+                    <!--end::Button-->
+
+                    <!--begin::Dropdown-->
+
+                    <!--end::Dropdown-->
+                </div>
+                <!--end::Toolbar-->
+            </div>
+        </div>
+        <!--end::Subheader-->
+
+<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+    <!--begin::Entry-->
+    <div class="d-flex flex-column-fluid">
+        <div class="container">
+            <div class="input-group mb-3">
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" placeholder="Rechercher un événement..." unicorn:model.debounce.300ms="search">
+                </div>
+                <div class="col-lg-2 card">
+                    <div class="dropdown dropdown-inline ml-2">
+                        <a href="#" class="btn btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="navi-icon"><i class="flaticon2-list-1 text-success"></i></span> Filtre</a>
+                        <div class="dropdown-menu p-0 m-0 dropdown-menu-md dropdown-menu-right">
+                            <!--begin::Navigation-->
+                            <ul class="navi">
+                                <li class="navi-header font-weight-bold py-5">
+                                    <span class="font-size-lg">Filtrer par :</span>
+                                </li>
+                                <li class="navi-separator mb-3 opacity-70"></li>
+                                <li class="navi-item">
+                                    <a href="#" class="navi-link">
+                                        <span class="navi-icon"><i class="flaticon2-calendar"></i></span>
+                                        <span class="navi-text">Date</span>
+                                    </a>
+                                </li>
+                                <li class="navi-item">
+                                    <a href="#" class="navi-link">
+                                        <span class="navi-icon"><i class="flaticon2-map"></i></span>
+                                        <span class="navi-text">Lieu</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <!--end::Navigation-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                {% for cooperative in cooperatives %}
+                <div class="col-xl-4">
+                    <div class="card card-custom gutter-b card-stretch">
+                        <div class="card-header" style="background-image: url({% static 'assets/media/bg/cooperative.jpg' %}); background-position: center; background-repeat: no-repeat; background-size: cover; height: 150px;"></div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex flex-column mr-auto">
+                                    <a href="{% url 'cooperative_detail' cooperative.pk %}"
+                                       class="text-dark text-hover-primary font-size-h4 font-weight-bolder mb-1">
+                                        {{ cooperative.nom }}
+                                    </a>
+                                    <span class="text-muted font-weight-bold mb-3">
+                                        {{ cooperative.description|truncatechars:100 }}
+                                    </span>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <div class="card-footer d-flex align-items-center">
+                            <div class="d-flex">
+                                <span class="svg-icon svg-icon-gray-500">
+                                    <i class="flaticon-list"></i>
+                                </span>
+                                <a href="{% url 'cooperative_detail' cooperative.pk %}" class="font-weight-bolder text-primary ml-2">Voir les détails</a>
+                            </div>
+                            <div class="d-flex ml-40">
+                                <div class="dropdown dropdown-inline align-right" data-toggle="tooltip" title="Actions rapides" data-placement="left">
+                                    <a href="#" class="btn btn-clean btn-hover-light-primary btn-sm btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="ki ki-bold-more-hor"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+                                        <ul class="navi navi-hover">
+                                            <li class="navi-header pb-1">
+                                                <span class="text-primary text-uppercase font-weight-bold font-size-sm">Actions:</span>
+                                            </li>
+{#                                            <li class="navi-item">#}
+{#                                                <a href="{% url 'event_details' event.pk %}" class="navi-link">#}
+{#                                                    <span class="navi-icon"><i class="flaticon2-list-2"></i></span>#}
+{#                                                    <span class="navi-text">Détails</span>#}
+{#                                                </a>#}
+{#                                            </li>#}
+{#                                            <li class="navi-item">#}
+{#                                                <a href="{% url 'event_update' event.pk %}" class="navi-link">#}
+{#                                                    <span class="navi-icon"><i class="flaticon2-writing"></i></span>#}
+{#                                                    <span class="navi-text">Modifier</span>#}
+{#                                                </a>#}
+{#                                            </li>#}
+{#                                            <li class="navi-item">#}
+{#                                                <a href="{% url 'event_delete' event.pk %}" class="navi-link">#}
+{#                                                    <span class="navi-icon"><i class="flaticon-delete"></i></span>#}
+{#                                                    <span class="navi-text">Supprimer</span>#}
+{#                                                </a>#}
+{#                                            </li>#}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            <div class="col-12 d-flex justify-content-center mt-5">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        {% if events.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="#" wire:click="gotoPage({{ events.previous_page_number }})">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% for page in events.paginator.page_range %}
+                        <li class="page-item {% if page == events.number %}active{% endif %}">
+                            <a class="page-link" href="#" wire:click="gotoPage({{ page }})">
+                                {{ page }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        {% if events.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="#" wire:click="gotoPage({{ events.next_page_number }})">
+                                Next
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+        <!--begin::Entry-->
+
+        <!--end::Entry-->
+    </div>
+{% endblock %}
