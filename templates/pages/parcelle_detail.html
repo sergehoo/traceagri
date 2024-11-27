@@ -502,38 +502,38 @@
                             }).addTo(parmap);
 
                             geojsonLayer.bindPopup(() => {
-  const cultures = Array.isArray(parcelle.culture)
-    ? parcelle.culture.map(culture => culture.value).join(", ") // Extraire "value" de chaque objet et joindre par une virgule
-    : (typeof parcelle.culture === "object" && parcelle.culture !== null)
-        ? Object.entries(parcelle.culture).map(([key, value]) => `<strong>${key}</strong>: ${value}`).join("<br>")
-        : parcelle.culture || '<em>Aucune culture spécifiée</em>';
+                                const cultures = Array.isArray(parcelle.culture)
+                                    ? parcelle.culture.map(culture => culture.value).join(", ") // Extraire "value" de chaque objet et joindre par une virgule
+                                    : (typeof parcelle.culture === "object" && parcelle.culture !== null)
+                                        ? Object.entries(parcelle.culture).map(([key, value]) => `<strong>${key}</strong>: ${value}`).join("<br>")
+                                        : parcelle.culture || '<em>Aucune culture spécifiée</em>';
 
-    const image = parcelle.images
-        ? `<div style="text-align: center; margin: 10px 0;">
+                                const image = parcelle.images
+                                    ? `<div style="text-align: center; margin: 10px 0;">
                 <img src="${parcelle.images}" alt="Image de la parcelle" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
            </div>`
-        : '<p style="color: gray; font-style: italic;">Aucune image disponible</p>';
+                                    : '<p style="color: gray; font-style: italic;">Aucune image disponible</p>';
 
-    // Fonction pour afficher les objets imbriqués
-    const formatNestedObject = (obj) => {
-        if (typeof obj !== "object" || obj === null) {
-            return obj || '<em>Non spécifié</em>';
-        }
-        return Object.entries(obj)
-            .map(([key, value]) => {
-                if (typeof value === "object") {
-                    return `<strong>${key}</strong>:<br>${formatNestedObject(value)}`;
-                }
-                return `<strong>${key}</strong>: ${value}`;
-            })
-            .join("<br>");
-    };
+                                // Fonction pour afficher les objets imbriqués
+                                const formatNestedObject = (obj) => {
+                                    if (typeof obj !== "object" || obj === null) {
+                                        return obj || '<em>Non spécifié</em>';
+                                    }
+                                    return Object.entries(obj)
+                                        .map(([key, value]) => {
+                                            if (typeof value === "object") {
+                                                return `<strong>${key}</strong>:<br>${formatNestedObject(value)}`;
+                                            }
+                                            return `<strong>${key}</strong>: ${value}`;
+                                        })
+                                        .join("<br>");
+                                };
 
-    const caracteristiq = typeof parcelle.carracteristic === "object" && parcelle.carracteristic !== null
-        ? formatNestedObject(parcelle.carracteristic)
-        : '<em>Aucune caractéristique spécifiée</em>';
+                                const caracteristiq = typeof parcelle.carracteristic === "object" && parcelle.carracteristic !== null
+                                    ? formatNestedObject(parcelle.carracteristic)
+                                    : '<em>Aucune caractéristique spécifiée</em>';
 
-    return `
+                                return `
         <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.5; text-align:left">
             <h3 style="margin: 0; font-size: 16px; color: #2c7a7b;">${parcelle.nom || 'Parcelle sans nom'}</h3>
             <p style="margin: 5px 0 10px;">
@@ -548,7 +548,7 @@
             ${image}
         </div>
     `;
-});
+                            });
 
                             parcelleLayers[parcelle.id] = geojsonLayer; // Utilise l'ID pour l'association
                         }

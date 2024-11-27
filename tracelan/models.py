@@ -1,11 +1,13 @@
 import datetime
+import json
 import random
 import uuid
 import zipfile
 from io import BytesIO
 
 from django.contrib.auth.models import User
-from django.contrib.gis.geos import Point
+from django.contrib.gis.gdal import SpatialReference, CoordTransform
+from django.contrib.gis.geos import Point, GEOSGeometry
 from django.db import models
 from django.contrib.gis.db import models
 from django.db.models import Sum
@@ -13,6 +15,7 @@ from django.utils.timezone import now
 from fastkml import kml
 from shapely.geometry import mapping, shape
 from django.utils.translation import gettext_lazy as _
+from shapely.ops import unary_union
 from simple_history.models import HistoricalRecords
 
 Status_choices = [
@@ -547,7 +550,7 @@ class Parcelle(models.Model):
     localite = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True)
 
     nom = models.CharField(max_length=100, null=True, blank=True)
-    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4)
+    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
 
     polygone_kmz = models.FileField(upload_to="parcelles/", blank=True, null=True)
     geojson = models.JSONField(null=True, blank=True)
@@ -578,20 +581,43 @@ class Parcelle(models.Model):
         verbose_name_plural = "Parcelles"
 
     def save(self, *args, **kwargs):
-        # Vérifie si un fichier KMZ a été importé
-        if self.polygone_kmz:
+        # Vérifier si le fichier KMZ a changé
+        kmz_changed = self.pk is None or self.polygone_kmz != type(self).objects.get(pk=self.pk).polygone_kmz
+
+        # Si le fichier KMZ a changé, convertir en GeoJSON et recalculer les champs
+        if kmz_changed and self.polygone_kmz:
             self.geojson = self.kmz_to_geojson()
 
-        # Extraire les coordonnées à partir du GeoJSON
+        # Calculer la surface et les coordonnées si un GeoJSON valide est disponible
         if self.geojson:
             try:
-                geometry = shape(self.geojson["features"][0]["geometry"])
-                centroid = geometry.centroid
-                self.longitude = round(centroid.x, 6)  # Longitude
-                self.latitude = round(centroid.y, 6)  # Latitude
-                self.geom = Point(centroid.x, centroid.y, srid=4326)  # Mise à jour de geom
+                # Combiner les géométries pour obtenir une surface unique
+                geometries = [shape(feature["geometry"]) for feature in self.geojson["features"]]
+                combined_geometry = unary_union(geometries)
+
+                # Vérifier si la géométrie combinée est valide
+                if combined_geometry.is_valid:
+                    # Reprojection pour calcul précis (EPSG:4326 vers EPSG:3857)
+                    srid_target = SpatialReference(3857)  # Système métrique
+                    srid_source = SpatialReference(4326)  # Système source (KMZ)
+                    transform = CoordTransform(srid_source, srid_target)
+
+                    # Convertir la géométrie en EPSG:3857
+                    gdal_geometry = GEOSGeometry(json.dumps(mapping(combined_geometry)), srid=4326)
+                    gdal_geometry.transform(transform)
+
+                    # Calculer la surface en hectares
+                    self.dimension_ha = round(gdal_geometry.area / 10000, 4)
+
+                    # Centroid pour la localisation
+                    centroid = combined_geometry.centroid
+                    self.longitude = round(centroid.x, 6)
+                    self.latitude = round(centroid.y, 6)
+                    self.geom = Point(centroid.x, centroid.y, srid=4326)
+                else:
+                    print("Géométrie invalide détectée dans le fichier KMZ.")
             except Exception as e:
-                print(f"Erreur lors de l'extraction des coordonnées : {e}")
+                print(f"Erreur lors du calcul de la dimension ou des coordonnées : {e}")
 
         super().save(*args, **kwargs)
 

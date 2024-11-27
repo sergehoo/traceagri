@@ -45,7 +45,7 @@ urlpatterns = i18n_patterns(
     path("parcelles/<int:pk>/", ParcelleDetailView.as_view(), name="parcelle-detail"),
     path("parcelles/create/<int:producteur_id>", ParcelleCreateView.as_view(), name="parcelle-create"),
     path("parcelles/<int:pk>/update/", ParcelleUpdateView.as_view(), name="parcelle-update"),
-    path("parcelles/<int:producteur_id>/delete/<int:pk>", ParcelleDeleteView.as_view(),name="parcelle-delete"),
+    path("parcelles/<int:producteur_id>/delete/<int:pk>", ParcelleDeleteView.as_view(), name="parcelle-delete"),
 
     # Project URLs
     path("projects/", ProjectListView.as_view(), name="project_list"),
