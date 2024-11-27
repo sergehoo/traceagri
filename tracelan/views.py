@@ -32,10 +32,12 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         producteurs = Producteur.objects.all().count()
         parcelle = Parcelle.objects.all().count()
+        top_parcelles = Parcelle.objects.order_by('-dimension_ha')[:10]
         # Ajouter une API pour les données du dashboard si nécessaire
         context['dashboard_data_url'] = reverse_lazy('dashboard-data-api')  # Assurez-vous de définir cette URL
         context['nombreproducteur'] = producteurs  # Assurez-vous de définir cette URL
         context['parcelle'] = parcelle  # Assurez-vous de définir cette URL
+        context['top_parcelles']= top_parcelles
         return context
 
 
