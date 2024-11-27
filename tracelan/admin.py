@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from tracelan.models import Cooperative, Producteur, Parcelle, Ville, DistrictSanitaire, Region, Project, Task, \
-    Milestone, Deliverable, Employee, Depense, Event, EventInvite
+    Milestone, Deliverable, Employee, Depense, Event, EventInvite, CulturePerennial, CultureSeasonal
 
 admin.site.site_header = 'TRACAFRIC BACK-END CONTROLER'
 admin.site.site_title = 'TRACAFRIC Super Admin Pannel'
@@ -132,3 +132,19 @@ class EventInviteAdmin(admin.ModelAdmin):
         except Exception:
             return "Not Found"
     get_invite.short_description = "Nom de l'invité"
+
+
+@admin.register(CulturePerennial)
+class CulturePerennialAdmin(admin.ModelAdmin):
+    list_display = ('type_culture', 'parcelle', 'annee_mise_en_place', 'date_derniere_recolte', 'dernier_rendement_kg_ha')
+    list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
+    search_fields = ('type_culture', 'parcelle__nom')
+    ordering = ('-annee_mise_en_place',)
+
+
+@admin.register(CultureSeasonal)
+class CultureSeasonalAdmin(admin.ModelAdmin):
+    list_display = ('type_culture', 'parcelle', 'annee_mise_en_place', 'date_recolte', 'dernier_rendement_kg_ha')
+    list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
+    search_fields = ('type_culture', 'parcelle__nom')
+    ordering = ('-annee_mise_en_place',)

@@ -15,6 +15,7 @@ from pathlib import Path
 from decouple import config
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -118,17 +119,6 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': 'traceagri3',
-#         'USER': 'postgres',
-#         'PASSWORD': 'weddingLIFE18',
-#         'HOST': 'localhost',
-#         'PORT': '5433',
-#     }
-# }
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -181,7 +171,6 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale/',
 ]
 
-
 LANGUAGE_CODE = 'fr'
 
 TIME_ZONE = 'UTC'
@@ -221,56 +210,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 1
 USE_L10N = True
-# USE_THOUSAND_SEPARATOR = True
-
-# CELERY_BROKER_URL = 'redis://localhost:6379/0'
-#
-# # Backend pour stocker les résultats des tâches
-# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-#
-# # Liste des modules de tâches à découvrir
-# CELERY_IMPORTS = ('dash.tasks',)
-#
-# # Autres configurations recommandées
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Africa/Abidjan'
-#
-# # Concurrence (nombre de workers)
-# CELERY_WORKER_CONCURRENCY = 4
-#
-# # CRISPY_TEMPLATE_PACK = 'uni_form'
-#
-# CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-# CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-
-# ACCOUNT_FORMS = {
-#     "login": "dash.forms.UserLoginForm",
-#     "signup": "dash.forms.UserRegistrationForm",
-#     "change_password": "dash.forms.PasswordChangeForm",
-#     "set_password": "dash.forms.PasswordSetForm",
-#     "reset_password": "dash.forms.PasswordResetForm",
-#     "reset_password_from_key": "dash.forms.PasswordResetKeyForm",
-# }
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_REDIRECT = "account_login"
 ACCOUNT_SIGNUP_REDIRECT_URL = "account_login"
 
-# Configuration de Redis
-# CELERY_BROKER_URL = 'redis://localhost:6379/0'
-#
 # Configuration de Celery
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-#
-#
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.yourdomain.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@yourdomain.com'
-# EMAIL_HOST_PASSWORD = 'your-email-password'

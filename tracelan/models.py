@@ -1,5 +1,6 @@
 import datetime
 import random
+import uuid
 import zipfile
 from io import BytesIO
 
@@ -465,14 +466,15 @@ class Ville(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return f"{self.name} - {self.district.nom} ({self.district.region.name})"
+        return f"{self.name}"
 
 
 class Cooperative(models.Model):
     nom = models.CharField(max_length=100)
-    code = models.CharField(max_length=20, unique=True)
+    code = models.CharField(max_length=100, default=uuid.uuid4, unique=True)
     ville = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True)
-    president = models.ForeignKey('Producteur', on_delete=models.CASCADE, null=True, blank=True, related_name='president')
+    president = models.ForeignKey('Producteur', on_delete=models.CASCADE, null=True, blank=True,
+                                  related_name='president')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -507,10 +509,11 @@ class Producteur(models.Model):
     prenom = models.CharField(max_length=500, null=True, blank=True)
     sexe = models.CharField(max_length=1, choices=[('M', 'Masculin'), ('F', 'Féminin')])
     telephone = models.CharField(max_length=20, blank=True, null=True)
-    date_naissance = models.DateField()
+    date_naissance = models.DateField(blank=True, null=True)
     lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
-    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs")
+    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,
+                                    blank=True)
     fonction = models.CharField(max_length=100, null=True, blank=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -554,6 +557,10 @@ class Parcelle(models.Model):
     status = models.CharField(choices=Status_choices, null=True, blank=True, max_length=100)
     carracteristic = models.JSONField(null=True, blank=True)
     culture = models.JSONField(null=True, blank=True)
+    culture_perenne = models.ManyToManyField('CulturePerennial', related_name="cultureperenne", blank=True)
+    culture_saisonniere = models.ManyToManyField('CultureSeasonal', related_name="culturesaison", blank=True)
+    affectations = models.TextField(null=True, blank=True)  # Pour les événements affectant la parcelle
+
     images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
 
@@ -627,6 +634,36 @@ class Parcelle(models.Model):
 
     def __str__(self):
         return f"{self.nom} ({self.dimension_ha} ha)" if self.nom else f"Parcelle sans nom ({self.dimension_ha} ha)"
+
+
+class CulturePerennial(models.Model):
+    parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures_perennial")
+    type_culture = models.CharField(max_length=100)
+    annee_mise_en_place = models.PositiveIntegerField()
+    date_derniere_recolte = models.DateField(null=True, blank=True)
+    dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    pratiques_culturales = models.TextField(null=True, blank=True)
+    utilise_fertilisants = models.BooleanField(default=False)
+    type_fertilisants = models.TextField(null=True, blank=True)
+    analyse_sol = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.type_culture} ({self.parcelle.nom})"
+
+
+class CultureSeasonal(models.Model):
+    parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures_seasonal")
+    type_culture = models.CharField(max_length=100)
+    annee_mise_en_place = models.PositiveIntegerField()
+    date_recolte = models.DateField(null=True, blank=True)
+    dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    pratiques_culturales = models.TextField(null=True, blank=True)
+    utilise_fertilisants = models.BooleanField(default=False)
+    type_fertilisants = models.TextField(null=True, blank=True)
+    analyse_sol = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.type_culture} ({self.parcelle.nom})"
 
 
 class Project(models.Model):
@@ -924,10 +961,12 @@ class EventInvite(models.Model):
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="invites")
     invite_type = models.CharField(max_length=20, choices=INVITE_TYPE_CHOICES, verbose_name="Type d'invité")
-    invite_id = models.IntegerField(verbose_name="ID de l'entité invitée")  # ID de l'entité associée (Producteur, Ville, etc.)
+    invite_id = models.IntegerField(
+        verbose_name="ID de l'entité invitée")  # ID de l'entité associée (Producteur, Ville, etc.)
     confirmed = models.BooleanField(default=False, verbose_name="Confirmation de présence")
     confirmation_token = models.CharField(max_length=64, null=True, blank=True)
-    confirmation_date = models.DateTimeField(null=True, blank=True, verbose_name="Date de confirmation")  # Nouveau champ
+    confirmation_date = models.DateTimeField(null=True, blank=True,
+                                             verbose_name="Date de confirmation")  # Nouveau champ
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
