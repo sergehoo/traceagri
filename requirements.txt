@@ -24,6 +24,7 @@ django-simple-history==3.7.0
 django-timezone-field==7.0
 django-unicorn==0.61.0
 djangorestframework==3.15.2
+et_xmlfile==2.0.0
 Faker==33.0.0
 fastkml==0.12
 googletrans==4.0.0rc1
@@ -40,7 +41,9 @@ importlib_metadata==8.5.0
 kombu==5.4.2
 Markdown==3.7
 numpy==2.0.2
+openpyxl==3.1.5
 orjson==3.10.11
+pandas==2.2.3
 pillow==11.0.0
 prompt_toolkit==3.0.48
 psycopg2==2.9.10
@@ -48,6 +51,7 @@ pygeoif==0.7
 python-crontab==3.2.0
 python-dateutil==2.9.0.post0
 python-decouple==3.8
+pytz==2024.2
 redis==5.2.0
 rfc3986==1.5.0
 shapely==2.0.6
@@ -61,5 +65,3 @@ tzdata==2024.2
 vine==5.1.0
 wcwidth==0.2.13
 zipp==3.21.0
-gunicorn
-pandas~=2.2.3
