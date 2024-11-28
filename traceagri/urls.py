@@ -27,7 +27,7 @@ from tracelan.views import HomePageView, ProducteurListView, ProducteurDetailVie
     TaskDeleteView, MilestoneListView, MilestoneCreateView, MilestoneUpdateView, MilestoneDeleteView, \
     ProjectDetailsView, EventListView, EventDetailView, get_invite_list, add_invites_to_event, \
     add_invites_and_send_emails, confirm_presence, CooperativeListView, CooperativeCreateView, CooperativeUpdateView, \
-    CooperativeDeleteView, CooperativeDetailView
+    CooperativeDeleteView, CooperativeDetailView, ParcelleExportView, ProducteurExportView
 
 urlpatterns = i18n_patterns(
     path('admin/', admin.site.urls),
@@ -41,11 +41,14 @@ urlpatterns = i18n_patterns(
     path('Producteurs/create', ProducteurCreateView.as_view(), name='producteurs-create'),
     path('Producteurs/details<int:pk>', ProducteurDetailView.as_view(), name='producteurs-details'),
 
+    path('export/producteurs/', ProducteurExportView.as_view(), name='producteur_export'),
+
     path("parcelles/", ParcelleListView.as_view(), name="parcelle-list"),
     path("parcelles/<int:pk>/", ParcelleDetailView.as_view(), name="parcelle-detail"),
     path("parcelles/create/<int:producteur_id>", ParcelleCreateView.as_view(), name="parcelle-create"),
     path("parcelles/<int:pk>/update/", ParcelleUpdateView.as_view(), name="parcelle-update"),
     path("parcelles/<int:producteur_id>/delete/<int:pk>", ParcelleDeleteView.as_view(), name="parcelle-delete"),
+    path('export/parcelles/', ParcelleExportView.as_view(), name='parcelle_export'),
 
     # Project URLs
     path("projects/", ProjectListView.as_view(), name="project_list"),

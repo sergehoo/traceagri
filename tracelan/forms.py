@@ -59,7 +59,7 @@ class ParcelleForm(forms.ModelForm):
         }
 
         def clean_culture(self):
-            """Valider que le champ culture contient un JSON valide et extraire les valeurs."""
+            """Valider que le champ culture contient un JSON valide et extraire la première valeur."""
             culture_data = self.cleaned_data['culture']
             try:
                 # Convertit la chaîne en liste d'objets JSON
@@ -67,7 +67,8 @@ class ParcelleForm(forms.ModelForm):
 
                 # Vérifie que chaque élément est un dictionnaire contenant une clé "value"
                 if all(isinstance(item, dict) and "value" in item for item in cultures):
-                    return [item["value"] for item in cultures]  # Retourne uniquement les valeurs
+                    # Retourne uniquement la première valeur
+                    return cultures[0]["value"] if cultures else ""
                 else:
                     raise forms.ValidationError("Chaque élément doit contenir une clé 'value'.")
             except ValueError:

@@ -1,4 +1,5 @@
 {% load humanize %}
+{% load i18n %}
 <div>
     <div class="mb-7">
         <div class="row align-items-center">
@@ -46,47 +47,56 @@
     </div>
 
     <table class="table table-bordered table-hover">
-        <thead style="background-color: #14532D; color: white">
-            <tr class="align-center">
-                <th>Code</th>
-                <th>Nom</th>
-                <th>Producteur</th>
-                <th>Localité</th>
-                <th>Dimension (ha)</th>
-                <th>Date de Création</th>
-                <th>Cultures</th>
-                <th>Actions</th>
+    <thead style="background-color: #14532D; color: white">
+        <tr class="align-center">
+            <th>{% trans "Code" %}</th>
+            <th>{% trans "Télécharger" %}</th>
+            <th>{% trans "Nom" %}</th>
+            <th>{% trans "Producteur" %}</th>
+            <th>{% trans "Localité" %}</th>
+            <th>{% trans "Dimension (ha)" %}</th>
+            <th>{% trans "Date de Création" %}</th>
+            <th>{% trans "Cultures" %}</th>
+            <th width="100px">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for parcelle in parcelles %}
+            <tr>
+                <td>{{ parcelle.code }}</td>
+                <td>
+                    {% if parcelle.polygone_kmz %}
+                        <a href="{{ parcelle.polygone_kmz.url }}" class="btn btn-sm btn-outline-dark" download>
+                            <i class="flaticon-multimedia-4"></i> {% trans "KMZ" %}
+                        </a>
+                    {% else %}
+                        <span class="text-muted">{% trans "Aucun fichier" %}</span>
+                    {% endif %}
+                </td>
+                <td>{{ parcelle.nom }}</td>
+                <td>{{ parcelle.producteur.nom }} {{ parcelle.producteur.prenom }}</td>
+                <td>{{ parcelle.localite.name }}</td>
+                <td>{{ parcelle.dimension_ha|floatformat:0 }} {% trans "hectar(s)" %}</td>
+                <td>{{ parcelle.created_at|naturalday }}</td>
+                <td>
+                    {% for item in parcelle.culture %}
+                        <span class="label label-dark label-inline font-weight-normal mr-2 mt-2">{{ item.value }}</span>
+                    {% empty %}
+                        <span class="text-muted small">{% trans "Indéfini" %}</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href="{% url 'parcelle-update' parcelle.pk %}" class="btn btn-icon btn-primary btn-xs"><i class="flaticon2-edit"></i></a>
+                    <a href="{% url 'parcelle-delete' producteur_id=parcelle.producteur.id pk=parcelle.pk %}" class="btn btn-icon btn-danger btn-xs "><i class="flaticon2-trash"></i></a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            {% for parcelle in parcelles %}
-                <tr>
-                    <td>{{ parcelle.code|truncatechars:6 }}</td>
-                    <td>{{ parcelle.nom }}</td>
-                    <td>{{ parcelle.producteur.nom }} {{ parcelle.producteur.prenom }}</td>
-                    <td>{{ parcelle.localite.name }}</td>
-                    <td>{{ parcelle.dimension_ha|floatformat:0 }} hectar(s)</td>
-                    <td>{{ parcelle.created_at|naturalday }}</td>
-                    <td>
-{#                        {% for culture in parcelle.culture %}#}
-
-                            <span class="label label-secondary label-inline font-weight-normal mr-2">{{ parcelle.culture }}</span>
-
-{#                        {% endfor %}#}
-                    </td>
-                    <td>
-                        <a href="#" class="btn btn-icon btn-secondary btn-xs mr-2"><i class="flaticon2-list-2"></i></a>
-                        <a href="#" class="btn btn-icon btn-secondary btn-xs mr-2"><i class="flaticon2-edit"></i></a>
-                        <a href="#" class="btn btn-icon btn-secondary btn-xs mr-0"><i class="flaticon2-trash"></i></a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center">Aucune parcelle trouvée</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">{% trans "Aucune parcelle trouvée" %}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
     <!-- Pagination controls -->
     <nav>

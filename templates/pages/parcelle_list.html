@@ -61,44 +61,26 @@
 
 	<!--begin::Dropdown Menu-->
 	<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
-		<!--begin::Navigation-->
-		<ul class="navi flex-column navi-hover py-2">
-			<li class="navi-header font-weight-bolder text-uppercase font-size-sm text-primary pb-2">
-		        Choose an option:
-		    </li>
-			<li class="navi-item">
-				<a href="#" class="navi-link">
-					<span class="navi-icon"><i class="la la-print"></i></span>
-					<span class="navi-text">Print</span>
-				</a>
-			</li>
-			<li class="navi-item">
-				<a href="#" class="navi-link">
-					<span class="navi-icon"><i class="la la-copy"></i></span>
-					<span class="navi-text">Copy</span>
-				</a>
-			</li>
-			<li class="navi-item">
-				<a href="#" class="navi-link">
-					<span class="navi-icon"><i class="la la-file-excel-o"></i></span>
-					<span class="navi-text">Excel</span>
-				</a>
-			</li>
-			<li class="navi-item">
-				<a href="#" class="navi-link">
-					<span class="navi-icon"><i class="la la-file-text-o"></i></span>
-					<span class="navi-text">CSV</span>
-				</a>
-			</li>
-			<li class="navi-item">
-				<a href="#" class="navi-link">
-					<span class="navi-icon"><i class="la la-file-pdf-o"></i></span>
-					<span class="navi-text">PDF</span>
-				</a>
-			</li>
-		</ul>
-		<!--end::Navigation-->
-	</div>
+    <!--begin::Navigation-->
+    <ul class="navi flex-column navi-hover py-2">
+        <li class="navi-header font-weight-bolder text-uppercase font-size-sm text-primary pb-2">
+            Exporter en :
+        </li>
+        <li class="navi-item">
+            <a href="{% url 'parcelle_export' %}?format=csv" class="navi-link">
+                <span class="navi-icon"><i class="la la-file-text-o"></i></span>
+                <span class="navi-text">CSV</span>
+            </a>
+        </li>
+        <li class="navi-item">
+            <a href="{% url 'parcelle_export' %}?format=excel" class="navi-link">
+                <span class="navi-icon"><i class="la la-file-excel-o"></i></span>
+                <span class="navi-text">Excel</span>
+            </a>
+        </li>
+    </ul>
+    <!--end::Navigation-->
+</div>
 	<!--end::Dropdown Menu-->
 </div>
                 <a href="#" class="btn btn-light-primary font-weight-bolder ">

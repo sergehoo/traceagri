@@ -1,5 +1,7 @@
+import csv
 import json
 import logging
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,6 +16,7 @@ from django.utils.timezone import now
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
+from openpyxl.workbook import Workbook
 
 from tracelan.forms import ProducteurForm, ParcelleForm, ProjectForm, TaskForm, MilestoneForm, DepenseForm, \
     TaskProjectForm, AddMemberForm, AddInviteForm
@@ -37,7 +40,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         context['dashboard_data_url'] = reverse_lazy('dashboard-data-api')  # Assurez-vous de définir cette URL
         context['nombreproducteur'] = producteurs  # Assurez-vous de définir cette URL
         context['parcelle'] = parcelle  # Assurez-vous de définir cette URL
-        context['top_parcelles']= top_parcelles
+        context['top_parcelles'] = top_parcelles
         return context
 
 
@@ -114,10 +117,162 @@ class ProducteurUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("producteur_list")
 
 
+class ProducteurExportView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # Récupérer le format d'export (csv, excel)
+        export_format = request.GET.get('format', 'csv')  # Par défaut, CSV
+        producteurs = Producteur.objects.annotate(nbr_parcelles=Count('parcelles'))
+
+        if export_format == 'csv':
+            return self.export_csv(producteurs)
+        elif export_format == 'excel':
+            return self.export_excel(producteurs)
+        else:
+            return HttpResponse("Format non pris en charge.", status=400)
+
+    def export_csv(self, producteurs):
+        # Créer la réponse HTTP avec l'en-tête pour un fichier CSV
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="Producteurs.csv"'
+
+        writer = csv.writer(response)
+        # Ajouter les en-têtes des colonnes
+        writer.writerow(['Nom', 'Prénom', 'Sexe', 'Téléphone', 'Nombre de Parcelles'])
+
+        # Ajouter les données des producteurs
+        for producteur in producteurs:
+            writer.writerow([
+                producteur.nom,
+                producteur.prenom,
+                producteur.sexe,
+                producteur.telephone,
+                producteur.nbr_parcelles
+            ])
+
+        return response
+
+    def export_excel(self, producteurs):
+        # Créer un fichier Excel
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Producteurs"
+
+        # Ajouter les en-têtes des colonnes
+        headers = ['Nom', 'Prénom', 'Sexe', 'Téléphone', 'Nombre de Parcelles']
+        sheet.append(headers)
+
+        # Ajouter les données des producteurs
+        for producteur in producteurs:
+            sheet.append([
+                producteur.nom,
+                producteur.prenom,
+                producteur.sexe,
+                producteur.telephone,
+                producteur.nbr_parcelles
+            ])
+
+        # Créer la réponse HTTP avec l'en-tête pour un fichier Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Producteurs.xlsx"'
+        workbook.save(response)
+        return response
+
+
 class ProducteurDeleteView(LoginRequiredMixin, DeleteView):
     model = Producteur
     template_name = "pages/producteur_confirm_delete.html"
     success_url = reverse_lazy("producteur_list")
+
+
+class ParcelleExportView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # Récupérer le format d'export (csv, excel)
+        export_format = request.GET.get('format', 'csv')  # Par défaut, CSV
+        parcelles = Parcelle.objects.select_related('producteur', 'localite').prefetch_related('culture_perenne',
+                                                                                               'culture_saisonniere')
+
+        if export_format == 'csv':
+            return self.export_csv(parcelles)
+        elif export_format == 'excel':
+            return self.export_excel(parcelles)
+        else:
+            return HttpResponse("Format non pris en charge.", status=400)
+
+    def export_csv(self, parcelles):
+        # Créer la réponse HTTP avec l'en-tête pour un fichier CSV
+        dates = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="Exportparcelles_{dates}.csv"'
+
+        writer = csv.writer(response)
+        # Ajouter les en-têtes des colonnes
+        writer.writerow([
+            'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
+            'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
+        ])
+
+        # Ajouter les données des parcelles
+        for parcelle in parcelles:
+            producteur = f"{parcelle.producteur.nom} {parcelle.producteur.prenom}" if parcelle.producteur else "N/A"
+            cultures_perennes = ", ".join(culture.nom for culture in parcelle.culture_perenne.all())
+            cultures_saisonnieres = ", ".join(culture.nom for culture in parcelle.culture_saisonniere.all())
+
+            writer.writerow([
+                parcelle.nom,
+                parcelle.code,
+                parcelle.localite.nom if parcelle.localite else '',
+                parcelle.dimension_ha,
+                parcelle.longitude,
+                parcelle.latitude,
+                parcelle.status,
+                producteur,
+                cultures_perennes,
+                cultures_saisonnieres
+            ])
+
+        return response
+
+    def export_excel(self, parcelles):
+        # Créer un fichier Excel
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Parcelles"
+
+        # Ajouter les en-têtes des colonnes
+        headers = [
+            'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
+            'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
+        ]
+        sheet.append(headers)
+
+        # Ajouter les données des parcelles
+        for parcelle in parcelles:
+            producteur = f"{parcelle.producteur.nom} {parcelle.producteur.prenom}" if parcelle.producteur else "N/A"
+            cultures_perennes = ", ".join(culture.nom for culture in parcelle.culture_perenne.all())
+            cultures_saisonnieres = ", ".join(culture.nom for culture in parcelle.culture_saisonniere.all())
+
+            sheet.append([
+                parcelle.nom,
+                parcelle.code,
+                parcelle.localite.nom if parcelle.localite else '',
+                parcelle.dimension_ha,
+                parcelle.longitude,
+                parcelle.latitude,
+                parcelle.status,
+                producteur,
+                cultures_perennes,
+                cultures_saisonnieres
+            ])
+
+        # Créer la réponse HTTP avec l'en-tête pour un fichier Excel
+
+        dates = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Format: YYYY-MM-DD_HH-MM-SS
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Exportparcelles_{dates}.xlsx"'
+
+        workbook.save(response)
+        return response
 
 
 class ParcelleListView(LoginRequiredMixin, ListView):
