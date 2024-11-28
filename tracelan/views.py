@@ -220,7 +220,7 @@ class ParcelleExportView(LoginRequiredMixin, View):
             writer.writerow([
                 parcelle.nom,
                 parcelle.code,
-                parcelle.localite.nom if parcelle.localite else '',
+                parcelle.localite.name if parcelle.localite else '',
                 parcelle.dimension_ha,
                 parcelle.longitude,
                 parcelle.latitude,
