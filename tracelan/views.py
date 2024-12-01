@@ -21,7 +21,7 @@ from openpyxl.workbook import Workbook
 from tracelan.forms import ProducteurForm, ParcelleForm, ProjectForm, TaskForm, MilestoneForm, DepenseForm, \
     TaskProjectForm, AddMemberForm, AddInviteForm
 from tracelan.models import Producteur, Parcelle, DistrictSanitaire, Region, Project, Task, Milestone, Event, \
-    Cooperative, Ville, EventInvite, CooperativeMember
+    Cooperative, Ville, EventInvite, CooperativeMember, DynamicForm, DynamicField
 from tracelan.task import envoyer_email_invitation
 
 
@@ -810,3 +810,23 @@ class CooperativeDetailView(LoginRequiredMixin, DetailView):
         context['events'] = events
 
         return context
+
+
+class DynamicFormCreateView(CreateView):
+    model = DynamicForm
+    fields = ['name', 'description']
+    template_name = "dynamic_form_create.html"
+
+    def form_valid(self, form):
+        form.instance.project = get_object_or_404(Project, pk=self.kwargs['project_id'])
+        return super().form_valid(form)
+
+
+class DynamicFieldCreateView(CreateView):
+    model = DynamicField
+    fields = ['label', 'field_type', 'required', 'options', 'order']
+    template_name = "dynamic_field_create.html"
+
+    def form_valid(self, form):
+        form.instance.form = get_object_or_404(DynamicForm, pk=self.kwargs['form_id'])
+        return super().form_valid(form)

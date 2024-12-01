@@ -3,14 +3,18 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum, Count
 from django.db.models.functions import ExtractYear
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+
 from traceagri.api.serializers import ProducteurSerializer, ParcelleMobileSerializer, ProducteurMobileSerializer, \
-    UserSerializer
-from tracelan.models import Producteur, Parcelle, Region, DistrictSanitaire, Cooperative
+    UserSerializer, DynamicFormSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer
+from tracelan.models import Producteur, Parcelle, Region, DistrictSanitaire, Cooperative, DynamicForm, FormResponse, \
+    FieldResponse, Project, CooperativeMember
 
 
 class DashboardDataAPIView(APIView):
@@ -138,3 +142,39 @@ class ParcelleMobileViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class DynamicFormViewSet(ReadOnlyModelViewSet):
+    queryset = DynamicForm.objects.prefetch_related('fields')
+    serializer_class = DynamicFormSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class SubmitFormResponse(APIView):
+    def post(self, request, form_id):
+        form = get_object_or_404(DynamicForm, pk=form_id)
+        response = FormResponse.objects.create(form=form)
+        for field in form.fields.all():
+            FieldResponse.objects.create(
+                response=response,
+                field=field,
+                value=request.data.get(field.label, "")
+            )
+        return Response({"message": "Form submitted successfully."}, status=status.HTTP_201_CREATED)
+
+
+class ProjectViewSet(ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+class CooperativeViewSet(ModelViewSet):
+    queryset = Cooperative.objects.all()
+    serializer_class = CooperativeSerializer
+
+# Vue pour les Membres des Coopératives
+class CooperativeMemberViewSet(ModelViewSet):
+    queryset = CooperativeMember.objects.prefetch_related('producteurs', 'cooperative')
+    serializer_class = CooperativeMemberSerializer
+

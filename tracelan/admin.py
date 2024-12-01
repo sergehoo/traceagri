@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from tracelan.models import Cooperative, Producteur, Parcelle, Ville, DistrictSanitaire, Region, Project, Task, \
-    Milestone, Deliverable, Employee, Depense, Event, EventInvite, CulturePerennial, CultureSeasonal
+    Milestone, Deliverable, Employee, Depense, Event, EventInvite, CulturePerennial, CultureSeasonal, DynamicField, \
+    DynamicForm, FieldResponse, FormResponse
 
 admin.site.site_header = 'TRACAFRIC BACK-END CONTROLER'
 admin.site.site_title = 'TRACAFRIC Super Admin Pannel'
@@ -110,6 +111,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
     list_display = ("name", "start_date", "end_date", "location")
 
+
 @admin.register(EventInvite)
 class EventInviteAdmin(admin.ModelAdmin):
     list_display = ('event', 'get_invite', 'invite_type_display', 'created_at', 'updated_at')
@@ -121,6 +123,7 @@ class EventInviteAdmin(admin.ModelAdmin):
         Display the human-readable name for the invite type.
         """
         return obj.get_invite_type_display()
+
     invite_type_display.short_description = "Type d'invité"
 
     def get_invite(self, obj):
@@ -131,12 +134,14 @@ class EventInviteAdmin(admin.ModelAdmin):
             return obj.get_invite()
         except Exception:
             return "Not Found"
+
     get_invite.short_description = "Nom de l'invité"
 
 
 @admin.register(CulturePerennial)
 class CulturePerennialAdmin(admin.ModelAdmin):
-    list_display = ('type_culture', 'parcelle', 'annee_mise_en_place', 'date_derniere_recolte', 'dernier_rendement_kg_ha')
+    list_display = (
+        'type_culture', 'parcelle', 'annee_mise_en_place', 'date_derniere_recolte', 'dernier_rendement_kg_ha')
     list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
     search_fields = ('type_culture', 'parcelle__nom')
     ordering = ('-annee_mise_en_place',)
@@ -148,3 +153,33 @@ class CultureSeasonalAdmin(admin.ModelAdmin):
     list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
     search_fields = ('type_culture', 'parcelle__nom')
     ordering = ('-annee_mise_en_place',)
+
+
+# Configuration pour les champs dynamiques
+class DynamicFieldInline(admin.TabularInline):
+    model = DynamicField
+    extra = 1  # Nombre de champs supplémentaires visibles par défaut
+    fields = ['label', 'field_type', 'required', 'options', 'order']
+
+
+# Configuration pour les formulaires dynamiques
+@admin.register(DynamicForm)
+class DynamicFormAdmin(admin.ModelAdmin):
+    list_display = ['name', 'project', 'created_at']
+    list_filter = ['project', 'created_at']
+    search_fields = ['name', 'project__name']
+    inlines = [DynamicFieldInline]
+
+
+# Configuration pour les réponses de formulaire
+class FieldResponseInline(admin.TabularInline):
+    model = FieldResponse
+    extra = 0  # Ne pas afficher de champs supplémentaires par défaut
+
+
+@admin.register(FormResponse)
+class FormResponseAdmin(admin.ModelAdmin):
+    list_display = ['form', 'submitted_at']
+    list_filter = ['form', 'submitted_at']
+    search_fields = ['form__name']
+    inlines = [FieldResponseInline]

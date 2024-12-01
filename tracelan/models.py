@@ -1015,3 +1015,48 @@ class EventInvite(models.Model):
     def __str__(self):
         # Use get_invite_type_display() to get the human-readable name of the invite_type field
         return f"{self.get_invite()} ({self.get_invite_type_display()})"
+
+
+class DynamicForm(models.Model):
+    project = models.ForeignKey(Project, related_name="forms", on_delete=models.CASCADE, verbose_name="Projet")
+    name = models.CharField(max_length=255, verbose_name="Nom du Formulaire")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+
+    def __str__(self):
+        return f"{self.name} ({self.project.name})"
+
+
+class DynamicField(models.Model):
+    FIELD_TYPES = [
+        ('text', 'Text'),
+        ('number', 'Number'),
+        ('email', 'Email'),
+        ('date', 'Date'),
+        ('select', 'Select'),
+        ('checkbox', 'Checkbox'),
+        ('radio', 'Radio'),
+    ]
+
+    form = models.ForeignKey(DynamicForm, related_name="fields", on_delete=models.CASCADE, verbose_name="Formulaire")
+    label = models.CharField(max_length=255, verbose_name="Label")
+    field_type = models.CharField(max_length=50, choices=FIELD_TYPES, verbose_name="Type de Champ")
+    required = models.BooleanField(default=True, verbose_name="Requis")
+    options = models.TextField(blank=True, null=True,
+                               help_text="Valeurs séparées par des virgules pour 'select', 'checkbox', ou 'radio'.",
+                               verbose_name="Options")
+    order = models.PositiveIntegerField(default=0, verbose_name="Ordre")
+
+    def __str__(self):
+        return f"{self.label} ({self.field_type})"
+
+
+class FormResponse(models.Model):
+    form = models.ForeignKey(DynamicForm, related_name="responses", on_delete=models.CASCADE)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+
+class FieldResponse(models.Model):
+    response = models.ForeignKey(FormResponse, related_name="field_responses", on_delete=models.CASCADE)
+    field = models.ForeignKey(DynamicField, on_delete=models.CASCADE)
+    value = models.TextField()

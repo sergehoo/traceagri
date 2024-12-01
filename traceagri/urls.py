@@ -19,7 +19,7 @@ from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.messages import api
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from tracelan.views import HomePageView, ProducteurListView, ProducteurDetailView, ProducteurCreateView, \
     ParcelleListView, ParcelleDetailView, ParcelleCreateView, ParcelleUpdateView, ParcelleDeleteView, ProjectListView, \
@@ -36,6 +36,9 @@ urlpatterns = i18n_patterns(
     path('accounts/', include('allauth.urls')),
     path('api/', include('traceagri.api.urls')),
     path('api-auth/', include('rest_framework.urls')),
+    path('auth/', include('djoser.urls')),
+    path('auth/tablette/', include('djoser.urls.authtoken')),
+
     path('', HomePageView.as_view(), name='home'),
     path('Producteurs', ProducteurListView.as_view(), name='producteurs-list'),
     path('Producteurs/create', ProducteurCreateView.as_view(), name='producteurs-create'),
