@@ -80,7 +80,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 class VilleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ville
-        fields = ['id', 'nom']  # Ajoutez les champs nécessaires
+        fields = ['id', 'name']  # Ajoutez les champs nécessaires
 
 
 class CooperativeSerializer(serializers.ModelSerializer):
