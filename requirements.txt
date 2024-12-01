@@ -68,3 +68,4 @@ zipp==3.21.0
 gunicorn
 psycopg2-binary
 openpyxl
+djoser
