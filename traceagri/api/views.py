@@ -169,12 +169,13 @@ class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
 
+
 class CooperativeViewSet(ModelViewSet):
     queryset = Cooperative.objects.all()
     serializer_class = CooperativeSerializer
+
 
 # Vue pour les Membres des Coopératives
 class CooperativeMemberViewSet(ModelViewSet):
     queryset = CooperativeMember.objects.prefetch_related('producteurs', 'cooperative')
     serializer_class = CooperativeMemberSerializer
-

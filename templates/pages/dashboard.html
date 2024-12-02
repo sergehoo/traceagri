@@ -201,101 +201,107 @@
 
       <script>
           document.addEventListener("DOMContentLoaded", function () {
-    const dashboardDataUrl = "{{ dashboard_data_url }}";
-    fetch(dashboardDataUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Erreur HTTP : ' + response.status);
-            return response.json();
-        })
-        .then(data => {
-            if (!data) throw new Error('Données manquantes dans la réponse de l\'API');
+              const dashboardDataUrl = "{{ dashboard_data_url }}";
+              fetch(dashboardDataUrl)
+                  .then(response => {
+                      if (!response.ok) throw new Error('Erreur HTTP : ' + response.status);
+                      return response.json();
+                  })
+                  .then(data => {
+                      if (!data) throw new Error('Données manquantes dans la réponse de l\'API');
 
-            // Graphique Donut pour les statistiques globales
-            if (data.total_producteurs !== undefined && data.total_parcelles !== undefined && data.total_cooperatives !== undefined) {
-                const totalStatsOptions = {
-                    chart: {
-                        type: 'donut'
-                    },
-                    series: [data.total_producteurs, data.total_parcelles, data.total_cooperatives],
-                    labels: ['Producteurs', 'Parcelles', 'Coopératives']
-                };
-                const totalStatsChart = new ApexCharts(document.querySelector("#totalStats"), totalStatsOptions);
-                totalStatsChart.render();
-            }
+                      // Graphique Donut pour les statistiques globales
+                      if (data.total_producteurs !== undefined && data.total_parcelles !== undefined && data.total_cooperatives !== undefined) {
+                          const totalStatsOptions = {
+                              chart: {
+                                  type: 'donut'
+                              },
+                              series: [data.total_producteurs, data.total_parcelles, data.total_cooperatives],
+                              labels: ['Producteurs', 'Parcelles', 'Coopératives']
+                          };
+                          const totalStatsChart = new ApexCharts(document.querySelector("#totalStats"), totalStatsOptions);
+                          totalStatsChart.render();
+                      }
 
-            // Graphique Pie pour les producteurs par sexe
-            if (data.producteurs_par_sexe && Array.isArray(data.producteurs_par_sexe)) {
-                const producteursParSexeOptions = {
-                    chart: {
-                        type: 'pie'
-                    },
-                    series: data.producteurs_par_sexe.map(item => item.count || 0),
-                    labels: data.producteurs_par_sexe.map(item => item.sexe === 'M' ? 'Masculin' : 'Féminin')
-                };
-                const producteursParSexeChart = new ApexCharts(document.querySelector("#producteursParSexe"), producteursParSexeOptions);
-                producteursParSexeChart.render();
-            }
+                      // Graphique Pie pour les producteurs par sexe
+                      if (data.producteurs_par_sexe && Array.isArray(data.producteurs_par_sexe)) {
+                          const producteursParSexeOptions = {
+                              chart: {
+                                  type: 'pie'
+                              },
+                              series: data.producteurs_par_sexe.map(item => item.count || 0),
+                              labels: data.producteurs_par_sexe.map(item => item.sexe === 'M' ? 'Masculin' : 'Féminin')
+                          };
+                          const producteursParSexeChart = new ApexCharts(document.querySelector("#producteursParSexe"), producteursParSexeOptions);
+                          producteursParSexeChart.render();
+                      }
 
-            // Graphique Bar pour les producteurs par région
-            if (data.producteurs_par_region && Array.isArray(data.producteurs_par_region)) {
-                const producteursParRegionOptions = {
-                    chart: {
-                        type: 'bar'
-                    },
-                    series: [{
-                        name: 'Nombre de producteurs',
-                        data: data.producteurs_par_region.map(item => item.count || 0)
-                    }],
-                    xaxis: {
-                        categories: data.producteurs_par_region.map(item => item.cooperative__ville__district__region__name || 'Inconnue')
-                    }
-                };
-                const producteursParRegionChart = new ApexCharts(document.querySelector("#producteursParRegion"), producteursParRegionOptions);
-                producteursParRegionChart.render();
-            }
+                      // Graphique Bar pour les producteurs par région
+                      if (data.producteurs_par_region && Array.isArray(data.producteurs_par_region)) {
+                          const producteursParRegionOptions = {
+                              chart: {
+                                  type: 'bar'
+                              },
+                              series: [{
+                                  name: 'Nombre de producteurs',
+                                  data: data.producteurs_par_region.map(item => item.count || 0)
+                              }],
+                              xaxis: {
+                                  categories: data.producteurs_par_region.map(item => item.cooperative__ville__district__region__name || 'Inconnue')
+                              }
+                          };
+                          const producteursParRegionChart = new ApexCharts(document.querySelector("#producteursParRegion"), producteursParRegionOptions);
+                          producteursParRegionChart.render();
+                      }
 
-            // Graphique Bar pour les parcelles par région
-            if (data.parcelles_par_region && Array.isArray(data.parcelles_par_region)) {
-                const parcellesParRegionOptions = {
-                    chart: {
-                        type: 'bar'
-                    },
-                    series: [{
-                        name: 'Nombre de parcelles',
-                        data: data.parcelles_par_region.map(item => item.total_parcelles || 0)
-                    }, {
-                        name: 'Surface totale (ha)',
-                        data: data.parcelles_par_region.map(item => item.surface_totale || 0)
-                    }],
-                    xaxis: {
-                        categories: data.parcelles_par_region.map(item => item.region__name || 'Inconnue')
-                    }
-                };
-                const parcellesParRegionChart = new ApexCharts(document.querySelector("#parcellesParRegion"), parcellesParRegionOptions);
-                parcellesParRegionChart.render();
-            }
+                      // Graphique Bar pour les parcelles par région
+                      if (data.parcelles_par_region && Array.isArray(data.parcelles_par_region)) {
+                          const parcellesParRegionOptions = {
+                              chart: {
+                                  type: 'bar'
+                              },
+                              series: [{
+                                  name: 'Nombre de parcelles',
+                                  data: data.parcelles_par_region.map(item => item.total_parcelles || 0)
+                              }, {
+                                  name: 'Surface totale (ha)',
+                                  data: data.parcelles_par_region.map(item => item.surface_totale || 0)
+                              }],
+                              xaxis: {
+                                  categories: data.parcelles_par_region.map(item => item.region__name || 'Inconnue')
+                              }
+                          };
+                          const parcellesParRegionChart = new ApexCharts(document.querySelector("#parcellesParRegion"), parcellesParRegionOptions);
+                          parcellesParRegionChart.render();
+                      }
 
-            // Graphique Pie pour les parcelles par culture
-            if (data.parcelles_par_culture && Array.isArray(data.parcelles_par_culture)) {
-                // Extraire les séries et les étiquettes correctement
-                const series = data.parcelles_par_culture.map(item => item.count || 0);
-                const labels = data.parcelles_par_culture.map(item => item.culture?.value || item.culture || 'Inconnue');
+                      // Graphique Pie pour les parcelles par culture
+                      if (data.parcelles_par_culture && Array.isArray(data.parcelles_par_culture)) {
+                          // Extraire les séries et les étiquettes correctement
+                          const series = data.parcelles_par_culture.map(item => item.count || 0);
+                          const labels = data.parcelles_par_culture.map(item => {
+                              if (typeof item.culture === 'object' && item.culture !== null) {
+                                  // Vérifiez si "culture" contient une clé "value", sinon utilisez une valeur par défaut
+                                  return item.culture.value || 'Inconnue';
+                              }
+                              return item.culture || 'Inconnue'; // Utilisez directement la valeur si ce n'est pas un objet
+                          });
 
-                // Configurer le graphique
-                const parcellesParCultureOptions = {
-                    chart: {
-                        type: 'pie'
-                    },
-                    series: series,
-                    labels: labels
-                };
+                          // Configurer le graphique
+                          const parcellesParCultureOptions = {
+                              chart: {
+                                  type: 'pie'
+                              },
+                              series: series,
+                              labels: labels
+                          };
 
-                // Rendu du graphique
-                const parcellesParCultureChart = new ApexCharts(document.querySelector("#parcellesParCulture"), parcellesParCultureOptions);
-                parcellesParCultureChart.render();
-            }
-        })
-        .catch(error => console.error('Erreur lors du chargement des données :', error));
+                          // Rendu du graphique
+                          const parcellesParCultureChart = new ApexCharts(document.querySelector("#parcellesParCulture"), parcellesParCultureOptions);
+                          parcellesParCultureChart.render();
+                      }
+                  })
+                  .catch(error => console.error('Erreur lors du chargement des données :', error));
           });
       </script>
   {% endblock %}

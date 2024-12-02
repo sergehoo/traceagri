@@ -560,7 +560,7 @@ class Parcelle(models.Model):
     status = models.CharField(choices=Status_choices, null=True, blank=True, max_length=100)
     carracteristic = models.JSONField(null=True, blank=True)
     culture = models.JSONField(null=True, blank=True)
-    culture_perenne = models.ManyToManyField('CulturePerennial', related_name="cultureperenne", blank=True)
+    culture_perenne = models.ForeignKey('CulturePerennial', on_delete=models.CASCADE,related_name="cultureperenne", blank=True)
     culture_saisonniere = models.ManyToManyField('CultureSeasonal', related_name="culturesaison", blank=True)
     affectations = models.TextField(null=True, blank=True)  # Pour les événements affectant la parcelle
 
