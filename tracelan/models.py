@@ -781,9 +781,13 @@ class Project(models.Model):
 
     @property
     def marge_estimatif(self):
-        marge = self.previsionnel - self.budget_estimatif
-
-        return marge
+        """
+        Calcule la marge estimative.
+        Si previsionnel ou budget_estimatif est None, retourne 0.
+        """
+        previsionnel = self.previsionnel or 0
+        budget_estimatif = self.budget_estimatif or 0
+        return previsionnel - budget_estimatif
 
     @property
     def profit_percentage(self):

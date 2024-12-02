@@ -56,7 +56,7 @@
             <th>{% trans "Localité" %}</th>
             <th>{% trans "Dimension (ha)" %}</th>
             <th>{% trans "Date de Création" %}</th>
-            <th>{% trans "Cultures" %}</th>
+{#            <th>{% trans "Cultures" %}</th>#}
             <th width="100px">{% trans "Actions" %}</th>
         </tr>
     </thead>
@@ -78,13 +78,13 @@
                 <td>{{ parcelle.localite.name }}</td>
                 <td>{{ parcelle.dimension_ha|floatformat:0 }} {% trans "hectar(s)" %}</td>
                 <td>{{ parcelle.created_at|naturalday }}</td>
-                <td>
-                    {% for item in parcelle.culture %}
-                        <span class="label label-dark label-inline font-weight-normal mr-2 mt-2">{{ item.value }}</span>
-                    {% empty %}
-                        <span class="text-muted small">{% trans "Indéfini" %}</span>
-                    {% endfor %}
-                </td>
+{#                <td>#}
+{#                    {% for item in parcelle.culture %}#}
+{#                        <span class="label label-dark label-inline font-weight-normal mr-2 mt-2">{{ item.value }}</span>#}
+{#                    {% empty %}#}
+{#                        <span class="text-muted small">{% trans "Indéfini" %}</span>#}
+{#                    {% endfor %}#}
+{#                </td>#}
                 <td>
                     <a href="{% url 'parcelle-update' parcelle.pk %}" class="btn btn-icon btn-primary btn-xs"><i class="flaticon2-edit"></i></a>
                     <a href="{% url 'parcelle-delete' producteur_id=parcelle.producteur.id pk=parcelle.pk %}" class="btn btn-icon btn-danger btn-xs "><i class="flaticon2-trash"></i></a>
