@@ -208,10 +208,8 @@ class ProducteurDeleteView(LoginRequiredMixin, DeleteView):
 
 class ParcelleExportView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        # Récupérer le format d'export (csv, excel)
         export_format = request.GET.get('format', 'csv')  # Par défaut, CSV
-        parcelles = Parcelle.objects.select_related('producteur', 'localite').prefetch_related('culture_perenne',
-                                                                                               'culture_saisonniere')
+        parcelles = Parcelle.objects.select_related('producteur', 'localite').prefetch_related('cultures__culture')
 
         if export_format == 'csv':
             return self.export_csv(parcelles)
@@ -221,25 +219,31 @@ class ParcelleExportView(LoginRequiredMixin, View):
             return HttpResponse("Format non pris en charge.", status=400)
 
     def export_csv(self, parcelles):
-        # Créer la réponse HTTP avec l'en-tête pour un fichier CSV
         dates = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="Exportparcelles_{dates}.csv"'
 
         writer = csv.writer(response)
-        # Ajouter les en-têtes des colonnes
         writer.writerow([
-            'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
+            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
             'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
         ])
 
-        # Ajouter les données des parcelles
         for parcelle in parcelles:
             producteur = f"{parcelle.producteur.nom} {parcelle.producteur.prenom}" if parcelle.producteur else "N/A"
-            cultures_perennes = ", ".join(culture.nom for culture in parcelle.culture_perenne.all())
-            cultures_saisonnieres = ", ".join(culture.nom for culture in parcelle.culture_saisonniere.all())
+            cultures_perennes = ", ".join(
+                culture_detail.culture.nom
+                for culture_detail in parcelle.cultures.all()
+                if culture_detail.type_culture == 'perennial'
+            )
+            cultures_saisonnieres = ", ".join(
+                culture_detail.culture.nom
+                for culture_detail in parcelle.cultures.all()
+                if culture_detail.type_culture == 'seasonal'
+            )
 
             writer.writerow([
+                parcelle.unique_id,
                 parcelle.nom,
                 parcelle.code,
                 parcelle.localite.name if parcelle.localite else '',
@@ -255,28 +259,34 @@ class ParcelleExportView(LoginRequiredMixin, View):
         return response
 
     def export_excel(self, parcelles):
-        # Créer un fichier Excel
         workbook = Workbook()
         sheet = workbook.active
         sheet.title = "Parcelles"
 
-        # Ajouter les en-têtes des colonnes
         headers = [
-            'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
+            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
             'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
         ]
         sheet.append(headers)
 
-        # Ajouter les données des parcelles
         for parcelle in parcelles:
             producteur = f"{parcelle.producteur.nom} {parcelle.producteur.prenom}" if parcelle.producteur else "N/A"
-            cultures_perennes = ", ".join(culture.nom for culture in parcelle.culture_perenne.all())
-            cultures_saisonnieres = ", ".join(culture.nom for culture in parcelle.culture_saisonniere.all())
+            cultures_perennes = ", ".join(
+                culture_detail.culture.nom
+                for culture_detail in parcelle.cultures.all()
+                if culture_detail.type_culture == 'perennial'
+            )
+            cultures_saisonnieres = ", ".join(
+                culture_detail.culture.nom
+                for culture_detail in parcelle.cultures.all()
+                if culture_detail.type_culture == 'seasonal'
+            )
 
             sheet.append([
+                parcelle.unique_id,
                 parcelle.nom,
                 parcelle.code,
-                parcelle.localite.nom if parcelle.localite else '',
+                parcelle.localite.name if parcelle.localite else '',
                 parcelle.dimension_ha,
                 parcelle.longitude,
                 parcelle.latitude,
@@ -286,10 +296,7 @@ class ParcelleExportView(LoginRequiredMixin, View):
                 cultures_saisonnieres
             ])
 
-        # Créer la réponse HTTP avec l'en-tête pour un fichier Excel
-
-        dates = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Format: YYYY-MM-DD_HH-MM-SS
-
+        dates = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename="Exportparcelles_{dates}.xlsx"'
 
@@ -891,7 +898,8 @@ class MobileDataListView(ListView):
         total_data = MobileData.objects.count()
         valid_data = MobileData.objects.filter(validate=True).count()  # Exemple de critère pour valide
         invalid_data = total_data - valid_data
-        duplicates = MobileData.objects.values('telephone').annotate(count=Count('telephone')).filter(count__gt=1, validate=False).count()
+        duplicates = MobileData.objects.values('telephone').annotate(count=Count('telephone')).filter(count__gt=1,
+                                                                                                      validate=False).count()
 
         # Ajout des métriques au contexte
         context['total_data'] = total_data
