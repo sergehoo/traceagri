@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+import time
 import uuid
 import zipfile
 from io import BytesIO
@@ -10,13 +11,14 @@ from django.contrib.gis.gdal import SpatialReference, CoordTransform
 from django.contrib.gis.geos import Point, GEOSGeometry
 from django.db import models
 from django.contrib.gis.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Max
 from django.utils.timezone import now
 from fastkml import kml
 from shapely.geometry import mapping, shape
 from django.utils.translation import gettext_lazy as _
 from shapely.ops import unary_union
 from simple_history.models import HistoricalRecords
+from unidecode import unidecode
 
 Status_choices = [
     ('En projet', 'En projet'),
@@ -476,6 +478,7 @@ class Cooperative(models.Model):
     nom = models.CharField(max_length=100)
     code = models.CharField(max_length=100, default=uuid.uuid4, unique=True)
     ville = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True)
+    specialite = models.ForeignKey('Culture', on_delete=models.CASCADE, null=True, blank=True)
     president = models.ForeignKey('Producteur', on_delete=models.CASCADE, null=True, blank=True,
                                   related_name='president')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -499,6 +502,7 @@ class Cooperative(models.Model):
 class CooperativeMember(models.Model):
     cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, null=True, blank=True)
     producteurs = models.ManyToManyField('Producteur', related_name='members', blank=True)
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -519,6 +523,7 @@ class Producteur(models.Model):
                                     blank=True)
     fonction = models.CharField(max_length=100, null=True, blank=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -544,10 +549,70 @@ class Producteur(models.Model):
         return f"{self.nom} {self.prenom}" if self.nom and self.prenom else self.nom or "Producteur anonyme"
 
 
+class Culture(models.Model):
+    CATEGORY_CHOICES = [
+        ('vivriere', _('Culture Vivrière')),
+        ('rente', _('Culture de Rente')),
+        ('maraichere', _('Culture Maraîchère')),
+        ('fruitiere', _('Culture Fruitière')),
+        ('specialisee', _('Culture Spécialisée')),
+        ('florale', _('Culture Florale et Ornementale')),
+        ('emergente', _('Culture Émergente')),
+    ]
+
+    name = models.CharField(max_length=200, unique=True, verbose_name=_("Nom de la Culture"))
+    category = models.CharField(
+        max_length=50, choices=CATEGORY_CHOICES, verbose_name=_("Catégorie")
+    )
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Est Active"))
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
+
+    class Meta:
+        verbose_name = _("Culture")
+        verbose_name_plural = _("Cultures")
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class CultureDetail(models.Model):
+    CULTURE_TYPE_CHOICES = [
+        ('perennial', _('Culture Pérenne')),
+        ('seasonal', _('Culture Saisonnière')),
+    ]
+
+    parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures")
+    culture = models.ForeignKey(Culture, on_delete=models.CASCADE)
+    type_culture = models.CharField(max_length=50, choices=CULTURE_TYPE_CHOICES, verbose_name=_("Type de Culture"))
+    annee_mise_en_place = models.PositiveIntegerField(verbose_name=_("Année de mise en place"))
+    date_recolte = models.DateField(null=True, blank=True, verbose_name=_("Date de récolte (saisonnière)"))
+    date_derniere_recolte = models.DateField(null=True, blank=True,
+                                             verbose_name=_("Date de dernière récolte (pérenne)"))
+    dernier_rendement_kg_ha = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, verbose_name=_("Dernier rendement (kg/ha)")
+    )
+    pratiques_culturales = models.TextField(null=True, blank=True, verbose_name=_("Pratiques culturales"))
+    utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
+    type_fertilisants = models.TextField(null=True, blank=True, verbose_name=_("Type de fertilisants"))
+    analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
+
+    def __str__(self):
+        return f"{self.culture.name} ({self.parcelle.nom}) - {self.get_type_culture_display()}"
+
+
 class Parcelle(models.Model):
+    unique_id = models.CharField(max_length=20, unique=True, null=True, editable=False, blank=True,
+                                 verbose_name="Identifiant Unique")
     producteur = models.ForeignKey(Producteur, on_delete=models.CASCADE, related_name="parcelles")
     code = models.CharField(max_length=100, null=True, blank=True)
-    localite = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True)
+    localite = models.ForeignKey(Ville, on_delete=models.CASCADE)
 
     nom = models.CharField(max_length=100, null=True, blank=True)
     dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
@@ -560,13 +625,14 @@ class Parcelle(models.Model):
     status = models.CharField(choices=Status_choices, null=True, blank=True, max_length=100)
     carracteristic = models.JSONField(null=True, blank=True)
     culture = models.JSONField(null=True, blank=True)
-    culture_perenne = models.ForeignKey('CulturePerennial', on_delete=models.CASCADE,related_name="cultureperenne", blank=True)
-    culture_saisonniere = models.ManyToManyField('CultureSeasonal', related_name="culturesaison", blank=True)
+    # culture_perenne = models.ForeignKey('CulturePerennial', on_delete=models.CASCADE, related_name="cultureperenne",null=True, blank=True)
+    # culture_saisonniere = models.ManyToManyField('CultureSeasonal', related_name="culturesaison", blank=True)
     affectations = models.TextField(null=True, blank=True)  # Pour les événements affectant la parcelle
 
     images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
 
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -581,6 +647,9 @@ class Parcelle(models.Model):
         verbose_name_plural = "Parcelles"
 
     def save(self, *args, **kwargs):
+        if not self.unique_id:  # Générer uniquement si l'identifiant unique n'existe pas
+            self.unique_id = self.generate_unique_id()
+
         # Vérifier si le fichier KMZ a changé
         kmz_changed = self.pk is None or self.polygone_kmz != type(self).objects.get(pk=self.pk).polygone_kmz
 
@@ -621,6 +690,45 @@ class Parcelle(models.Model):
 
         super().save(*args, **kwargs)
 
+    def generate_unique_id(self):
+        from unidecode import unidecode
+        import random
+        import time
+        from datetime import datetime
+
+        # Obtenir les initiales de la région (sans accents)
+        if self.localite and self.localite.district and self.localite.district.region:
+            region_initial = unidecode(self.localite.district.region.name)[:2].upper()
+            region_initial = ''.join(filter(str.isalnum, region_initial))[:2]
+        else:
+            region_initial = "XX"  # Valeur par défaut si région manquante
+
+        # Obtenir l'initiale du projet (sans accents)
+        if self.projet:  # Vérifier si le projet est défini
+            project_initial = unidecode(self.projet.name)[0].upper()
+            project_initial = ''.join(filter(str.isalnum, project_initial))[:1]
+        else:
+            project_initial = "X"  # Valeur par défaut si projet manquant
+
+        # Obtenir l'année actuelle
+        current_year = str(datetime.now().year)[-2:]
+
+        # Boucle pour garantir l'unicité
+        for _ in range(10):  # Limite à 10 essais
+            # Générer un identifiant avec timestamp et random
+            timestamp_part = str(int(time.time() * 1000))[-3:]
+            random_part = str(random.randint(100, 999))
+            sequence_number = f"{timestamp_part}{random_part}"
+
+            # Construire l'identifiant unique
+            unique_id = f"{region_initial}{sequence_number}{project_initial}{current_year}"
+
+            # Vérifier si cet identifiant est unique
+            if not Parcelle.objects.filter(unique_id=unique_id).exists():
+                return unique_id
+
+        raise Exception("Impossible de générer un identifiant unique après plusieurs tentatives.")
+
     def extract_features(self, features, geojson_features):
         """Parcours récursif des fonctionnalités pour extraire les géométries"""
         for feature in features:
@@ -659,38 +767,40 @@ class Parcelle(models.Model):
             return None
 
     def __str__(self):
-        return f"{self.nom} ({self.dimension_ha} ha)" if self.nom else f"Parcelle sans nom ({self.dimension_ha} ha)"
+        return f"{self.nom} ({self.unique_id}) ({self.dimension_ha} ha)" if self.nom else f"Parcelle sans nom ({self.dimension_ha} ha)"
 
 
-class CulturePerennial(models.Model):
-    parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures_perennial")
-    type_culture = models.CharField(max_length=100)
-    annee_mise_en_place = models.PositiveIntegerField()
-    date_derniere_recolte = models.DateField(null=True, blank=True)
-    dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    pratiques_culturales = models.TextField(null=True, blank=True)
-    utilise_fertilisants = models.BooleanField(default=False)
-    type_fertilisants = models.TextField(null=True, blank=True)
-    analyse_sol = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.type_culture} ({self.parcelle.nom})"
-
-
-class CultureSeasonal(models.Model):
-    parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures_seasonal")
-    type_culture = models.CharField(max_length=100)
-    annee_mise_en_place = models.PositiveIntegerField()
-    date_recolte = models.DateField(null=True, blank=True)
-    dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    pratiques_culturales = models.TextField(null=True, blank=True)
-    utilise_fertilisants = models.BooleanField(default=False)
-    type_fertilisants = models.TextField(null=True, blank=True)
-    analyse_sol = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.type_culture} ({self.parcelle.nom})"
-
+# class CulturePerennial(models.Model):
+#     parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures_perennial")
+#     culture = models.ForeignKey(Culture, on_delete=models.CASCADE )
+#     type_culture = models.CharField(max_length=100)
+#     annee_mise_en_place = models.PositiveIntegerField()
+#     date_derniere_recolte = models.DateField(null=True, blank=True)
+#     dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+#     pratiques_culturales = models.TextField(null=True, blank=True)
+#     utilise_fertilisants = models.BooleanField(default=False)
+#     type_fertilisants = models.TextField(null=True, blank=True)
+#     analyse_sol = models.BooleanField(default=False)
+#
+#     def __str__(self):
+#         return f"{self.type_culture} ({self.parcelle.nom})"
+#
+#
+# class CultureSeasonal(models.Model):
+#     parcelle = models.ForeignKey('Parcelle', on_delete=models.CASCADE, related_name="cultures_seasonal")
+#     culture = models.ForeignKey(Culture, on_delete=models.CASCADE )
+#     type_culture = models.CharField(max_length=100)
+#     annee_mise_en_place = models.PositiveIntegerField()
+#     date_recolte = models.DateField(null=True, blank=True)
+#     dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+#     pratiques_culturales = models.TextField(null=True, blank=True)
+#     utilise_fertilisants = models.BooleanField(default=False)
+#     type_fertilisants = models.TextField(null=True, blank=True)
+#     analyse_sol = models.BooleanField(default=False)
+#
+#     def __str__(self):
+#         return f"{self.type_culture} ({self.parcelle.nom})"
+#
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -715,6 +825,7 @@ class Project(models.Model):
     previsionnel = models.IntegerField(verbose_name=_("Budget Previsionnel"), null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     history = HistoricalRecords()
 
     class Meta:
@@ -869,6 +980,8 @@ class Task(models.Model):
                                     related_name="assigned_tasks_by", verbose_name=_("Assigner par"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+
     history = HistoricalRecords()
 
     def save(self, *args, **kwargs):
@@ -974,6 +1087,7 @@ class Event(models.Model):
     banner = models.FileField(upload_to='events/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -999,6 +1113,7 @@ class EventInvite(models.Model):
                                              verbose_name="Date de confirmation")  # Nouveau champ
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
 
     def get_invite(self):
         """
@@ -1027,6 +1142,9 @@ class DynamicForm(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name="Description")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
 
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
+
     def __str__(self):
         return f"{self.name} ({self.project.name})"
 
@@ -1050,6 +1168,9 @@ class DynamicField(models.Model):
                                help_text="Valeurs séparées par des virgules pour 'select', 'checkbox', ou 'radio'.",
                                verbose_name="Options")
     order = models.PositiveIntegerField(default=0, verbose_name="Ordre")
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
 
     def __str__(self):
         return f"{self.label} ({self.field_type})"
@@ -1064,3 +1185,136 @@ class FieldResponse(models.Model):
     response = models.ForeignKey(FormResponse, related_name="field_responses", on_delete=models.CASCADE)
     field = models.ForeignKey(DynamicField, on_delete=models.CASCADE)
     value = models.TextField()
+
+
+class MobileData(models.Model):
+    #Infos sur le proucteur
+    nom = models.CharField(max_length=100, null=True, blank=True)
+    prenom = models.CharField(max_length=500, null=True, blank=True)
+    sexe = models.CharField(max_length=1,null=True, blank=True, choices=[('M', 'Masculin'), ('F', 'Féminin')])
+    telephone = models.CharField(max_length=20, blank=True, null=True)
+    date_naissance = models.DateField(blank=True, null=True)
+    lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
+    fonction = models.CharField(max_length=100, null=True, blank=True)
+    localite = models.ForeignKey(Ville,null=True, blank=True, on_delete=models.CASCADE, related_name="localite_producteur")
+
+    # Infos sur la parcelle
+    nom_parcelle = models.CharField(max_length=100, null=True, blank=True)
+    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
+
+    CATEGORY_CHOICES = [
+        ('vivriere', _('Culture Vivrière')),
+        ('industrial', _('Culture Industrielle')),
+        ('rente', _('Culture de Rente')),
+        ('maraichere', _('Culture Maraîchère')),
+        ('fruitiere', _('Culture Fruitière')),
+        ('specialisee', _('Culture Spécialisée')),
+        ('florale', _('Culture Florale et Ornementale')),
+        ('emergente', _('Culture Émergente')),
+    ]
+    CULTURE_TYPE_CHOICES = [
+        ('perennial', _('Culture Pérenne')),
+        ('seasonal', _('Culture Saisonnière')),
+    ]
+    CULTURE_CHOICES = [
+        # Cultures Pérennes (de rente)
+        ('cacao', _('Cacao')),
+        ('cafe', _('Café')),
+        ('hevea', _('Hévéa')),
+        ('palmier_huile', _('Palmier à huile')),
+        ('cajou', _('Noix de cajou (Anacarde)')),
+        ('cocotier', _('Cocotier')),
+
+        # Cultures Vivrières
+        ('manioc', _('Manioc')),
+        ('igname', _('Igname')),
+        ('taro', _('Taro')),
+        ('patate_douce', _('Patate douce')),
+        ('riz', _('Riz')),
+        ('mais', _('Maïs')),
+        ('sorgho', _('Sorgho')),
+        ('mil', _('Mil')),
+        ('banane_plantain', _('Banane plantain')),
+
+        # Cultures Maraîchères (légumes)
+        ('aubergine', _('Aubergine africaine')),
+        ('tomate', _('Tomate')),
+        ('gombo', _('Gombo')),
+        ('piment', _('Piment')),
+        ('oignon', _('Oignon')),
+        ('chou', _('Chou')),
+        ('carotte', _('Carotte')),
+        ('poivron', _('Poivron')),
+        ('concombre', _('Concombre')),
+        ('laitue', _('Laitue')),
+
+        # Cultures Fruitières
+        ('ananas', _('Ananas')),
+        ('orange', _('Orange')),
+        ('banane', _('Banane dessert')),
+        ('papaye', _('Papaye')),
+        ('mangue', _('Mangue')),
+        ('avocat', _('Avocat')),
+        ('goyave', _('Goyave')),
+        ('citron', _('Citron')),
+        ('corossol', _('Corossol')),
+        ('pasteque', _('Pastèque')),
+        ('melon', _('Melon')),
+
+        # Cultures Industrielles
+        ('coton', _('Coton')),
+        ('canne_sucre', _('Canne à sucre')),
+        ('tabac', _('Tabac')),
+
+        # Cultures Spécifiques (émergentes ou niches)
+        ('gingembre', _('Gingembre')),
+        ('curcuma', _('Curcuma')),
+        ('sesame', _('Sésame')),
+        ('soja', _('Soja')),
+        ('arachide', _('Arachide')),
+        ('pois_angole', _('Pois d’Angole')),
+        ('haricot_niebe', _('Haricot niébé')),
+    ]
+
+    # Infos sur les cultures de la parcelle
+    type_culture = models.CharField(max_length=50,null=True, blank=True, choices=CULTURE_TYPE_CHOICES, verbose_name=_("Type de Culture"))
+    category = models.CharField(max_length=50,null=True, blank=True, choices=CATEGORY_CHOICES, verbose_name=_("Catégorie"))
+    nom_culture = models.CharField(max_length=200,null=True, blank=True, choices=CATEGORY_CHOICES,
+                                   verbose_name=_("Nom de la Culture"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
+                                          related_name="localite_parcelle")
+    annee_mise_en_place = models.PositiveIntegerField(null=True, blank=True,verbose_name=_("Année de mise en place"))
+    date_recolte = models.DateField(null=True, blank=True, verbose_name=_("Date de récolte (saisonnière)"))
+    date_derniere_recolte = models.DateField(null=True, blank=True,
+                                             verbose_name=_("Date de dernière récolte (pérenne)"))
+    dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+                                                  verbose_name=_("Dernier rendement (kg/ha)"))
+    pratiques_culturales = models.TextField(null=True, blank=True, verbose_name=_("Pratiques culturales"))
+    utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
+    type_fertilisants = models.TextField(null=True, blank=True, verbose_name=_("Type de fertilisants"))
+    analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
+    autre_culture = models.CharField(max_length=50,null=True, blank=True, choices=CULTURE_TYPE_CHOICES, verbose_name=_("Type"))
+    autre_culture_nom = models.CharField(max_length=200, choices=CATEGORY_CHOICES,null=True, blank=True)
+    autre_culture_volume_ha = models.IntegerField(null=True, blank=True)
+
+    # Infos sur la cooperative
+    nom_cooperative = models.CharField(max_length=100,null=True, blank=True)
+    ville = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
+                              related_name="adresse_cooperative")
+    specialites = models.ForeignKey('Culture', on_delete=models.CASCADE, null=True, blank=True)
+    is_president = models.BooleanField(default=False, verbose_name=_("President ?"))
+
+    projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
+    validate = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return f"{self.nom} ({self.projet.name})"

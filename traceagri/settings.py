@@ -39,7 +39,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://traceagri.com',
     'https://www.traceagri.com',
 ]
-
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", ]
 # Application definition
 ACCOUNT_ADAPTER = 'tracelan.adapters.NoSignupAccountAdapter'
 INSTALLED_APPS = [
@@ -55,15 +57,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_unicorn',
     'rest_framework',
-
     'rest_framework.authtoken',
     'djoser',
-
     'simple_history',
     'tracelan',
     'djgeojson',
     'leaflet',
     'django_celery_beat',
+    'corsheaders',
 
 ]
 
@@ -71,6 +72,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Ajoutez LocaleMiddleware après SessionMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -155,8 +157,8 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
     "djoser.auth_backends.LoginFieldBackend",
 )
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

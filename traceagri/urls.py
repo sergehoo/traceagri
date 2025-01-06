@@ -27,7 +27,8 @@ from tracelan.views import HomePageView, ProducteurListView, ProducteurDetailVie
     TaskDeleteView, MilestoneListView, MilestoneCreateView, MilestoneUpdateView, MilestoneDeleteView, \
     ProjectDetailsView, EventListView, EventDetailView, get_invite_list, add_invites_to_event, \
     add_invites_and_send_emails, confirm_presence, CooperativeListView, CooperativeCreateView, CooperativeUpdateView, \
-    CooperativeDeleteView, CooperativeDetailView, ParcelleExportView, ProducteurExportView
+    CooperativeDeleteView, CooperativeDetailView, ParcelleExportView, ProducteurExportView, MobileDataListView, \
+    MobileDataDetailView, MobileDataUpdateView, MobileDataDeleteView
 
 urlpatterns = i18n_patterns(
     path('admin/', admin.site.urls),
@@ -93,6 +94,11 @@ urlpatterns = i18n_patterns(
     # path("deliverables/new/", DeliverableCreateView.as_view(), name="deliverable_create"),
     # path("deliverables/<int:pk>/edit/", DeliverableUpdateView.as_view(), name="deliverable_update"),
     # path("deliverables/<int:pk>/delete/", DeliverableDeleteView.as_view(), name="deliverable_delete"),
+
+    path('liste/donnee/mobile', MobileDataListView.as_view(), name='mobiledata_list'),  # Liste
+    path('mobiledata<int:pk>/', MobileDataDetailView.as_view(), name='mobiledata_detail'),  # Détails
+    path('mobiledata<int:pk>/update/', MobileDataUpdateView.as_view(), name='mobiledata_update'),  # Mise à jour
+    path('mobiledata<int:pk>/delete/', MobileDataDeleteView.as_view(), name='mobiledata_delete'),  # Suppression
 
 ) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

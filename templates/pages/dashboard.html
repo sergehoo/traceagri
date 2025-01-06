@@ -63,7 +63,7 @@
                             </div>
                         </div>
 
-                        <div class="row mt-0 mt-lg-3">
+                        <div class="row">
                             <div class="col-xl-4">
                                 <!--begin::Mixed Widget 17-->
                                 <div class="card card-custom gutter-b card-stretch">
@@ -72,7 +72,10 @@
 
                                     <!--begin::Body-->
 
-                                  <div id="totalStats"></div>
+    <!-- Graphique Pie : Cultures par Type -->
+    <div id="totalStats" ></div>
+
+
 
                                     <!--end::Body-->
                                 </div>
@@ -82,7 +85,7 @@
 
                                 <!--begin::List Widget 9-->
                                 <div class="card card-custom gutter-b card-stretch">
-                                    <div id="parcellesParCulture"></div>
+                                    <div id="culturesParType"></div>
 
                                     <!--end: Card Body-->
                                 </div>
@@ -98,6 +101,34 @@
                             </div>
                         </div>
                         <!--end::Row-->
+{#                        <div class="row">#}
+{#                            <div class="col-xl-4">#}
+{#                                <!--begin::Mixed Widget 17-->#}
+{#                                <div class="card card-custom gutter-b card-stretch">#}
+{#                                    <div id="culturesParType"></div>#}
+{##}
+{#                                </div>#}
+{#                                <!--end::Mixed Widget 17-->#}
+{#                            </div>#}
+{#                            <div class="col-xl-4">#}
+{#                                <!--begin::Mixed Widget 17-->#}
+{#                                <div class="card card-custom gutter-b card-stretch">#}
+{#                                    <!-- Graphique Donut : Cultures par Catégorie -->#}
+{#                                    <div id="culturesParCategorie"></div>#}
+{#                                </div>#}
+{#                                <!--end::Mixed Widget 17-->#}
+{#                            </div>#}
+{#                            <div class="col-xl-4">#}
+{#                                <!--begin::Mixed Widget 17-->#}
+{#                                <div class="card card-custom gutter-b card-stretch">#}
+{#                                    <!-- Graphique Bar : Rendements par Culture -->#}
+{#                                    <div id="rendementsParCulture"></div>#}
+{#                                  #}
+{##}
+{#                                </div>#}
+{#                                <!--end::Mixed Widget 17-->#}
+{#                            </div>#}
+{#                        </div>#}
 
                         <!--begin::Row-->
                         <div class="row">
@@ -118,7 +149,7 @@
                                     <!--begin::Body-->
                                     <div class="card-body pt-3 pb-0">
                                         <!--begin::Table-->
-                                          <div id="parcellesParRegion" style="height: 350px;"></div>
+                                          <div id="parcellesParRegion"></div>
                                         <!--end::Table-->
                                     </div>
                                     <!--end::Body-->
@@ -193,12 +224,105 @@
 
                         <!--end::Dashboard-->
                     </div>
-                    <!--end::Container-->
-                </div>
+    <!--end::Container-->
+</div>
+
+
        <!--end::Entry-->
    </div>
 
 
+      <!--end::les trois derniers-->
+
+
+      <script>
+          document.addEventListener("DOMContentLoaded", function () {
+              // Données dynamiques fournies par le backend
+              const culturesParTypeData = {{ cultures_par_type|safe }};
+
+              // Extraire les labels et les séries des données
+              const typeLabels = culturesParTypeData.map(item => item.culture__name);
+              const typeSeries = culturesParTypeData.map(item => item.total);
+
+              // Configurer le graphique
+              const typeOptions = {
+                  chart: {type: 'pie'},
+                  series: typeSeries,
+                  labels: typeLabels,
+                  title: {text: "Répartition des Cultures par Nom", align: "center"}
+              };
+
+              // Rendu du graphique
+              new ApexCharts(document.querySelector("#culturesParType"), typeOptions).render();
+          });
+      </script>
+
+      <script>
+          document.addEventListener("DOMContentLoaded", function () {
+              // Données dynamiques fournies par le backend
+              const culturesParCategorieData = {{ cultures_par_categorie|safe }};
+
+              // Extraire les séries et les étiquettes
+              const categorieSeries = culturesParCategorieData.map(item => item.total);
+              const categorieLabels = culturesParCategorieData.map(item => item.culture__category);
+
+              // Options pour le graphique Donut
+              const categorieOptions = {
+                  chart: {type: 'donut', height: 350},
+                  series: categorieSeries,
+                  labels: categorieLabels,
+                  title: {text: "Cultures par Catégorie", align: "center"}
+              };
+
+              // Rendu du graphique
+              new ApexCharts(document.querySelector("#culturesParCategorie"), categorieOptions).render();
+          });
+      </script>
+
+
+
+      <script>
+          // Données passées depuis le backend via le contexte Django
+          const rendementsParCulture = {{ rendements_par_culture|safe }};
+
+          // Extraire les noms des cultures et leurs rendements
+          const cultures = rendementsParCulture.map(item => item.culture__name);
+          const rendements = rendementsParCulture.map(item => parseFloat(item.total_rendement));
+
+          // Configuration du graphique
+          const options = {
+              chart: {
+                  type: 'bar',
+                  height: 400,
+              },
+              series: [{
+                  name: 'Rendement (kg)',
+                  data: rendements,
+              }],
+              xaxis: {
+                  categories: cultures,
+              },
+              title: {
+                  text: 'Total Rendement par Culture',
+                  align: 'center',
+              },
+              tooltip: {
+                  y: {
+                      formatter: function (val) {
+                          return val.toLocaleString('fr-FR') + " kg";
+                      }
+                  }
+              }
+          };
+
+          // Initialisation et rendu du graphique
+          const chart = new ApexCharts(document.querySelector("#rendementsParCulture"), options);
+          chart.render();
+      </script>
+
+
+
+       <!--les autres charts-->
       <script>
           document.addEventListener("DOMContentLoaded", function () {
               const dashboardDataUrl = "{{ dashboard_data_url }}";
@@ -217,7 +341,8 @@
                                   type: 'donut'
                               },
                               series: [data.total_producteurs, data.total_parcelles, data.total_cooperatives],
-                              labels: ['Producteurs', 'Parcelles', 'Coopératives']
+                              labels: ['Producteurs', 'Parcelles', 'Coopératives'],
+                              title: {text: "Statistiques global", align: "center"}
                           };
                           const totalStatsChart = new ApexCharts(document.querySelector("#totalStats"), totalStatsOptions);
                           totalStatsChart.render();
@@ -230,7 +355,8 @@
                                   type: 'pie'
                               },
                               series: data.producteurs_par_sexe.map(item => item.count || 0),
-                              labels: data.producteurs_par_sexe.map(item => item.sexe === 'M' ? 'Masculin' : 'Féminin')
+                              labels: data.producteurs_par_sexe.map(item => item.sexe === 'M' ? 'Masculin' : 'Féminin'),
+                              title: {text: "Repartition des producteurs par Sexe", align: "center"}
                           };
                           const producteursParSexeChart = new ApexCharts(document.querySelector("#producteursParSexe"), producteursParSexeOptions);
                           producteursParSexeChart.render();
@@ -293,7 +419,8 @@
                                   type: 'pie'
                               },
                               series: series,
-                              labels: labels
+                              labels: labels,
+                              title: {text: "Repartition des parcelles par culture", align: "center"}
                           };
 
                           // Rendu du graphique
@@ -304,4 +431,5 @@
                   .catch(error => console.error('Erreur lors du chargement des données :', error));
           });
       </script>
+
   {% endblock %}

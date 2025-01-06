@@ -49,21 +49,21 @@
     <table class="table table-bordered table-hover">
     <thead style="background-color: #14532D; color: white">
         <tr class="align-center">
-            <th>{% trans "Code" %}</th>
-            <th>{% trans "Télécharger" %}</th>
-            <th>{% trans "Nom" %}</th>
-            <th>{% trans "Producteur" %}</th>
-            <th>{% trans "Localité" %}</th>
-            <th>{% trans "Dimension (ha)" %}</th>
-            <th>{% trans "Date de Création" %}</th>
+            <th>{% trans "UID CODE" %}</th>
+            <th>{% trans "TÉLÉCHARGER" %}</th>
+            <th>{% trans "NOM" %}</th>
+            <th>{% trans "PRODUCTEUR" %}</th>
+            <th>{% trans "LOCALITE" %}</th>
+            <th>{% trans "DIMENSION (ha)" %}</th>
+            <th>{% trans "DATE" %}</th>
 {#            <th>{% trans "Cultures" %}</th>#}
-            <th width="100px">{% trans "Actions" %}</th>
+            <th width="100px">{% trans "ACTIONS" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for parcelle in parcelles %}
             <tr>
-                <td>{{ parcelle.code }}</td>
+                <td>{{ parcelle.unique_id }}</td>
                 <td>
                     {% if parcelle.polygone_kmz %}
                         <a href="{{ parcelle.polygone_kmz.url }}" class="btn btn-sm btn-outline-dark" download>

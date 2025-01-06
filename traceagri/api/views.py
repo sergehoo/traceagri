@@ -138,6 +138,12 @@ class ParcelleMobileViewSet(viewsets.ModelViewSet):
     serializer_class = ParcelleMobileSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_producteur_name(self, obj):
+        return f"{obj.producteur.nom} {obj.producteur.prenom}" if obj.producteur else "Producteur inconnu"
+
+    def get_localite_name(self, obj):
+        return obj.localite.name if obj.localite else "Localité inconnue"
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

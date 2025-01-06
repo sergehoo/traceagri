@@ -21,7 +21,7 @@ from openpyxl.workbook import Workbook
 from tracelan.forms import ProducteurForm, ParcelleForm, ProjectForm, TaskForm, MilestoneForm, DepenseForm, \
     TaskProjectForm, AddMemberForm, AddInviteForm
 from tracelan.models import Producteur, Parcelle, DistrictSanitaire, Region, Project, Task, Milestone, Event, \
-    Cooperative, Ville, EventInvite, CooperativeMember, DynamicForm, DynamicField
+    Cooperative, Ville, EventInvite, CooperativeMember, DynamicForm, DynamicField, CultureDetail, Culture, MobileData
 from tracelan.task import envoyer_email_invitation
 
 
@@ -36,11 +36,33 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         producteurs = Producteur.objects.all().count()
         parcelle = Parcelle.objects.all().count()
         top_parcelles = Parcelle.objects.order_by('-dimension_ha')[:10]
+
+        # Données pour les graphiques
+        cultures_par_type = (
+            CultureDetail.objects.values('culture__name')
+            .annotate(total=Count('id'))
+            .order_by('culture__name')
+        )
+        cultures_par_categorie = (
+            CultureDetail.objects.values('culture__category')
+            .annotate(total=Count('id'))
+            .order_by('culture__category')
+        )
+        rendements_par_culture = (
+            CultureDetail.objects.values('culture__name')
+            .annotate(total_rendement=Sum('dernier_rendement_kg_ha'))
+            .order_by('-total_rendement')
+        )
+
         # Ajouter une API pour les données du dashboard si nécessaire
         context['dashboard_data_url'] = reverse_lazy('dashboard-data-api')  # Assurez-vous de définir cette URL
         context['nombreproducteur'] = producteurs  # Assurez-vous de définir cette URL
         context['parcelle'] = parcelle  # Assurez-vous de définir cette URL
         context['top_parcelles'] = top_parcelles
+        context['cultures_par_type'] = list(cultures_par_type)
+        context['cultures_par_categorie'] = list(cultures_par_categorie)
+        context['rendements_par_culture'] = list(rendements_par_culture)
+
         return context
 
 
@@ -830,3 +852,94 @@ class DynamicFieldCreateView(CreateView):
     def form_valid(self, form):
         form.instance.form = get_object_or_404(DynamicForm, pk=self.kwargs['form_id'])
         return super().form_valid(form)
+
+
+# ListeView
+class MobileDataListView(ListView):
+    model = MobileData
+    template_name = "pages/mobiledata_list.html"  # Nom du template
+    context_object_name = "mobiledata_list"  # Nom utilisé dans le contexte pour accéder aux objets
+    paginate_by = 10
+    ordering = "telephone"
+
+    def get_queryset(self):
+        # Récupérer tous les objets au départ
+        queryset = MobileData.objects.all()
+
+        # Vérifier si un filtre est appliqué via l'URL
+        filter_type = self.request.GET.get('filter', 'all')  # Par défaut, afficher toutes les données
+        if filter_type == 'valid':
+            queryset = queryset.filter(validate=True)  # Critère pour "valide"
+        elif filter_type == 'invalid':
+            queryset = queryset.filter(validate=False)  # Critère pour "non valide"
+        elif filter_type == 'duplicates':
+            # Trouver les doublons (par exemple, par numéro de téléphone)
+            duplicate_phones = (
+                MobileData.objects.values('telephone')
+                .annotate(count=Count('telephone'))
+                .filter(count__gt=1)
+                .values_list('telephone', flat=True)
+            )
+            queryset = queryset.filter(telephone__in=duplicate_phones, validate=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Calcul des métriques
+        total_data = MobileData.objects.count()
+        valid_data = MobileData.objects.filter(validate=True).count()  # Exemple de critère pour valide
+        invalid_data = total_data - valid_data
+        duplicates = MobileData.objects.values('telephone').annotate(count=Count('telephone')).filter(count__gt=1, validate=False).count()
+
+        # Ajout des métriques au contexte
+        context['total_data'] = total_data
+        context['valid_data'] = valid_data
+        context['invalid_data'] = invalid_data
+        context['duplicates'] = duplicates
+
+        return context
+
+
+# DetailView
+class MobileDataDetailView(DetailView):
+    model = MobileData
+    template_name = "pages/mobiledata_detail.html"  # Nom du template
+    context_object_name = "mobiledata"  # Nom utilisé dans le contexte pour accéder à l'objet
+
+
+# UpdateView
+class MobileDataUpdateView(UpdateView):
+    model = MobileData
+    fields = [
+        'nom', 'prenom', 'sexe', 'telephone', 'date_naissance', 'lieu_naissance', 'photo', 'fonction',
+        'localite', 'nom_parcelle', 'dimension_ha', 'longitude', 'latitude', 'type_culture', 'category',
+        'nom_culture', 'description', 'annee_mise_en_place', 'date_recolte', 'date_derniere_recolte',
+        'dernier_rendement_kg_ha', 'pratiques_culturales', 'utilise_fertilisants', 'type_fertilisants',
+        'analyse_sol', 'nom_cooperative', 'is_president'
+    ]
+    template_name = "pages/mobiledata_form.html"  # Nom du template pour le formulaire d'édition
+    success_url = reverse_lazy('mobiledata_list')  # Redirection après une mise à jour réussie
+
+
+# DeleteView
+class MobileDataDeleteView(DeleteView):
+    model = MobileData
+    template_name = "pages/mobiledata_confirm_delete.html"  # Nom du template pour la confirmation de suppression
+    # success_url = reverse_lazy('mobiledata_list')  # Redirection après une suppression réussie
+    context_object_name = "mobiledatadelete"
+
+    def get_success_url(self):
+        # Assurez-vous que self.producteur a un ID valide
+        messages.success(self.request, "La parcelle a été supprimée avec succès.")
+        return reverse('mobiledata_list')
+
+    # def delete(self, request, *args, **kwargs):
+    #     # Appeler la suppression
+    #     response = super().delete(request, *args, **kwargs)
+    #
+    #     # Ajouter un message de succès
+    #     messages.success(self.request, "La parcelle a été supprimée avec succès.")
+    #
+    #     return response

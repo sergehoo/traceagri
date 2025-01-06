@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from tracelan.models import Cooperative, Producteur, Parcelle, Ville, DistrictSanitaire, Region, Project, Task, \
-    Milestone, Deliverable, Employee, Depense, Event, EventInvite, CulturePerennial, CultureSeasonal, DynamicField, \
-    DynamicForm, FieldResponse, FormResponse
+    Milestone, Deliverable, Employee, Depense, Event, EventInvite, DynamicField, \
+    DynamicForm, FieldResponse, FormResponse, CultureDetail, Culture, MobileData
 
 admin.site.site_header = 'TRACAFRIC BACK-END CONTROLER'
 admin.site.site_title = 'TRACAFRIC Super Admin Pannel'
@@ -48,7 +48,7 @@ class ProducteurAdmin(admin.ModelAdmin):
 
 @admin.register(Parcelle)
 class ParcelleAdmin(admin.ModelAdmin):
-    list_display = ("nom", "dimension_ha", "producteur", "longitude", "latitude")
+    list_display = ("nom", "unique_id", "dimension_ha", "producteur", "longitude", "latitude")
     search_fields = ("nom", "producteur__nom", "producteur__prenom")
     list_filter = ("producteur",)
     readonly_fields = ("longitude", "latitude")
@@ -138,24 +138,59 @@ class EventInviteAdmin(admin.ModelAdmin):
     get_invite.short_description = "Nom de l'invité"
 
 
-@admin.register(CulturePerennial)
-class CulturePerennialAdmin(admin.ModelAdmin):
-    list_display = (
-        'type_culture', 'parcelle', 'annee_mise_en_place', 'date_derniere_recolte', 'dernier_rendement_kg_ha')
-    list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
-    search_fields = ('type_culture', 'parcelle__nom')
-    ordering = ('-annee_mise_en_place',)
-
-
-@admin.register(CultureSeasonal)
-class CultureSeasonalAdmin(admin.ModelAdmin):
-    list_display = ('type_culture', 'parcelle', 'annee_mise_en_place', 'date_recolte', 'dernier_rendement_kg_ha')
-    list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
-    search_fields = ('type_culture', 'parcelle__nom')
-    ordering = ('-annee_mise_en_place',)
+# @admin.register(CulturePerennial)
+# class CulturePerennialAdmin(admin.ModelAdmin):
+#     list_display = (
+#         'type_culture', 'parcelle', 'annee_mise_en_place', 'date_derniere_recolte', 'dernier_rendement_kg_ha')
+#     list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
+#     search_fields = ('type_culture', 'parcelle__nom')
+#     ordering = ('-annee_mise_en_place',)
+#
+#
+# @admin.register(CultureSeasonal)
+# class CultureSeasonalAdmin(admin.ModelAdmin):
+#     list_display = ('type_culture', 'parcelle', 'annee_mise_en_place', 'date_recolte', 'dernier_rendement_kg_ha')
+#     list_filter = ('type_culture', 'annee_mise_en_place', 'utilise_fertilisants', 'analyse_sol')
+#     search_fields = ('type_culture', 'parcelle__nom')
+#     ordering = ('-annee_mise_en_place',)
 
 
 # Configuration pour les champs dynamiques
+
+@admin.register(Culture)
+class CultureAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('category', 'is_active')
+    search_fields = ('name', 'description')
+    ordering = ('name',)
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(CultureDetail)
+class CultureDetailAdmin(admin.ModelAdmin):
+    list_display = (
+        'culture', 'type_culture', 'parcelle', 'annee_mise_en_place', 'dernier_rendement_kg_ha', 'utilise_fertilisants')
+    list_filter = ('type_culture', 'utilise_fertilisants', 'analyse_sol')
+    search_fields = ('culture__name', 'parcelle__nom', 'pratiques_culturales')
+    autocomplete_fields = ('culture', 'parcelle')
+    fieldsets = (
+        (None, {
+            'fields': ('parcelle', 'culture', 'type_culture', 'annee_mise_en_place')
+        }),
+        ('Récoltes', {
+            'fields': ('date_recolte', 'date_derniere_recolte', 'dernier_rendement_kg_ha')
+        }),
+        ('Pratiques agricoles', {
+            'fields': ('pratiques_culturales', 'utilise_fertilisants', 'type_fertilisants', 'analyse_sol')
+        }),
+        ('Informations système', {
+            'classes': ('collapse',),
+            'fields': ('id',),
+        }),
+    )
+    readonly_fields = ('id',)
+
+
 class DynamicFieldInline(admin.TabularInline):
     model = DynamicField
     extra = 1  # Nombre de champs supplémentaires visibles par défaut
@@ -183,3 +218,62 @@ class FormResponseAdmin(admin.ModelAdmin):
     list_filter = ['form', 'submitted_at']
     search_fields = ['form__name']
     inlines = [FieldResponseInline]
+
+
+@admin.register(MobileData)
+class MobileDataAdmin(admin.ModelAdmin):
+    # Champs à afficher dans la liste d'administration
+    list_display = (
+        'projet',
+        'nom',
+        'prenom',
+        'sexe',
+        'telephone',
+        'nom_parcelle',
+        'type_culture',
+        'category',
+        'nom_culture',
+        'annee_mise_en_place',
+        'dernier_rendement_kg_ha',
+        'nom_cooperative',
+        'created_at',
+    )
+    # Champs cliquables pour accéder aux détails
+    list_display_links = ('nom', 'prenom', 'nom_parcelle')
+    # Champs de recherche
+    search_fields = ('nom', 'prenom', 'telephone', 'nom_parcelle', 'nom_culture')
+    # Filtres dans la liste
+    list_filter = ('projet', 'sexe', 'category', 'type_culture', 'nom_culture', 'utilise_fertilisants', 'analyse_sol')
+    # Champs en lecture seule
+    readonly_fields = ('created_at', 'updated_at')
+    # Organisation des champs dans le formulaire
+    fieldsets = (
+        ("Informations sur le Producteur", {
+            'fields': (
+                'nom', 'prenom', 'sexe', 'telephone', 'date_naissance',
+                'lieu_naissance', 'photo', 'fonction', 'localite',
+            )
+        }),
+        ("Informations sur la Parcelle", {
+            'fields': (
+                'nom_parcelle', 'dimension_ha', 'longitude', 'latitude', 'images',
+            )
+        }),
+        ("Informations sur la Culture", {
+            'fields': (
+                'type_culture', 'category', 'nom_culture', 'description',
+                'localite_parcelle', 'annee_mise_en_place', 'date_recolte',
+                'date_derniere_recolte', 'dernier_rendement_kg_ha', 'pratiques_culturales',
+                'utilise_fertilisants', 'type_fertilisants', 'analyse_sol',
+                'autre_culture', 'autre_culture_nom', 'autre_culture_volume_ha',
+            )
+        }),
+        ("Informations sur la Coopérative", {
+            'fields': (
+                'nom_cooperative', 'ville', 'specialites', 'is_president',
+            )
+        }),
+        ("Informations Générales", {
+            'fields': ('projet', 'created_by', 'created_at', 'updated_at','validate')
+        }),
+    )

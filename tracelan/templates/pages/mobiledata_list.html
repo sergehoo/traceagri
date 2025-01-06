@@ -1,0 +1,213 @@
+{% extends 'layout/base.html' %}
+{% load humanize %}
+{% load static %}
+{% load unicorn %}
+{% csrf_token %}
+
+{% block content %}
+
+    <div style="
+    background-color: #32291f;
+    background-image: url({% static 'assets/media/bg/addparcelle.jpg' %});
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    {#height: 100vh; #}
+" class="content d-flex flex-column flex-column-fluid" id="kt_content">
+
+<div class="subheader py-2 py-lg-6  subheader-transparent " id="kt_subheader">
+    <div class=" container  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+		<!--begin::Info-->
+        <div class="d-flex align-items-center flex-wrap mr-1">
+
+			<!--begin::Page Heading-->
+			<div class="d-flex align-items-baseline flex-wrap mr-5">
+				<!--begin::Page Title-->
+	            <h5 class="text-dark font-weight-bold my-1 mr-5">
+	                Ressources	                	            </h5>
+				<!--end::Page Title-->
+
+	            					<!--begin::Breadcrumb-->
+	                <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
+	                    							<li class="breadcrumb-item">
+	                        	<a href="" class="text-muted">
+	                            	Parcelles	                        	</a>
+							</li>
+	                    							<li class="breadcrumb-item">
+	                        	<a href="" class="text-muted">
+	                            	Liste des Parcelles                       	</a>
+							</li>
+
+	                    	                </ul>
+					<!--end::Breadcrumb-->
+	            			</div>
+			<!--end::Page Heading-->
+        </div>
+		<!--end::Info-->
+
+		<!--begin::Toolbar-->
+        <div class="d-flex align-items-center">
+							<!--begin::Actions-->
+            <div class="dropdown dropdown-inline mr-2">
+	<a href="#"  class="btn btn-light-primary font-weight-bolder dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<span class="svg-icon svg-icon-md"><!--begin::Svg Icon | path:assets/media/svg/icons/Design/PenAndRuller.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect x="0" y="0" width="24" height="24"/>
+        <path d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z" fill="#000000" opacity="0.3"/>
+        <path d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z" fill="#000000"/>
+    </g>
+</svg><!--end::Svg Icon--></span>		Export
+	</a>
+
+	<!--begin::Dropdown Menu-->
+	<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+    <!--begin::Navigation-->
+    <ul class="navi flex-column navi-hover py-2">
+        <li class="navi-header font-weight-bolder text-uppercase font-size-sm text-primary pb-2">
+            Exporter en :
+        </li>
+        <li class="navi-item">
+            <a href="{% url 'parcelle_export' %}?format=csv" class="navi-link">
+                <span class="navi-icon"><i class="la la-file-text-o"></i></span>
+                <span class="navi-text">CSV</span>
+            </a>
+        </li>
+        <li class="navi-item">
+            <a href="{% url 'parcelle_export' %}?format=excel" class="navi-link">
+                <span class="navi-icon"><i class="la la-file-excel-o"></i></span>
+                <span class="navi-text">Excel</span>
+            </a>
+        </li>
+    </ul>
+    <!--end::Navigation-->
+</div>
+	<!--end::Dropdown Menu-->
+</div>
+                <a href="#" class="btn btn-light-primary font-weight-bolder ">
+                    Nouveau
+                </a>
+				<!--end::Actions-->
+
+        </div>
+		<!--end::Toolbar-->
+    </div>
+</div>
+<!--end::Subheader-->
+
+					<!--begin::Entry-->
+	<div class="d-flex flex-column-fluid">
+		<!--begin::Container-->
+		<div class=" container ">
+							<!--begin::Notice-->
+<div class="alert alert-custom alert-white alert-shadow gutter-b" role="alert">
+	<div class="alert-icon">
+    </div>
+    <div class="alert-text" >
+        <a href="?filter=all" class="btn btn-secondary mr-5">
+            Nombre total de données: <span class="badge bg-primary">{{ total_data }}</span>
+        </a>
+        <a href="?filter=valid" class="btn btn-secondary mr-5">
+            Nombre de données valides: <span class="badge bg-success">{{ valid_data }}</span>
+        </a>
+        <a href="?filter=invalid" class="btn btn-secondary mr-5">
+            Nombre de données non valides: <span class="badge bg-danger">{{ invalid_data }}</span>
+        </a>
+        <a href="?filter=duplicates" class="btn btn-secondary mr-5">
+            Nombre de doublons: <span class="badge bg-warning">{{ duplicates }}</span>
+        </a>
+    </div>
+</div>
+            <!--end::Notice-->
+
+            <!--begin::Card-->
+            <div class="card card-custom">
+
+                <div class="card-body">
+                    <table class="table table-responsive table-bordered table-hover">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Sexe</th>
+                            <th>Numéro de Téléphone</th>
+                            <th>Localité</th>
+                            <th>Nom de la Parcelle</th>
+                            <th>Type de Culture</th>
+                            <th>Catégorie</th>
+                            <th content="center" width="150px">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for mobiledata in mobiledata_list %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ mobiledata.nom }}</td>
+                                <td>{{ mobiledata.prenom }}</td>
+                                <td>{{ mobiledata.get_sexe_display }}</td>
+                                <td>{{ mobiledata.telephone }}</td>
+                                <td>{{ mobiledata.localite }}</td>
+                                <td>{{ mobiledata.nom_parcelle }}</td>
+                                <td>{{ mobiledata.get_type_culture_display }}</td>
+                                <td>{{ mobiledata.get_category_display }}</td>
+                                <td content="center">
+                                    <a href="{{ mobiledata.get_absolute_url }}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-check-mark text-success mr-2"></i></a>
+                                    <a href="{{ mobiledata.get_absolute_url }}" class="btn btn-icon btn-light btn-xs"><i class="flaticon-eye text-dark ml-2 mr-2 "></i></a>
+                                    <a href="{% url 'mobiledata_update' mobiledata.pk %}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-edit ml-2 mr-2 text-secondary"></i></a>
+                                    <a href="{% url 'mobiledata_delete' mobiledata.pk %}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-trash text-danger"></i></a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center">Aucune donnée disponible</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+             <div class="col-12 d-flex justify-content-center mt-5">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+                {% for page in page_obj.paginator.page_range %}
+                <li class="page-item {% if page == page_obj.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page }}">
+                        {{ page }}
+                    </a>
+                </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+
+            </div>
+
+            <!--end::Card-->
+        </div>
+
+
+        <!--end::Container-->
+    </div>
+        <!--end::Entry-->
+    </div>
+
+
+
+
+
+{% endblock %}
