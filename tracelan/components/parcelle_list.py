@@ -119,7 +119,9 @@ class ParcelleListView(UnicornView):
             queryset = queryset.filter(
                 Q(nom__icontains=self.search_query) |
                 Q(producteur__nom__icontains=self.search_query) |
-                Q(producteur__prenom__icontains=self.search_query)
+                Q(producteur__prenom__icontains=self.search_query) |
+                Q(unique_id__icontains=self.search_query)
+
             )
 
         if self.cooperative_id:

@@ -49,7 +49,7 @@ class ProducteurAdmin(admin.ModelAdmin):
 @admin.register(Parcelle)
 class ParcelleAdmin(admin.ModelAdmin):
     list_display = ("nom", "unique_id", "dimension_ha", "producteur", "longitude", "latitude")
-    search_fields = ("nom", "producteur__nom", "producteur__prenom")
+    search_fields = ("nom", "producteur__nom", "producteur__prenom","unique_id")
     list_filter = ("producteur",)
     readonly_fields = ("longitude", "latitude")
 
