@@ -128,13 +128,12 @@
                                         </li>
                                     </ul>
                                 </div>
+
                                 <div class="mb-10">
 
                                     <div class="table-responsive">
                                         <table class="table table-borderless mb-0">
                                             <tbody>
-
-
                                             <!--begin::Item-->
                                             <tr>
                                                 <td class="w-40px pb-6 pl-0 pr-2">
@@ -247,10 +246,13 @@
                             <div class="card-header border-0 py-5">
                                 <h3 class="card-title align-items-start flex-column">
                                     <span class="card-label font-weight-bolder text-dark">Parcelles du Producteurs</span>
+                                            
                                     <span class="text-muted mt-3 font-weight-bold font-size-sm">
                                 Informations liées au producteur
                             </span>
-                                </h3>
+                                </h3><a href="{% url 'parcelle-create' producteur_id=producteurdetails.id %}" class="btn btn-light-primary font-weight-bolder ">
+                    Ajouter Parcelle
+                </a>
                             </div>
                             <div class="card-body">
 
@@ -589,6 +591,6 @@
                 .catch(error => console.error("Erreur lors du chargement des parcelles :", error));
         });
     </script>
-    
+
 
 {% endblock %}
