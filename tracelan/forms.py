@@ -265,7 +265,7 @@ class CultureActivityForm(forms.ModelForm):
 
         ]
         widgets = {
-            'culture': Select(attrs={'class': 'form-control', 'placeholder': 'Sélectionnez une culture'}),
+            'culture': Select(attrs={'class': 'form-control select2','id': "kt_select2_2", 'name': "param", 'placeholder': 'Sélectionnez une culture'}),
             'type_culture': Select(attrs={'class': 'form-control ', 'placeholder': 'Type de culture'}),
             'dernier_rendement_kg_ha': NumberInput(attrs={'class': 'form-control', 'placeholder': 'Rendement (kg/ha)'}),
             'pratiques_culturales': Textarea(attrs={'class': 'form-control', 'placeholder': 'Pratiques culturales'}),
