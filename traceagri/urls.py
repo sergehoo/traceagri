@@ -28,7 +28,7 @@ from tracelan.views import HomePageView, ProducteurListView, ProducteurDetailVie
     ProjectDetailsView, EventListView, EventDetailView, get_invite_list, add_invites_to_event, \
     add_invites_and_send_emails, confirm_presence, CooperativeListView, CooperativeCreateView, CooperativeUpdateView, \
     CooperativeDeleteView, CooperativeDetailView, ParcelleExportView, ProducteurExportView, MobileDataListView, \
-    MobileDataDetailView, MobileDataUpdateView, MobileDataDeleteView, LandingView
+    MobileDataDetailView, MobileDataUpdateView, MobileDataDeleteView, LandingView, add_culture_activity
 
 urlpatterns = i18n_patterns(
     path('admin/', admin.site.urls),
@@ -49,6 +49,8 @@ urlpatterns = i18n_patterns(
     path('export/producteurs/', ProducteurExportView.as_view(), name='producteur_export'),
 
     path("parcelles/", ParcelleListView.as_view(), name="parcelle-list"),
+    path('parcelle/<int:parcelle_id>/add_culture_activity/', add_culture_activity, name="add_culture_activity"),
+
     path("parcelles/<int:pk>/", ParcelleDetailView.as_view(), name="parcelle-detail"),
     path("parcelles/create/<int:producteur_id>", ParcelleCreateView.as_view(), name="parcelle-create"),
     path("parcelles/<int:pk>/update/", ParcelleUpdateView.as_view(), name="parcelle-update"),

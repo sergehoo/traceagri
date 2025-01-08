@@ -21,6 +21,7 @@
             z-index: 1000; /* Toujours au-dessus */
             transition: transform 2s ease-in-out; /* Animation fluide des mouvements */
         }
+
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -153,18 +154,64 @@
             padding: 20px;
             font-size: 14px;
         }
+
         .language-switcher {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 10;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .language-switcher select {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        /* Responsive Media Queries */
+@media (max-width: 1024px) {
+    .feature {
+        flex: 1 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+    }
+
+    .cta h2 {
+        font-size: 28px;
+    }
+
+    .cta p {
+        font-size: 16px;
+    }
 }
 
-.language-switcher select {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+@media (max-width: 768px) {
+    .feature {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .cta h2 {
+        font-size: 24px;
+    }
+
+    .cta p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cta {
+        padding: 40px 10px;
+    }
+
+    .cta h2 {
+        font-size: 20px;
+    }
+
+    .cta button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
 }
     </style>
 </head>
@@ -187,14 +234,13 @@
 <!-- Hero Section -->
 <section class="hero">
     <!-- Video Background -->
-    <video autoplay muted loop playsinline class="video-background">
-        <source src="{% static 'assets/media/agriculture-bg.mp4' %}" type="video/mp4">
+ <video autoplay muted loop playsinline class="video-background">
+        <source src="/static/assets/media/agriculture-bg.mp4" type="video/mp4">
         Votre navigateur ne supporte pas les vidéos HTML5.
     </video>
-
+    
     <!-- Overlay -->
     <div class="overlay"></div>
-
     <!-- Content Overlay -->
     <div class="hero-content">
         <h1>

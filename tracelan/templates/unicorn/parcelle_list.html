@@ -57,7 +57,7 @@
             <th>{% trans "DIMENSION (ha)" %}</th>
             <th>{% trans "DATE" %}</th>
 {#            <th>{% trans "Cultures" %}</th>#}
-            <th width="100px">{% trans "ACTIONS" %}</th>
+            <th width="120px">{% trans "ACTIONS" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -86,7 +86,8 @@
 {#                    {% endfor %}#}
 {#                </td>#}
                 <td>
-                    <a href="{% url 'parcelle-update' parcelle.pk %}" class="btn btn-icon btn-primary btn-xs"><i class="flaticon2-edit"></i></a>
+                    <a href="{% url 'parcelle-detail' parcelle.pk %}" class="btn btn-icon btn-primary btn-xs"><i class="flaticon2-list-2"></i></a>
+                    <a href="{% url 'parcelle-update' parcelle.pk %}" class="btn btn-icon btn-dark btn-xs"><i class="flaticon2-edit"></i></a>
                     <a href="{% url 'parcelle-delete' producteur_id=parcelle.producteur.id pk=parcelle.pk %}" class="btn btn-icon btn-danger btn-xs "><i class="flaticon2-trash"></i></a>
                 </td>
             </tr>

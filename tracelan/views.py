@@ -19,7 +19,7 @@ from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from openpyxl.workbook import Workbook
 
 from tracelan.forms import ProducteurForm, ParcelleForm, ProjectForm, TaskForm, MilestoneForm, DepenseForm, \
-    TaskProjectForm, AddMemberForm, AddInviteForm, ParcelleUpdateForm
+    TaskProjectForm, AddMemberForm, AddInviteForm, ParcelleUpdateForm, CultureActivityForm
 from tracelan.models import Producteur, Parcelle, DistrictSanitaire, Region, Project, Task, Milestone, Event, \
     Cooperative, Ville, EventInvite, CooperativeMember, DynamicForm, DynamicField, CultureDetail, Culture, MobileData
 from tracelan.task import envoyer_email_invitation
@@ -323,6 +323,34 @@ class ParcelleListView(LoginRequiredMixin, ListView):
         return context
 
 
+def add_culture_activity(request, parcelle_id):
+    parcelle = get_object_or_404(Parcelle, id=parcelle_id)
+
+    if request.method == "POST":
+        culture_id = request.POST.get("culture")
+        type_culture = request.POST.get("type_culture")
+        annee_mise_en_place = request.POST.get("annee_mise_en_place")
+        dernier_rendement_kg_ha = request.POST.get("dernier_rendement_kg_ha")
+        activite = request.POST.get("activite")
+
+        # Créer ou associer une nouvelle culture
+        culture = Culture.objects.get(id=culture_id)
+        CultureDetail.objects.create(
+            parcelle=parcelle,
+            culture=culture,
+            type_culture=type_culture,
+            annee_mise_en_place=annee_mise_en_place,
+            dernier_rendement_kg_ha=dernier_rendement_kg_ha,
+            pratiques_culturales=activite,
+            created_by=request.user.employee
+        )
+        messages.success(request, "Culture ou activité ajoutée avec succès.")
+        return redirect("parcelle-detail", pk=parcelle_id)
+
+    available_cultures = Culture.objects.all()
+    return redirect('parcelle-detail', pk=parcelle_id)
+
+
 class ParcelleDetailView(LoginRequiredMixin, DetailView):
     model = Parcelle
     template_name = "pages/parcelle_detail.html"
@@ -335,7 +363,7 @@ class ParcelleDetailView(LoginRequiredMixin, DetailView):
         # Récupérer les cultures et activités liées
         context['cultures'] = parcelle.cultures.all()  # Utilise le related_name défini
         context['activities'] = parcelle.affectations  # Assurez-vous que `affectations` est renseigné
-
+        context['cultureform'] = CultureActivityForm()  # Assurez-vous que `affectations` est renseigné
 
         return context
 

@@ -1,9 +1,11 @@
 import json
+from datetime import datetime
 
 from django import forms
+from django.forms import Select, NumberInput, Textarea, CheckboxInput, DateInput
 
 from tracelan.models import Producteur, Parcelle, Status_choices, Project, Task, Milestone, Deliverable, Depense, \
-    Employee, EventInvite
+    Employee, EventInvite, CultureDetail
 
 
 class ProducteurForm(forms.ModelForm):
@@ -235,3 +237,43 @@ class AddInviteForm(forms.Form):
             attrs={'class': 'form-control', 'placeholder': 'Entrez les IDs séparés par des virgules'}),
         help_text="IDs des invités, séparés par des virgules (ex: 1,2,3)"
     )
+
+
+class CultureActivityForm(forms.ModelForm):
+    YEARS = [(year, year) for year in range(1900, datetime.now().year + 1)]
+
+    annee_mise_en_place = forms.ChoiceField(
+        choices=YEARS,
+        widget=forms.Select(attrs={'class': 'form-control select2', 'id': "kt_select2_1", 'name': "param"}),
+        label="Année de mise en place"
+    )
+
+    class Meta:
+        model = CultureDetail
+        fields = [
+            'culture',
+            'type_culture',
+            'annee_mise_en_place',
+            'dernier_rendement_kg_ha',
+            'pratiques_culturales',
+            'annee_mise_en_place',
+            'date_recolte',
+            'date_derniere_recolte',
+            'utilise_fertilisants',
+            'type_fertilisants',
+            'analyse_sol',
+
+        ]
+        widgets = {
+            'culture': Select(attrs={'class': 'form-control', 'placeholder': 'Sélectionnez une culture'}),
+            'type_culture': Select(attrs={'class': 'form-control ', 'placeholder': 'Type de culture'}),
+            'dernier_rendement_kg_ha': NumberInput(attrs={'class': 'form-control', 'placeholder': 'Rendement (kg/ha)'}),
+            'pratiques_culturales': Textarea(attrs={'class': 'form-control', 'placeholder': 'Pratiques culturales'}),
+            'date_recolte': DateInput(
+                attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Date de récolte'}),
+            'date_derniere_recolte': DateInput(
+                attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Date de dernière récolte'}),
+            'utilise_fertilisants': CheckboxInput(attrs={'class': 'form-check-input'}),
+            'type_fertilisants': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type de fertilisants'}),
+            'analyse_sol': CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
