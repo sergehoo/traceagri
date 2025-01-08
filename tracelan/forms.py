@@ -75,6 +75,39 @@ class ParcelleForm(forms.ModelForm):
                 raise forms.ValidationError("Le champ Culture doit contenir un JSON valide.")
 
 
+class ParcelleUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Parcelle
+        fields = [
+            'producteur', 'code', 'localite', 'nom', 'dimension_ha',
+            'polygone_kmz', 'geojson', 'longitude', 'latitude', 'geom',
+            'status', 'carracteristic', 'culture', 'affectations',
+            'images',
+        ]
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'producteur': forms.Select(attrs={'class': 'form-control'}),
+            'localite': forms.Select(attrs={'class': 'form-control'}),
+            # 'projet': forms.Select(attrs={'class': 'form-control'}),
+            'carracteristic': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'culture': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'affectations': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'dimension_ha': forms.NumberInput(attrs={'class': 'form-control'}),
+            'longitude': forms.NumberInput(attrs={'class': 'form-control'}),
+            'latitude': forms.NumberInput(attrs={'class': 'form-control'}),
+            'polygone_kmz': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'images': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'nom': forms.TextInput(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_polygone_kmz(self):
+        file = self.cleaned_data.get('polygone_kmz')
+        if file and not file.name.endswith('.kmz'):
+            raise forms.ValidationError("Le fichier doit être au format KMZ.")
+        return file
+
+
 class CaracteristiqueForm(forms.ModelForm):
     class Meta:
         model = Parcelle
@@ -100,7 +133,8 @@ class CaracteristiqueForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ["name", "description", "manager", "members", "start_date", "end_date", "status", "previsionnel","marge_previsionnel"]
+        fields = ["name", "description", "manager", "members", "start_date", "end_date", "status", "previsionnel",
+                  "marge_previsionnel"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
@@ -185,7 +219,6 @@ class DepenseForm(forms.ModelForm):
 
 
 class AddMemberForm(forms.Form):
-
     member = forms.ModelChoiceField(queryset=Employee.objects.all(), label="Ajouter un membre", widget=forms.Select(
         attrs={'class': 'form-control select2', 'id': "kt_select2_1", 'name': "param"}))
 
@@ -198,6 +231,7 @@ class AddInviteForm(forms.Form):
     )
     invite_ids = forms.CharField(
         label="IDs des invités",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Entrez les IDs séparés par des virgules'}),
+        widget=forms.Textarea(
+            attrs={'class': 'form-control', 'placeholder': 'Entrez les IDs séparés par des virgules'}),
         help_text="IDs des invités, séparés par des virgules (ex: 1,2,3)"
     )

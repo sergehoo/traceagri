@@ -19,13 +19,16 @@ from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from openpyxl.workbook import Workbook
 
 from tracelan.forms import ProducteurForm, ParcelleForm, ProjectForm, TaskForm, MilestoneForm, DepenseForm, \
-    TaskProjectForm, AddMemberForm, AddInviteForm
+    TaskProjectForm, AddMemberForm, AddInviteForm, ParcelleUpdateForm
 from tracelan.models import Producteur, Parcelle, DistrictSanitaire, Region, Project, Task, Milestone, Event, \
     Cooperative, Ville, EventInvite, CooperativeMember, DynamicForm, DynamicField, CultureDetail, Culture, MobileData
 from tracelan.task import envoyer_email_invitation
 
 
 # Create your views here.
+
+class LandingView(TemplateView):
+    template_name = "pages/landing.html"
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
@@ -325,6 +328,17 @@ class ParcelleDetailView(LoginRequiredMixin, DetailView):
     template_name = "pages/parcelle_detail.html"
     context_object_name = "parcelle"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        parcelle = self.get_object()
+
+        # Récupérer les cultures et activités liées
+        context['cultures'] = parcelle.cultures.all()  # Utilise le related_name défini
+        context['activities'] = parcelle.affectations  # Assurez-vous que `affectations` est renseigné
+
+
+        return context
+
 
 class ParcelleCreateView(LoginRequiredMixin, CreateView):
     model = Parcelle
@@ -356,7 +370,7 @@ class ParcelleCreateView(LoginRequiredMixin, CreateView):
 class ParcelleUpdateView(LoginRequiredMixin, UpdateView):
     model = Parcelle
     template_name = "pages/parcelle_update.html"
-    form_class = ParcelleForm
+    form_class = ParcelleUpdateForm
     success_url = reverse_lazy("parcelle-list")  # Remplacez par le nom de votre URL
 
 

@@ -4,7 +4,8 @@ from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 
 from traceagri.api.views import ParcellesProducteurAPIView, DashboardDataAPIView, ProducteurMobileViewSet, \
-    ParcelleMobileViewSet, UserViewSet, DynamicFormViewSet, ProjectViewSet, CooperativeViewSet, CooperativeMemberViewSet
+    ParcelleMobileViewSet, UserViewSet, DynamicFormViewSet, ProjectViewSet, CooperativeViewSet, \
+    CooperativeMemberViewSet, ParcelleDetailAPIView
 
 router = DefaultRouter()
 router.register(r'producteursmobile', ProducteurMobileViewSet, basename='producteurmobile')
@@ -24,6 +25,7 @@ urlpatterns = ([
 
                    path('parcelles/<int:producteur_id>/', ParcellesProducteurAPIView.as_view(),
                         name='parcelles-producteur-api'),
+                   path('parcelles/detail<int:parcelle_id>/', ParcelleDetailAPIView.as_view(), name='parcelles-detail-api'),
                    path('dashboard-data/', DashboardDataAPIView.as_view(), name='dashboard-data-api'),
 
                ] + router.urls

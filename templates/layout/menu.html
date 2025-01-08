@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="header-bottom">
     <!--begin::Container-->
     <div class=" container ">
@@ -9,52 +10,51 @@
                 <!--begin::Header Nav-->
                 <ul class="menu-nav ">
                     <li class="menu-item  menu-item-open menu-item-here menu-item-submenu menu-item-rel menu-item-open menu-item-here"
-                        data-menu-toggle="hover" aria-haspopup="true"><a href="javascript:;"
-                                                                         class="menu-link menu-toggle"><span
-                            class="menu-text">Accueil</span><span
-                            class="menu-desc">Apercu generale et statistics </span><i
+                        data-menu-toggle="hover" aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
+                            class="menu-text">{% translate 'Accueil' %}</span><span
+                            class="menu-desc">{% trans "Apercu generale et statistics" %}</span><i
                             class="menu-arrow"></i></a>
                         <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                             <ul class="menu-subnav">
                                 <li class="menu-item  menu-item-active " aria-haspopup="true"><a
                                         href="{% url 'home' %}" class="menu-link "><span
-                                        class="menu-text">Dashboard</span><span
+                                        class="menu-text">{% trans "Dashboard" %}</span><span
                                         class="menu-desc"></span></a></li>
                                 <li class="menu-item " aria-haspopup="true">
-                                    <a target="_blank" href="#" class="menu-link "><span
-                                            class="menu-text">Landing Page</span><span
+                                    <a  href="{% url 'landing' %}" class="menu-link "><span
+                                            class="menu-text">{% trans "Landing Page" %}</span><span
                                             class="menu-desc"></span></a></li>
                             </ul>
                         </div>
                     </li>
                     <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover"
                         aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
-                            class="menu-text">Producteurs</span><span
-                            class="menu-desc">Producteurs & administrateurs </span><i class="menu-arrow"></i></a>
+                            class="menu-text">{% trans "Producteurs" %}</span><span
+                            class="menu-desc">{% trans "Producteurs & administrateurs" %} </span><i class="menu-arrow"></i></a>
                         <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                             <ul class="menu-subnav">
 
                                 <li class="menu-item " aria-haspopup="true">
                                     <a href="{% url 'producteurs-list' %}" class="menu-link "><span
-                                            class="menu-text">Liste des Producteurs</span><span
+                                            class="menu-text">{% trans "Liste des Producteurs" %}</span><span
                                             class="menu-desc"></span></a></li>
                             </ul>
                         </div>
                     </li>
                     <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover"
                         aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
-                            class="menu-text">Ressources</span><span
-                            class="menu-desc">Parcelles & Projets </span><i
+                            class="menu-text">{% trans "Ressources" %}</span><span
+                            class="menu-desc">{% trans "Parcelles & Projets" %} </span><i
                             class="menu-arrow"></i></a>
                         <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                             <ul class="menu-subnav">
                                 {#                                                     <li class="menu-item " aria-haspopup="true"><a href="#" class="menu-link "><span class="menu-text">Cartographie</span><span class="menu-desc"></span></a></li>#}
                                 <li class="menu-item " aria-haspopup="true"><a href="{% url 'parcelle-list' %}"
                                                                                class="menu-link "><span
-                                        class="menu-text">Parcelles</span><span class="menu-desc"></span></a></li>
+                                        class="menu-text">{% trans "Parcelles" %}</span><span class="menu-desc"></span></a></li>
                                 <li class="menu-item " aria-haspopup="true"><a href="{% url 'project_list' %}"
                                                                                class="menu-link "><span
-                                        class="menu-text">Projets</span><span class="menu-desc"></span></a></li>
+                                        class="menu-text">{% trans "Projets" %}</span><span class="menu-desc"></span></a></li>
                                 {#                                                     <li class="menu-item " aria-haspopup="true"><a href="#" class="menu-link "><span class="menu-text">Cultures</span><span class="menu-desc"></span></a></li>#}
 
                             </ul>
@@ -62,23 +62,23 @@
                     </li>
                     <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover"
                         aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
-                            class="menu-text">Organisation</span><span
-                            class="menu-desc"> Cooperative & evenements</span><i class="menu-arrow"></i></a>
+                            class="menu-text">{% trans "Organisation" %}</span><span
+                            class="menu-desc"> {% trans "Cooperative & evenements" %}</span><i class="menu-arrow"></i></a>
                         <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                             <ul class="menu-subnav">
                                 <li class="menu-item " aria-haspopup="true"><a href="{% url 'cooperative_list' %}"
                                                                                class="menu-link "><span
-                                        class="menu-text">Coopératives</span><span class="menu-desc"></span></a></li>
+                                        class="menu-text">{% trans "Coopératives" %}</span><span class="menu-desc"></span></a></li>
                                 <li class="menu-item " aria-haspopup="true"><a href="{% url 'event_list' %}"
                                                                                class="menu-link "><span
-                                        class="menu-text">Evènements</span><span class="menu-desc"></span></a></li>
+                                        class="menu-text">{% trans "Evènements" %}</span><span class="menu-desc"></span></a></li>
                             </ul>
                         </div>
                     </li>
                     <li class="menu-item menu-item-submenu" data-menu-toggle="hover" aria-haspopup="true">
                         <a href="javascript:;" class="menu-link menu-toggle">
-                            <span class="menu-text">Paramètres</span>
-                            <span class="menu-desc">Configuration des données</span>
+                            <span class="menu-text">{% trans "Paramètres" %}</span>
+                            <span class="menu-desc">{% trans "Configuration des données" %}</span>
                             <i class="menu-arrow"></i>
                         </a>
                         <div class="menu-submenu menu-submenu-fixed menu-submenu-center" style="width:1150px">
@@ -87,26 +87,26 @@
                                     <!-- Sous-menu Configuration générale -->
                                     <li class="menu-item">
                                         <h3 class="menu-heading menu-toggle">
-                                            <span class="menu-text">Configuration générale</span>
+                                            <span class="menu-text">{% trans "Configuration générale" %}</span>
                                             <i class="menu-arrow"></i>
                                         </h3>
                                         <ul class="menu-inner">
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Utilisateurs</span>
+                                                    <span class="menu-text">{% trans "Utilisateurs" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Rôles</span>
+                                                    <span class="menu-text">{% trans "Rôles" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Permissions</span>
+                                                    <span class="menu-text">{% trans "Permissions" %}</span>
                                                 </a>
                                             </li>
                                         </ul>
@@ -114,32 +114,32 @@
                                     <!-- Sous-menu Gestion des données -->
                                     <li class="menu-item">
                                         <h3 class="menu-heading menu-toggle">
-                                            <span class="menu-text">Gestion des données</span>
+                                            <span class="menu-text">{% trans "Gestion des données" %}</span>
                                             <i class="menu-arrow"></i>
                                         </h3>
                                         <ul class="menu-inner">
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Producteur</span>
+                                                    <span class="menu-text">{% trans "Producteur" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Cooperative</span>
+                                                    <span class="menu-text">{% trans "Cooperative" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Parcelles</span>
+                                                    <span class="menu-text">{% trans "Parcelles" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="{% url 'mobiledata_list' %}" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Donnees Mobiles</span>
+                                                    <span class="menu-text">{% trans "Donnees Mobiles" %}</span>
                                                 </a>
                                             </li>
                                         </ul>
@@ -147,26 +147,26 @@
                                     <!-- Sous-menu Rapports et analyses -->
                                     <li class="menu-item">
                                         <h3 class="menu-heading menu-toggle">
-                                            <span class="menu-text">Rapports et analyses</span>
+                                            <span class="menu-text">{% trans "Rapports et analyses" %}</span>
                                             <i class="menu-arrow"></i>
                                         </h3>
                                         <ul class="menu-inner">
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Tableaux de bord</span>
+                                                    <span class="menu-text">{% trans "Tableaux de bord" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Statistiques</span>
+                                                    <span class="menu-text">{% trans "Statistiques" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="#" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Exportations</span>
+                                                    <span class="menu-text">{% trans "Exportations" %}</span>
                                                 </a>
                                             </li>
                                         </ul>
@@ -174,20 +174,20 @@
                                     <!-- Sous-menu Erreurs et logs -->
                                     <li class="menu-item">
                                         <h3 class="menu-heading menu-toggle">
-                                            <span class="menu-text">Erreurs et logs</span>
+                                            <span class="menu-text">{% trans "Erreurs et logs" %}</span>
                                             <i class="menu-arrow"></i>
                                         </h3>
                                         <ul class="menu-inner">
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="errors/error-1.html" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Pages d'erreur</span>
+                                                    <span class="menu-text">{% trans "Pages d'erreur" %}</span>
                                                 </a>
                                             </li>
                                             <li class="menu-item" aria-haspopup="true">
                                                 <a href="errors/logs.html" class="menu-link">
                                                     <i class="menu-bullet menu-bullet-line"><span></span></i>
-                                                    <span class="menu-text">Historique des logs</span>
+                                                    <span class="menu-text">{% trans "Historique des logs" %}</span>
                                                 </a>
                                             </li>
                                         </ul>

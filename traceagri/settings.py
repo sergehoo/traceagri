@@ -184,9 +184,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGES = [
     ('fr', _('Français')),
     ('en', _('Anglais')),
-    ('es', _('Espagnol')),
-    ('de', _('Allemand')),
-    ('zh-hans', _('Chinois Simplifié')),
+    # ('es', _('Espagnol')),
+    # ('de', _('Allemand')),
+    # ('zh-hans', _('Chinois Simplifié')),
 ]
 
 LOCALE_PATHS = [
@@ -196,9 +196,8 @@ LOCALE_PATHS = [
 LANGUAGE_CODE = 'fr'
 
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 Mo
@@ -233,8 +232,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SITE_ID = 1
 USE_L10N = True
 
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "landing"
 ACCOUNT_LOGOUT_REDIRECT = "account_login"
 ACCOUNT_SIGNUP_REDIRECT_URL = "account_login"
 

@@ -28,7 +28,7 @@ from tracelan.views import HomePageView, ProducteurListView, ProducteurDetailVie
     ProjectDetailsView, EventListView, EventDetailView, get_invite_list, add_invites_to_event, \
     add_invites_and_send_emails, confirm_presence, CooperativeListView, CooperativeCreateView, CooperativeUpdateView, \
     CooperativeDeleteView, CooperativeDetailView, ParcelleExportView, ProducteurExportView, MobileDataListView, \
-    MobileDataDetailView, MobileDataUpdateView, MobileDataDeleteView
+    MobileDataDetailView, MobileDataUpdateView, MobileDataDeleteView, LandingView
 
 urlpatterns = i18n_patterns(
     path('admin/', admin.site.urls),
@@ -40,7 +40,8 @@ urlpatterns = i18n_patterns(
     path('auth/', include('djoser.urls')),
     path('auth/tablette/', include('djoser.urls.authtoken')),
 
-    path('', HomePageView.as_view(), name='home'),
+    path('dashboard', HomePageView.as_view(), name='home'),
+    path('', LandingView.as_view(), name='landing'),
     path('Producteurs', ProducteurListView.as_view(), name='producteurs-list'),
     path('Producteurs/create', ProducteurCreateView.as_view(), name='producteurs-create'),
     path('Producteurs/details<int:pk>', ProducteurDetailView.as_view(), name='producteurs-details'),

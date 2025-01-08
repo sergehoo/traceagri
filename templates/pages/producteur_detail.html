@@ -38,12 +38,10 @@
                         <!--begin::Breadcrumb-->
                         <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
                             <li class="breadcrumb-item">
-                                <a href="{% url 'producteurs-list' %}" class="text-muted">
-                                    Producteurs-list</a>
+                                <a href="{% url 'producteurs-list' %}" class="text-muted">Producteurs-list</a>
                             </li>
                             <li class="breadcrumb-item">
-                                <a href="" class="text-muted">
-                                    {{ producteurdetails }} </a>
+                                <a href="" class="text-muted">{{ producteurdetails }} </a>
                             </li>
 
                         </ul>
@@ -53,18 +51,7 @@
                 </div>
                 <!--end::Info-->
 
-                <!--begin::Toolbar-->
-                <div class="d-flex align-items-center">
-                    <!--begin::Actions-->
-                    <a href="{% url 'parcelle-create' producteur_id=producteurdetails.id %}"
-                       class="btn btn-light-primary font-weight-bolder btn-sm">
-                        Ajouter une parcelle
-                    </a>
-                    <!--end::Actions-->
 
-
-                </div>
-                <!--end::Toolbar-->
             </div>
         </div>
         <!--end::Subheader-->
@@ -339,7 +326,7 @@
               fill="#000000" opacity="0.3"></path>
     </g>
 </svg><!--end::Svg Icon--></span> </a>
-                                                        <a href="#"
+                                                        <a href="{% url 'parcelle-update' parcelle.pk %}"
                                                            class="btn btn-icon btn-light btn-hover-primary btn-sm mx-3">
                                         <span class="svg-icon svg-icon-md svg-icon-primary"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/Communication/Write.svg--><svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -602,75 +589,6 @@
                 .catch(error => console.error("Erreur lors du chargement des parcelles :", error));
         });
     </script>
-
-{#<script>#}
-{#document.addEventListener("DOMContentLoaded", function () {#}
-{#    const coteDIvoireBounds = [#}
-{#        [4.35, -8.60],#}
-{#        [10.73, -2.51]#}
-{#    ];#}
-{##}
-{#    const parmap = L.map('parcellemap', {#}
-{#        maxBounds: coteDIvoireBounds,#}
-{#        maxBoundsViscosity: 1.0,#}
-{#    }).setView([7.54, -5.55], 7);#}
-{##}
-{#    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}
-{#        maxZoom: 18,#}
-{#        attribution: '&copy; AFRIQ CONSULTING'#}
-{#    }).addTo(parmap);#}
-{##}
-{#    fetch("{% url 'parcelles-producteur-api' producteurdetails.id %}")#}
-{#        .then(response => {#}
-{#            if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);#}
-{#            return response.json();#}
-{#        })#}
-{#        .then(data => {#}
-{#            if (!data.length) {#}
-{#                console.warn("Aucune parcelle trouvée pour ce producteur.");#}
-{#                return;#}
-{#            }#}
-{##}
-{#            const parcelleLayers = {};#}
-{##}
-{#            data.forEach(parcelle => {#}
-{#                if (parcelle.geojson && parcelle.geojson.features.length > 0) {#}
-{#                    const geojsonLayer = L.geoJSON(parcelle.geojson, {#}
-{#                        style: {#}
-{#                            color: '#ff7800',#}
-{#                            weight: 2,#}
-{#                            opacity: 0.65,#}
-{#                        }#}
-{#                    }).addTo(parmap);#}
-{##}
-{#                    geojsonLayer.bindPopup(`#}
-{#                        <b>${parcelle.nom || 'Parcelle sans nom'}</b><br>#}
-{#                        Dimension: ${parcelle.dimension_ha} ha#}
-{#                    `);#}
-{##}
-{#                    parcelleLayers[parcelle.id] = geojsonLayer; // Utilise l'ID pour l'association#}
-{#                }#}
-{#            });#}
-{##}
-{#            document.querySelectorAll("tr[data-parcelle-id]").forEach(row => {#}
-{#                row.addEventListener("click", function () {#}
-{#                    const parcelleId = this.getAttribute("data-parcelle-id");#}
-{#                    const layer = parcelleLayers[parcelleId];#}
-{##}
-{#                    if (layer) {#}
-{#                        const bounds = layer.getBounds();#}
-{#                        parmap.fitBounds(bounds);#}
-{#                        layer.openPopup();#}
-{#                    } else {#}
-{#                        console.warn(`Aucune parcelle correspondante trouvée pour l'ID : ${parcelleId}`);#}
-{#                    }#}
-{#                });#}
-{#            });#}
-{##}
-{#            console.log("ParcelleLayers : ", parcelleLayers); // Vérifiez le contenu#}
-{#        })#}
-{#        .catch(error => console.error("Erreur lors du chargement des parcelles :", error));#}
-{#});#}
-{#</script>#}
+    
 
 {% endblock %}

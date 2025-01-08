@@ -127,6 +127,29 @@ class ParcellesProducteurAPIView(APIView):
         return Response(list(parcelles))
 
 
+class ParcelleDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, parcelle_id):
+        # Récupérer une parcelle spécifique
+        parcelle = get_object_or_404(Parcelle, id=parcelle_id)
+
+        # Préparer les données à retourner
+        parcelle_data = {
+            'id': parcelle.id,
+            'nom': parcelle.nom,
+            'longitude': parcelle.longitude,
+            'latitude': parcelle.latitude,
+            'geojson': parcelle.geojson,
+            'dimension_ha': parcelle.dimension_ha,
+            'culture': parcelle.culture,
+            'images': request.build_absolute_uri(parcelle.images.url) if parcelle.images else None,
+            'carracteristic': parcelle.carracteristic,
+        }
+
+        return Response(parcelle_data)
+
+
 class ProducteurMobileViewSet(viewsets.ModelViewSet):
     queryset = Producteur.objects.all()
     serializer_class = ProducteurMobileSerializer

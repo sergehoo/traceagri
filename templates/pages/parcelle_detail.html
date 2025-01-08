@@ -15,13 +15,13 @@
 
 
     <div style="
-    background-color: #1f371a;
-    background-image: url({% static 'assets/media/bg/landscape-cultivated-ground.png' %});
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    {#height: 100vh; #}
-" class="content d-flex flex-column flex-column-fluid" id="kt_content">
+            background-color: #1f371a;
+            background-image: url({% static 'assets/media/bg/landscape-cultivated-ground.png' %});
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            {#height: 100vh; #}
+            " class="content d-flex flex-column flex-column-fluid" id="kt_content">
 
 
         <!--begin::Subheader-->
@@ -46,7 +46,7 @@
                         <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
                             <li class="breadcrumb-item">
                                 <a href="{% url 'producteurs-list' %}" class="text-muted">
-                                   Producteurs-list</a>
+                                    Producteurs-list</a>
                             </li>
                             <li class="breadcrumb-item">
                                 <a href="" class="text-muted">
@@ -63,9 +63,9 @@
                 <!--begin::Toolbar-->
                 <div class="d-flex align-items-center">
                     <!--begin::Actions-->
-                    <a href="{% url 'parcelle-create' producteur_id=producteurdetails.id %}" class="btn btn-light-primary font-weight-bolder btn-sm">
-                       Ajouter une parcelle
-                    </a>
+                    {#                    <a href="{% url 'parcelle-create' producteur_id=producteurdetails.id %}" class="btn btn-light-primary font-weight-bolder btn-sm">#}
+                    {#                       Ajouter une parcelle#}
+                    {#                    </a>#}
                     <!--end::Actions-->
 
 
@@ -77,353 +77,156 @@
 
         <!--begin::Entry-->
         <div class="d-flex flex-column-fluid">
-    <!--begin::Container-->
-    <div class="container">
-        <!--begin::Profile-->
-        <div class="d-flex flex-row">
-            <!--begin::Aside-->
-            <div class="flex-row-auto offcanvas-mobile w-300px w-xl-350px" id="kt_profile_aside">
-                <!--begin::Card-->
-                <div class="card card-custom">
-                    <!--begin::Body-->
-                    <div class="card-body pt-15">
-                       <div class="text-center mb-10">
-    <div class="symbol symbol-60 symbol-circle symbol-xl-90">
-        {% if producteurdetails.photo %}
-        <div class="symbol-label" style="background-image:url('{{ producteurdetails.photo.url }}')"></div>
-            {% else %}
-        <div class="symbol-label" style="background-image:url('{% static 'assets/media/users/default.jpg' %}')"></div>
-        {% endif %}
-        <i class="symbol-badge symbol-badge-bottom bg-success"></i>
-    </div>
-
-    <h4 class="font-weight-bold my-2">
-        {{ producteurdetails.nom }} {{ producteurdetails.prenom }}
-    </h4>
-    <div class="text-muted mb-2">
-        {{ producteurdetails.cooperative.nom }}
-    </div>
-    <span class="label label-light-warning label-inline font-weight-bold label-lg">
-           Président de region
-    </span>
-</div>
-<!--end::User-->
-
-<!--begin::Contact-->
-<div class="mb-10">
-    <ul class="list-group text-left">
-        <li class="list-group-item">
-            <strong>Coopérative :</strong> {{ producteurdetails.cooperative.nom }}
-        </li>
-        <li class="list-group-item">
-            <strong>Sexe :</strong>
-            {% if producteurdetails.sexe == 'M' %}
-                Masculin
-            {% else %}
-                Féminin
-            {% endif %}
-        </li>
-        <li class="list-group-item">
-            <strong>Date de Naissance :</strong> {{ producteurdetails.date_naissance|date:"d/m/Y" }}
-        </li>
-        <li class="list-group-item">
-            <strong>Lieu de Naissance :</strong> {{ producteurdetails.lieu_naissance }}
-        </li>
-        <li class="list-group-item">
-            <strong>Téléphone :</strong>
-            <a href="tel:{{ producteurdetails.telephone }}" class="text-muted text-hover-primary">
-                {{ producteurdetails.telephone }}
-            </a>
-        </li>
-    </ul>
-</div>
-                    <div class="mb-10">
-
-                        <div class="table-responsive">
-            <table class="table table-borderless mb-0">
-                <tbody>
-
-
-                    <!--begin::Item-->
-                    <tr>
-                        <td class="w-40px pb-6 pl-0 pr-2">
-                            <!--begin::Symbol-->
-                            <div class="symbol symbol-40 symbol-light-danger align-middle">
-                                <span class="symbol-label">
-                                    <span class="svg-icon svg-icon-lg svg-icon-danger"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/Layout/Layout-4-blocks.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-    <title>Stockholm-icons / Layout / Layout-4-blocks</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect x="0" y="0" width="24" height="24"></rect>
-        <rect fill="#000000" x="4" y="4" width="7" height="7" rx="1.5"></rect>
-        <path d="M5.5,13 L9.5,13 C10.3284271,13 11,13.6715729 11,14.5 L11,18.5 C11,19.3284271 10.3284271,20 9.5,20 L5.5,20 C4.67157288,20 4,19.3284271 4,18.5 L4,14.5 C4,13.6715729 4.67157288,13 5.5,13 Z M14.5,4 L18.5,4 C19.3284271,4 20,4.67157288 20,5.5 L20,9.5 C20,10.3284271 19.3284271,11 18.5,11 L14.5,11 C13.6715729,11 13,10.3284271 13,9.5 L13,5.5 C13,4.67157288 13.6715729,4 14.5,4 Z M14.5,13 L18.5,13 C19.3284271,13 20,13.6715729 20,14.5 L20,18.5 C20,19.3284271 19.3284271,20 18.5,20 L14.5,20 C13.6715729,20 13,19.3284271 13,18.5 L13,14.5 C13,13.6715729 13.6715729,13 14.5,13 Z" fill="#000000" opacity="0.3"></path>
-    </g>
-</svg><!--end::Svg Icon--></span>                                </span>
-                            </div>
-                            <!--end::Symbol-->
-                        </td>
-                        <td class="font-size-lg font-weight-bolder text-dark-75 w-150px align-middle pb-6">Evenements</td>
-
-                    </tr>
-                    <!--end::Item-->
-
-                    <!--begin::Item-->
-                    <tr>
-                        <td class="w-40px pb-6 pl-0 pr-2">
-                            <!--begin::Symbol-->
-                            <div class="symbol symbol-40 symbol-light-primary align-middle">
-                                <span class="symbol-label">
-                                    <span class="svg-icon svg-icon-lg svg-icon-primary"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/Communication/Group.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-    <title>Stockholm-icons / Communication / Group</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <polygon points="0 0 24 0 24 24 0 24"></polygon>
-        <path d="M18,14 C16.3431458,14 15,12.6568542 15,11 C15,9.34314575 16.3431458,8 18,8 C19.6568542,8 21,9.34314575 21,11 C21,12.6568542 19.6568542,14 18,14 Z M9,11 C6.790861,11 5,9.209139 5,7 C5,4.790861 6.790861,3 9,3 C11.209139,3 13,4.790861 13,7 C13,9.209139 11.209139,11 9,11 Z" fill="#000000" fill-rule="nonzero" opacity="0.3"></path>
-        <path d="M17.6011961,15.0006174 C21.0077043,15.0378534 23.7891749,16.7601418 23.9984937,20.4 C24.0069246,20.5466056 23.9984937,21 23.4559499,21 L19.6,21 C19.6,18.7490654 18.8562935,16.6718327 17.6011961,15.0006174 Z M0.00065168429,20.1992055 C0.388258525,15.4265159 4.26191235,13 8.98334134,13 C13.7712164,13 17.7048837,15.2931929 17.9979143,20.2 C18.0095879,20.3954741 17.9979143,21 17.2466999,21 C13.541124,21 8.03472472,21 0.727502227,21 C0.476712155,21 -0.0204617505,20.45918 0.00065168429,20.1992055 Z" fill="#000000" fill-rule="nonzero"></path>
-    </g>
-</svg><!--end::Svg Icon--></span>                                </span>
-                            </div>
-                            <!--end::Symbol-->
-                        </td>
-                        <td class="font-size-lg font-weight-bolder text-dark-75 w-150px align-middle pb-6">Activites</td>
-
-                    </tr>
-                    <!--end::Item-->
-
-                    <!--begin::Item-->
-                    <tr>
-                        <td class="w-40px pl-0 pr-2">
-                            <!--begin::Symbol-->
-                            <div class="symbol symbol-40 symbol-light-warning align-middle">
-                                <span class="symbol-label">
-                                    <span class="svg-icon svg-icon-lg svg-icon-warning"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/Home/Library.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-    <title>Stockholm-icons / Home / Library</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect x="0" y="0" width="24" height="24"></rect>
-        <path d="M5,3 L6,3 C6.55228475,3 7,3.44771525 7,4 L7,20 C7,20.5522847 6.55228475,21 6,21 L5,21 C4.44771525,21 4,20.5522847 4,20 L4,4 C4,3.44771525 4.44771525,3 5,3 Z M10,3 L11,3 C11.5522847,3 12,3.44771525 12,4 L12,20 C12,20.5522847 11.5522847,21 11,21 L10,21 C9.44771525,21 9,20.5522847 9,20 L9,4 C9,3.44771525 9.44771525,3 10,3 Z" fill="#000000"></path>
-        <rect fill="#000000" opacity="0.3" transform="translate(17.825568, 11.945519) rotate(-19.000000) translate(-17.825568, -11.945519) " x="16.3255682" y="2.94551858" width="3" height="18" rx="1"></rect>
-    </g>
-</svg><!--end::Svg Icon--></span>                                </span>
-                            </div>
-                            <!--end::Symbol-->
-                        </td>
-                        <td class="font-size-lg font-weight-bolder text-dark-75 w-150px align-middle">Documents</td>
-
-                    </tr>
-                    <!--end::Item-->
-                </tbody>
-            </table>
+            <!--begin::Container-->
+            <div class="container mt-5">
+    <!-- Titre -->
+    <h2 class="mb-4 text-center">Détails de la Parcelle</h2>
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1>{{ parcelle.nom }}</h1>
+            <h2>Identifiant Unique :<strong>{{ parcelle.unique_id }}</strong> </h2>
         </div>
-</div>
-<!--end::Contact-->
-                    </div>
-                    <!--end::Body-->
+        <div class="card-body">
+            <div class="row">
+                <!-- Informations principales -->
+                <div class="col-md-6">
+                    <h5>Informations Générales</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Producteur :</strong> {{ parcelle.producteur.nom }} {{ parcelle.producteur.prenom }}</li>
+                       <li class="list-group-item"><strong>Dimension :</strong> {{ parcelle.dimension_ha|floatformat:2 }} ha</li>
+                       <li class="list-group-item">
+    <strong>Cultures :</strong>
+    {% if parcelle.culture %}
+        <ul>
+            {% for item in parcelle.culture %}
+                <li class="badge badge-secondary">{{ item.value }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Aucune culture enregistrée pour cette parcelle.</p>
+    {% endif %}
+</li>
+                        <li class="list-group-item">Status :<strong>{{ parcelle.status }}</strong> </li>
+                    </ul>
                 </div>
-                <!--end::Card-->
-            </div>
-            <!--end::Aside-->
 
-            <!--begin::Content-->
-
-            <div class="flex-row-fluid ml-lg-8">
-                <!--begin::Details-->
-                <div class="card card-custom gutter-b">
-                    <div class="card-header border-0 py-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label font-weight-bolder text-dark">Parcelles du Producteurs</span>
-                            <span class="text-muted mt-3 font-weight-bold font-size-sm">
-                                Informations liées au producteur
-                            </span>
-                        </h3>
-                    </div>
-                    <div class="card-body">
-
-                        <div style="border: 1px solid #ccc; width: 100%; max-width: 850px; margin: 0 auto;">
-                            <div id="parcellemap" style="height: 500px; width: 100%;"></div>
-{#                            <div id="map"></div>#}
-                        </div>
-
-
-                        <div class="col-lg-12">
-                            <div class="table-responsive">
-                                <table class="table table-head-custom table-vertical-center"
-                                       id="kt_advance_table_widget_2">
-                                    <thead>
-                                    <tr class="text-uppercase">
-                                        <th >CodeGPS</th>
-                                        <th >District</th>
-                                        <th ><span class="text-primary">Nom</span></th>
-                                        <th >Localite</th>
-                                        <th >status</th>
-                                        <th >action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for parcelle in parcelle %}
-                                        <tr data-parcelle-id="{{ parcelle.id }}">
-                                            <td class="pl-0">
-                                                <a href="#"
-                                                   class="text-dark-75 font-weight-bolder text-hover-primary font-size-lg">{{ parcelle.code|truncatechars:6 }}</a>
-                                            </td>
-                                            <td>
-            <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
-                {{ parcelle.localite.district.nom }}
-            </span>
-                                                <span class="text-muted font-weight-bold">
-                {{ parcelle.localite.district.region.name }}
-            </span>
-                                            </td>
-                                            <td>
-            <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
-                <a href="#" class="zoom-parcelle text-dark-75 font-weight-bolder text-hover-primary font-size-lg">
-                    {{ parcelle.nom }}
-                </a>
-            </span>
-                                                <span class="text-muted font-weight-bold">
-                {{ parcelle.dimension_ha|floatformat:0 }} Ha
-            </span>
-                                            </td>
-                                            <td>
-            <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
-                {{ parcelle.localite.name }}
-            </span>
-
-                                            </td>
-                                            <td>
-                                                <span class="label label-lg label-light-dark label-inline">{{ parcelle.status }}</span>
-                                            </td>
-                                            <td class="text-right pr-0">
-                                                <a href="{% url 'parcelle-detail' parcelle.pk %}" class="btn btn-icon btn-light btn-hover-primary btn-sm">
-                                        <span class="svg-icon svg-icon-md svg-icon-primary"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/General/Settings-1.svg--><svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
-                                                viewBox="0 0 24 24" version="1.1">
-    <title>Stockholm-icons / General / Settings-1</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect x="0" y="0" width="24" height="24"></rect>
-        <path d="M7,3 L17,3 C19.209139,3 21,4.790861 21,7 C21,9.209139 19.209139,11 17,11 L7,11 C4.790861,11 3,9.209139 3,7 C3,4.790861 4.790861,3 7,3 Z M7,9 C8.1045695,9 9,8.1045695 9,7 C9,5.8954305 8.1045695,5 7,5 C5.8954305,5 5,5.8954305 5,7 C5,8.1045695 5.8954305,9 7,9 Z"
-              fill="#000000"></path>
-        <path d="M7,13 L17,13 C19.209139,13 21,14.790861 21,17 C21,19.209139 19.209139,21 17,21 L7,21 C4.790861,21 3,19.209139 3,17 C3,14.790861 4.790861,13 7,13 Z M17,19 C18.1045695,19 19,18.1045695 19,17 C19,15.8954305 18.1045695,15 17,15 C15.8954305,15 15,15.8954305 15,17 C15,18.1045695 15.8954305,19 17,19 Z"
-              fill="#000000" opacity="0.3"></path>
-    </g>
-</svg><!--end::Svg Icon--></span> </a>
-                                                <a href="#"
-                                                   class="btn btn-icon btn-light btn-hover-primary btn-sm mx-3">
-                                        <span class="svg-icon svg-icon-md svg-icon-primary"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/Communication/Write.svg--><svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
-                                                viewBox="0 0 24 24" version="1.1">
-    <title>Stockholm-icons / Communication / Write</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect x="0" y="0" width="24" height="24"></rect>
-        <path d="M12.2674799,18.2323597 L12.0084872,5.45852451 C12.0004303,5.06114792 12.1504154,4.6768183 12.4255037,4.38993949 L15.0030167,1.70195304 L17.5910752,4.40093695 C17.8599071,4.6812911 18.0095067,5.05499603 18.0083938,5.44341307 L17.9718262,18.2062508 C17.9694575,19.0329966 17.2985816,19.701953 16.4718324,19.701953 L13.7671717,19.701953 C12.9505952,19.701953 12.2840328,19.0487684 12.2674799,18.2323597 Z"
-              fill="#000000" fill-rule="nonzero"
-              transform="translate(14.701953, 10.701953) rotate(-135.000000) translate(-14.701953, -10.701953) "></path>
-        <path d="M12.9,2 C13.4522847,2 13.9,2.44771525 13.9,3 C13.9,3.55228475 13.4522847,4 12.9,4 L6,4 C4.8954305,4 4,4.8954305 4,6 L4,18 C4,19.1045695 4.8954305,20 6,20 L18,20 C19.1045695,20 20,19.1045695 20,18 L20,13 C20,12.4477153 20.4477153,12 21,12 C21.5522847,12 22,12.4477153 22,13 L22,18 C22,20.209139 20.209139,22 18,22 L6,22 C3.790861,22 2,20.209139 2,18 L2,6 C2,3.790861 3.790861,2 6,2 L12.9,2 Z"
-              fill="#000000" fill-rule="nonzero" opacity="0.3"></path>
-    </g>
-</svg><!--end::Svg Icon--></span> </a>
-                                                <a href="{% url 'parcelle-delete' producteur_id=parcelle.producteur.id pk=parcelle.id  %}" class="btn btn-icon btn-light btn-hover-primary btn-sm">
-                                        <span class="svg-icon svg-icon-md svg-icon-primary"><!--begin::Svg Icon | path:/metronic/theme/html/demo9/dist/assets/media/svg/icons/General/Trash.svg--><svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
-                                                viewBox="0 0 24 24" version="1.1">
-    <title>Stockholm-icons / General / Trash</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect x="0" y="0" width="24" height="24"></rect>
-        <path d="M6,8 L6,20.5 C6,21.3284271 6.67157288,22 7.5,22 L16.5,22 C17.3284271,22 18,21.3284271 18,20.5 L18,8 L6,8 Z"
-              fill="#000000" fill-rule="nonzero"></path>
-        <path d="M14,4.5 L14,4 C14,3.44771525 13.5522847,3 13,3 L11,3 C10.4477153,3 10,3.44771525 10,4 L10,4.5 L5.5,4.5 C5.22385763,4.5 5,4.72385763 5,5 L5,5.5 C5,5.77614237 5.22385763,6 5.5,6 L18.5,6 C18.7761424,6 19,5.77614237 19,5.5 L19,5 C19,4.72385763 18.7761424,4.5 18.5,4.5 L14,4.5 Z"
-              fill="#000000" opacity="0.3"></path>
-    </g>
-</svg><!--end::Svg Icon--></span> </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-
-                            </div>
-
-                        </div>
-
-
-                    </div>
+                <!-- Coordonnées géographiques -->
+                <div class="col-md-6">
+                    <h5>Coordonnées Géographiques</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Latitude :</strong> {{ parcelle.latitude }}</li>
+                        <li class="list-group-item"><strong>Longitude :</strong> {{ parcelle.longitude }}</li>
+                        <li class="list-group-item"><strong>Localité :</strong> {{ parcelle.localite.name }}</li>
+                        <li class="list-group-item"><strong>District :</strong> {{ parcelle.localite.district }}</li>
+                        <li class="list-group-item"><strong>Region :</strong> {{ parcelle.localite.district.region }}</li>
+                        
+                    </ul>
                 </div>
-                <!--end::Details-->
             </div>
-            <!--end::Content-->
+
+            <!-- Description de la parcelle -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5>Description et Caractéristiques</h5>
+                    <p>{{ parcelle.affectations }}</p>
+                    <pre>{{ parcelle.carracteristic|json_script:"caracteristiques" }}</pre>
+                </div>
+            </div>
+
+            <!-- Carte de la parcelle -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5>Localisation sur la Carte</h5>
+                    <div id="parcellemap" style="height: 500px; width: 100%;"></div>
+                </div>
+            </div>
         </div>
-        <!--end::Profile-->
     </div>
-    <!--end::Container-->
+
+    <!-- Images -->
+    {% if parcelle.images %}
+        <div class="mt-4">
+            <h5>Images de la Parcelle</h5>
+            <img src="{{ parcelle.images.url }}" alt="Image de la parcelle" class="img-fluid">
+        </div>
+    {% endif %}
 </div>
+
+<!-- Script pour la carte -->
+
+
+            <!--end::Container-->
+        </div>
         <!--end::Entry-->
-    <div class="d-flex flex-column-fluid">
-    <!--begin::Container-->
-    <div class="container">
-        <!--begin::Profile-->
-        <div class="d-flex flex-row">
+        <div class="d-flex flex-column-fluid">
+            <!--begin::Container-->
+            <div class="container">
+                <!--begin::Profile-->
+                <div class="d-flex flex-row">
 
 
-            <!--begin::Content-->
+                    <!--begin::Content-->
 
-            <div class="flex-row-fluid ml-lg-8 mt-20">
-                <!--begin::Details-->
-                <div class="card card-custom gutter-b">
-                    <div class="card-header border-0 py-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label font-weight-bolder text-dark">Détails supplémentaires</span>
-                            <span class="text-muted mt-3 font-weight-bold font-size-sm">
-                                Informations liées au producteur
-                            </span>
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="col-lg-8">
-                            <div class="table-responsive">
-                                <table class="table table-head-custom table-vertical-center" id="kt_advance_table_widget_2">
-                                    <thead>
-                                    <tr class="text-uppercase">
-
-
-                                        <th class="pl-0" style="min-width: 100px">CodeGPS</th>
-                                        <th style="min-width: 120px">District</th>
-                                        <th style="min-width: 150px"><span class="text-primary">Nom</span></th>
-                                        <th style="min-width: 150px">Localite</th>
-                                        <th style="min-width: 130px">status</th>
-                                        <th class="pr-0 text-right" style="min-width: 160px">action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-
-</tbody>
-                                </table>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-                </div>
-                <!--end::Details-->
-            </div>
-            <!--end::Content-->
+                    <div class="flex-row-fluid ml-lg-8 mt-20">
+    <!--begin::Details-->
+    <div class="card card-custom gutter-b">
+        <div class="card-header border-0 py-5">
+            <h3 class="card-title align-items-start flex-column">
+                <span class="card-label font-weight-bolder text-dark">Cultures et Activités Liées</span>
+                <span class="text-muted mt-3 font-weight-bold font-size-sm">Informations supplémentaires liées à la parcelle</span>
+            </h3>
         </div>
-        <!--end::Profile-->
+        <div class="card-body">
+            <div class="row">
+                <!-- Cultures -->
+                <div class="col-lg-6">
+                    <h5 class="font-weight-bold text-primary">Cultures</h5>
+                    {% if cultures %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nom de la Culture</th>
+                                    <th>Type</th>
+                                    <th>Année de Mise en Place</th>
+                                    <th>Dernier Rendement (kg/ha)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for culture in cultures %}
+                                    <tr>
+                                        <td>{{ culture.culture.name }}</td>
+                                        <td>{{ culture.get_type_culture_display }}</td>
+                                        <td>{{ culture.annee_mise_en_place }}</td>
+                                        <td>{{ culture.dernier_rendement_kg_ha }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Aucune culture associée à cette parcelle.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Activités -->
+                <div class="col-lg-6">
+                    <h5 class="font-weight-bold text-primary">Activités</h5>
+                    {% if activities %}
+                        <p>{{ activities }}</p>
+                    {% else %}
+                        <p>Aucune activité associée à cette parcelle.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-    <!--end::Container-->
+    <!--end::Details-->
 </div>
+                    <!--end::Content-->
+                </div>
+                <!--end::Profile-->
+            </div>
+            <!--end::Container-->
+        </div>
     </div>
 
 
@@ -433,216 +236,90 @@
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const coteDIvoireBounds = [
-                [4.35, -8.60],
-                [10.73, -2.51]
-            ];
+    document.addEventListener("DOMContentLoaded", function () {
+        const parcelleId = "{{ parcelle.id }}"; // ID de la parcelle à afficher
+        const apiUrl = "{% url 'parcelles-detail-api' 0 %}".replace('0', parcelleId);
 
-            const parmap = L.map('parcellemap', {
-                maxBounds: coteDIvoireBounds,
-                maxBoundsViscosity: 1.0,
-            }).setView([7.54, -5.55], 7);
+        // Définir les limites de la Côte d'Ivoire
+        const coteDIvoireBounds = [
+            [4.35, -8.60],
+            [10.73, -2.51]
+        ];
 
-            // Fond de carte Satellite (Esri)
-            const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '&copy; <a href="https://www.afriqconsulting.com/">AFRIQCONSULTING</a>',
-                maxZoom: 18
-            }).addTo(parmap);
+        // Initialiser la carte
+        const map = L.map('parcellemap', {
+            maxBounds: coteDIvoireBounds,
+            maxBoundsViscosity: 1.0,
+        }).setView([7.54, -5.55], 7);
 
-            // Couche des routes et labels (Esri)
-            const roadsAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '&copy; <a href="https://www.afriqconsulting.com/">AFRIQCONSULTING</a>',
-                maxZoom: 18
-            });
+        // Ajouter les couches Satellite et Routes
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; <a href="https://www.afriqconsulting.com/">AFRIQCONSULTING</a>',
+            maxZoom: 18
+        }).addTo(map);
 
-            // Superposer les labels et les routes à la carte satellite
-            satellite.addTo(parmap);
-            roadsAndLabels.addTo(parmap);
-
-            // Contrôle des couches
-            L.control.layers({
-                "Satellite": satellite
-            }, {
-                "Routes et Labels": roadsAndLabels
-            }).addTo(parmap);
-
-            // Charger les parcelles depuis l'API
-            fetch("{% url 'parcelles-producteur-api' producteurdetails.id %}")
-                .then(response => {
-                    if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data.length) {
-                        console.warn("Aucune parcelle trouvée pour ce producteur.");
-                        return;
-                    }
-
-                    const parcelleLayers = {};
-
-                    data.forEach(parcelle => {
-                        if (parcelle.geojson && parcelle.geojson.features.length > 0) {
-                            const geojsonLayer = L.geoJSON(parcelle.geojson, {
-                                style: {
-                                    color: '#ff7800',
-                                    weight: 2,
-                                    opacity: 0.65,
-                                },
-                                onEachFeature: (feature, layer) => {
-                                    layer.on({
-                                        mouseover: function () {
-                                            layer.setStyle({weight: 3, color: '#00ff00'});
-                                        },
-                                        mouseout: function () {
-                                            geojsonLayer.resetStyle(layer);
-                                        }
-                                    });
-                                }
-                            }).addTo(parmap);
-
-                            geojsonLayer.bindPopup(() => {
-                                const cultures = Array.isArray(parcelle.culture)
-                                    ? parcelle.culture.map(culture => culture.value).join(", ") // Extraire "value" de chaque objet et joindre par une virgule
-                                    : (typeof parcelle.culture === "object" && parcelle.culture !== null)
-                                        ? Object.entries(parcelle.culture).map(([key, value]) => `<strong>${key}</strong>: ${value}`).join("<br>")
-                                        : parcelle.culture || '<em>Aucune culture spécifiée</em>';
-
-                                const image = parcelle.images
-                                    ? `<div style="text-align: center; margin: 10px 0;">
-                <img src="${parcelle.images}" alt="Image de la parcelle" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
-           </div>`
-                                    : '<p style="color: gray; font-style: italic;">Aucune image disponible</p>';
-
-                                // Fonction pour afficher les objets imbriqués
-                                const formatNestedObject = (obj) => {
-                                    if (typeof obj !== "object" || obj === null) {
-                                        return obj || '<em>Non spécifié</em>';
-                                    }
-                                    return Object.entries(obj)
-                                        .map(([key, value]) => {
-                                            if (typeof value === "object") {
-                                                return `<strong>${key}</strong>:<br>${formatNestedObject(value)}`;
-                                            }
-                                            return `<strong>${key}</strong>: ${value}`;
-                                        })
-                                        .join("<br>");
-                                };
-
-                                const caracteristiq = typeof parcelle.carracteristic === "object" && parcelle.carracteristic !== null
-                                    ? formatNestedObject(parcelle.carracteristic)
-                                    : '<em>Aucune caractéristique spécifiée</em>';
-
-                                return `
-        <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.5; text-align:left">
-            <h3 style="margin: 0; font-size: 16px; color: #2c7a7b;">${parcelle.nom || 'Parcelle sans nom'}</h3>
-            <p style="margin: 5px 0 10px;">
-                <strong>Dimension :</strong> ${parcelle.dimension_ha} ha
-            </p>
-            <p style="margin: 5px 0;">
-                <strong>Culture(s) :</strong><br>${cultures}
-            </p>
-            <p style="margin: 5px 0;">
-                <strong>Caractéristiques :</strong><br>${caracteristiq}
-            </p>
-            ${image}
-        </div>
-    `;
-                            });
-
-                            parcelleLayers[parcelle.id] = geojsonLayer; // Utilise l'ID pour l'association
-                        }
-                    });
-
-                    document.querySelectorAll("tr[data-parcelle-id]").forEach(row => {
-                        row.addEventListener("click", function () {
-                            const parcelleId = this.getAttribute("data-parcelle-id");
-                            const layer = parcelleLayers[parcelleId];
-
-                            if (layer) {
-                                const bounds = layer.getBounds();
-                                parmap.fitBounds(bounds);
-                                layer.openPopup();
-                            } else {
-                                console.warn(`Aucune parcelle correspondante trouvée pour l'ID : ${parcelleId}`);
-                            }
-                        });
-                    });
-
-                    console.log("ParcelleLayers : ", parcelleLayers); // Vérifiez le contenu
-                })
-                .catch(error => console.error("Erreur lors du chargement des parcelles :", error));
+        const roadsAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; <a href="https://www.afriqconsulting.com/">AFRIQCONSULTING</a>',
+            maxZoom: 18
         });
-    </script>
 
-{#<script>#}
-{#document.addEventListener("DOMContentLoaded", function () {#}
-{#    const coteDIvoireBounds = [#}
-{#        [4.35, -8.60],#}
-{#        [10.73, -2.51]#}
-{#    ];#}
-{##}
-{#    const parmap = L.map('parcellemap', {#}
-{#        maxBounds: coteDIvoireBounds,#}
-{#        maxBoundsViscosity: 1.0,#}
-{#    }).setView([7.54, -5.55], 7);#}
-{##}
-{#    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}
-{#        maxZoom: 18,#}
-{#        attribution: '&copy; AFRIQ CONSULTING'#}
-{#    }).addTo(parmap);#}
-{##}
-{#    fetch("{% url 'parcelles-producteur-api' producteurdetails.id %}")#}
-{#        .then(response => {#}
-{#            if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);#}
-{#            return response.json();#}
-{#        })#}
-{#        .then(data => {#}
-{#            if (!data.length) {#}
-{#                console.warn("Aucune parcelle trouvée pour ce producteur.");#}
-{#                return;#}
-{#            }#}
-{##}
-{#            const parcelleLayers = {};#}
-{##}
-{#            data.forEach(parcelle => {#}
-{#                if (parcelle.geojson && parcelle.geojson.features.length > 0) {#}
-{#                    const geojsonLayer = L.geoJSON(parcelle.geojson, {#}
-{#                        style: {#}
-{#                            color: '#ff7800',#}
-{#                            weight: 2,#}
-{#                            opacity: 0.65,#}
-{#                        }#}
-{#                    }).addTo(parmap);#}
-{##}
-{#                    geojsonLayer.bindPopup(`#}
-{#                        <b>${parcelle.nom || 'Parcelle sans nom'}</b><br>#}
-{#                        Dimension: ${parcelle.dimension_ha} ha#}
-{#                    `);#}
-{##}
-{#                    parcelleLayers[parcelle.id] = geojsonLayer; // Utilise l'ID pour l'association#}
-{#                }#}
-{#            });#}
-{##}
-{#            document.querySelectorAll("tr[data-parcelle-id]").forEach(row => {#}
-{#                row.addEventListener("click", function () {#}
-{#                    const parcelleId = this.getAttribute("data-parcelle-id");#}
-{#                    const layer = parcelleLayers[parcelleId];#}
-{##}
-{#                    if (layer) {#}
-{#                        const bounds = layer.getBounds();#}
-{#                        parmap.fitBounds(bounds);#}
-{#                        layer.openPopup();#}
-{#                    } else {#}
-{#                        console.warn(`Aucune parcelle correspondante trouvée pour l'ID : ${parcelleId}`);#}
-{#                    }#}
-{#                });#}
-{#            });#}
-{##}
-{#            console.log("ParcelleLayers : ", parcelleLayers); // Vérifiez le contenu#}
-{#        })#}
-{#        .catch(error => console.error("Erreur lors du chargement des parcelles :", error));#}
-{#});#}
-{#</script>#}
+        L.control.layers({
+            "Satellite": satellite
+        }, {
+            "Routes et Labels": roadsAndLabels
+        }).addTo(map);
+
+        // Charger les détails de la parcelle depuis l'API
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(parcelle => {
+                console.log("Données de la parcelle :", parcelle);
+
+                if (parcelle.geojson && parcelle.geojson.features.length > 0) {
+                    // Ajouter la géométrie GeoJSON à la carte
+                    const geojsonLayer = L.geoJSON(parcelle.geojson, {
+                        style: {
+                            color: '#ff7800',
+                            weight: 2,
+                            opacity: 0.65,
+                        }
+                    }).addTo(map);
+
+                    // Zoom sur la parcelle
+                    map.fitBounds(geojsonLayer.getBounds());
+
+                    // Ajouter un popup à la parcelle
+                    geojsonLayer.bindPopup(`
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                            <h3 style="margin: 0; font-size: 16px; color: #2c7a7b;">${parcelle.nom || 'Parcelle sans nom'}</h3>
+                            <p><strong>Dimension :</strong> ${parcelle.dimension_ha} ha</p>
+                            <p><strong>Culture(s) :</strong> ${Array.isArray(parcelle.culture) ? parcelle.culture.join(', ') : 'Non spécifiée'}</p>
+                            ${parcelle.images ? `<img src="${parcelle.images}" alt="Image de la parcelle" style="max-width: 100%; margin-top: 10px;" />` : '<p>Aucune image disponible</p>'}
+                        </div>
+                    `).openPopup();
+                } else if (parcelle.latitude && parcelle.longitude) {
+                    // Si aucune géométrie GeoJSON, placer un marqueur sur les coordonnées
+                    console.warn("Aucune géométrie GeoJSON détectée. Utilisation des coordonnées.");
+                    const marker = L.marker([parcelle.latitude, parcelle.longitude]).addTo(map);
+                    map.setView([parcelle.latitude, parcelle.longitude], 15);
+
+                    marker.bindPopup(`
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                            <h3 style="margin: 0; font-size: 16px; color: #2c7a7b;">${parcelle.nom || 'Parcelle sans nom'}</h3>
+                            <p><strong>Dimension :</strong> ${parcelle.dimension_ha} ha</p>
+                        </div>
+                    `).openPopup();
+                } else {
+                    console.error("Aucune donnée de localisation disponible pour cette parcelle.");
+                }
+            })
+            .catch(error => console.error("Erreur lors de la récupération de la parcelle :", error));
+    });
+</script>
+
+    
 
 {% endblock %}

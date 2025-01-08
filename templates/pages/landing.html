@@ -1,0 +1,273 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AC | Traceagri</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'assets/media/logos/favicon.png' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="{% static 'assets/css/style.bundle.css' %}">
+
+    <style>
+        .drone {
+            position: absolute;
+            width: 150px; /* Taille du drone */
+            height: auto;
+            z-index: 1000; /* Toujours au-dessus */
+            transition: transform 2s ease-in-out; /* Animation fluide des mouvements */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1; /* Vidéo en arrière-plan */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 83, 45, 0.5);
+            z-index: 0;
+        }
+
+
+        .hero {
+            position: relative; /* Nécessaire pour superposer le contenu sur la vidéo */
+            color: #fff;
+
+            text-align: center;
+            padding: 200px 20px;
+            height: 120vh; /* Occupe toute la hauteur de l'écran */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Empêche le débordement si la vidéo est plus grande */
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1; /* Place le contenu au-dessus de la superposition */
+            padding: 20px;
+            height: 120vh;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            z-index: 1; /* Place le texte au-dessus de la vidéo */
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 40px;
+            z-index: 1;
+        }
+
+        .hero button {
+            background-color: #0BB783;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero button:hover {
+            background-color: #008F6B;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 40px 20px;
+        }
+
+        .feature {
+            flex: 0 1 calc(33.333% - 40px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px;
+            padding: 20px;
+            text-align: center;
+            background-color: white;
+        }
+
+        .feature img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .feature h3 {
+            font-size: 22px;
+            margin: 20px 0 10px;
+        }
+
+        .cta {
+            background: #F3F6F9;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .cta h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .cta button {
+            background-color: #008FFB;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        footer {
+            background: #14532D;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .language-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.language-switcher select {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+    </style>
+</head>
+<body>
+    <img src="{% static 'assets/media/bg/drone.png' %}" class="drone" id="drone" alt="Drone"/>
+<div class="language-switcher">
+              <form action="{% url 'set_language' %}" method="post">
+    {% csrf_token %}
+    <select name="language" onchange="this.form.submit()">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% for lang_code, lang_name in LANGUAGES %}
+            <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+                {{ lang_name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+</div>
+<!-- Hero Section -->
+<section class="hero">
+    <!-- Video Background -->
+    <video autoplay muted loop playsinline class="video-background">
+        <source src="{% static 'assets/media/agriculture-bg.mp4' %}" type="video/mp4">
+        Votre navigateur ne supporte pas les vidéos HTML5.
+    </video>
+
+    <!-- Overlay -->
+    <div class="overlay"></div>
+
+    <!-- Content Overlay -->
+    <div class="hero-content">
+        <h1>
+            {% trans "Bienvenue sur" %} <br>
+            <img alt="Logo" src="{% static 'assets/media/logos/logo-trace-agri-new-white.png' %}" class="max-h-70px"/>
+        </h1>
+        <p>{% trans "Votre plateforme complète de suivi, gestion et traçabilité des données agricoles." %}
+            <br>{% trans " Simplifiez vos opérations agricoles dès aujourd'hui." %}</p>
+
+        <a class="btn btn-success" href="{% url 'home' %}">{% trans "Découvrir la plateforme" %}</a>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="feature">
+        <img src="{% static 'assets/media/farming.jpg' %}" alt="Gestion agricole">
+        <h3>{% trans "Gestion Agricole" %} </h3>
+        <p>{% trans " Optimisez la gestion des cultures, des parcelles et des coopératives avec des outils puissants." %}</p>
+    </div>
+    <div class="feature">
+        <img src="{% static 'assets/media/data.jpg' %}" alt="Analyse de données">
+        <h3>{% trans "Analyse de Données" %}</h3>
+        <p>{% trans "Accédez à des statistiques détaillées pour prendre des décisions éclairées et stratégiques." %}</p>
+    </div>
+    <div class="feature">
+        <img src="{% static 'assets/media/tracing.jpg' %}" alt="Traçabilité">
+        <h3>{% trans "Traçabilité" %}</h3>
+        <p>{% trans "Assurez la traçabilité complète de vos produits agricoles, du champ au marché." %}</p>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta">
+    <h2>{% trans "Rejoignez une communauté de producteurs innovants" %}</h2>
+    <p>{% trans "Commencez à gérer efficacement vos exploitations agricoles avec notre plateforme intuitive." %}</p>
+    <button>{% trans "Créer un compte gratuit" %}</button>
+</section>
+
+<footer>
+    <p>&copy; 2024 AQ | Agriculture Tracer - Tous droits réservés.</p>
+    <p>{% trans " Développé par" %} <a href="http://afriqconsulting.com" target="_blank" style="color: #0BB783;">Afriq Consulting</a></p>
+</footer>
+ <script>
+        const drone = document.getElementById("drone");
+
+        function getRandomPosition() {
+            // Obtenez la largeur et la hauteur de la fenêtre
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Génère des positions aléatoires dans la fenêtre
+            const randomX = Math.floor(Math.random() * (width - 100)); // Ajuste avec la taille du drone
+            const randomY = Math.floor(Math.random() * (height - 100));
+
+            return { x: randomX, y: randomY };
+        }
+
+        function moveDrone() {
+            // Obtenez une nouvelle position aléatoire
+            const { x, y } = getRandomPosition();
+
+            // Déplacez le drone en utilisant transform
+            drone.style.transform = `translate(${x}px, ${y}px)`;
+
+            // Définit un délai aléatoire pour le prochain mouvement
+            const randomDelay = Math.random() * 2000 + 2000; // Entre 2 et 4 secondes
+            setTimeout(moveDrone, randomDelay);
+        }
+
+        // Démarre le mouvement
+        moveDrone();
+    </script>
+
+</body>
+</html>
