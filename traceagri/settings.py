@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_unicorn',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'djoser',
     'simple_history',
     'tracelan',
@@ -140,8 +141,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
 
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
 
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

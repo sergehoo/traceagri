@@ -6,6 +6,7 @@ from django.db.models.functions import ExtractYear
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -218,6 +219,7 @@ class MobileDataPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+
 class MobileDataStatsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -231,40 +233,89 @@ class MobileDataStatsAPIView(APIView):
             "synchronised": synchronised,
             "non_synchronised": non_synchronised
         })
+
+
 class MobileDataViewSet(viewsets.ModelViewSet):
     """
     API professionnelle pour gérer les données MobileData.
     """
     queryset = MobileData.objects.select_related('localite', 'ville').all()
-
     serializer_class = MobileDataSerializer
     pagination_class = MobileDataPagination
-    permission_classes = [
-        IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['validate', 'created_by']  # Exemple: filtrer par utilisateur ou validation
-    search_fields = ['nom', 'prenom', 'telephone']  # Recherche textuelle
-    ordering_fields = ['created_at', 'updated_at']  # Tri
-    ordering = ['-created_at']  # Ordre par défaut
+    filterset_fields = ['validate', 'created_by']  # Filtres disponibles dans l'API
+    search_fields = ['nom', 'prenom', 'telephone']  # Champs pour la recherche textuelle
+    ordering_fields = ['created_at', 'updated_at']  # Champs triables
+    ordering = ['-created_at']  # Ordre de tri par défaut
+
+    def perform_create(self, serializer):
+        """
+        Associe automatiquement l'utilisateur connecté lors de la création.
+        """
+        try:
+            serializer.save(created_by=self.request.user)
+        except Exception as e:
+            raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
+
+    def perform_update(self, serializer):
+        """
+        Associe automatiquement l'utilisateur connecté lors de la mise à jour.
+        """
+        try:
+            serializer.save(updated_by=self.request.user)
+        except Exception as e:
+            raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
 
     def create(self, request, *args, **kwargs):
         """
-        Crée une nouvelle instance MobileData et associe l'utilisateur connecté.
+        Crée une nouvelle instance MobileData et associe automatiquement l'utilisateur.
         """
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(created_by=request.user)  # Associer l'utilisateur qui crée les données
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)  # Validation des données
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         """
-        Met à jour une instance existante et associe l'utilisateur qui met à jour.
+        Met à jour une instance existante avec des données validées et associe l'utilisateur.
         """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        if serializer.is_valid():
-            serializer.save(updated_by=request.user)  # Associer l'utilisateur qui met à jour
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)  # Validation des données
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Supprime une instance MobileData.
+        """
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+        except Exception as e:
+            return Response({"error": f"Erreur lors de la suppression : {str(e)}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Instance supprimée avec succès"}, status=status.HTTP_204_NO_CONTENT)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Liste les instances MobileData en fonction des filtres, recherche et tri.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Récupère les détails d'une instance spécifique MobileData.
+        """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
