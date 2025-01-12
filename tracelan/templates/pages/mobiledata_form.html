@@ -1,0 +1,270 @@
+{% extends 'layout/base.html' %}
+{% load humanize %}
+{% load static %}
+{% load unicorn %}
+{% csrf_token %}
+
+{% block content %}
+
+    <div style="
+    background-color: #32291f;
+    background-image: url({% static 'assets/media/bg/addparcelle.jpg' %});
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    {#height: 100vh; #}
+" class="content d-flex flex-column flex-column-fluid" id="kt_content">
+
+<div class="subheader py-2 py-lg-6  subheader-transparent " id="kt_subheader">
+    <div class=" container  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+		<!--begin::Info-->
+        <div class="d-flex align-items-center flex-wrap mr-1">
+
+			<!--begin::Page Heading-->
+			<div class="d-flex align-items-baseline flex-wrap mr-5">
+				<!--begin::Page Title-->
+	            <h5 class="text-dark font-weight-bold my-1 mr-5">
+	                Ressources	                	            </h5>
+				<!--end::Page Title-->
+
+	            					<!--begin::Breadcrumb-->
+	                <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
+	                    							<li class="breadcrumb-item">
+	                        	<a href="" class="text-muted">
+	                            	Parcelles	                        	</a>
+							</li>
+	                    							<li class="breadcrumb-item">
+	                        	<a href="" class="text-muted">
+	                            	Liste des Parcelles                       	</a>
+							</li>
+
+	                    	                </ul>
+					<!--end::Breadcrumb-->
+	            			</div>
+			<!--end::Page Heading-->
+        </div>
+		<!--end::Info-->
+
+		<!--begin::Toolbar-->
+        <div class="d-flex align-items-center">
+							<!--begin::Actions-->
+            <div class="dropdown dropdown-inline mr-2">
+	<a href="#"  class="btn btn-light-primary font-weight-bolder dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<span class="svg-icon svg-icon-md"><!--begin::Svg Icon | path:assets/media/svg/icons/Design/PenAndRuller.svg--><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect x="0" y="0" width="24" height="24"/>
+        <path d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z" fill="#000000" opacity="0.3"/>
+        <path d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z" fill="#000000"/>
+    </g>
+</svg><!--end::Svg Icon--></span>		Export
+	</a>
+
+	<!--begin::Dropdown Menu-->
+	<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+    <!--begin::Navigation-->
+    <ul class="navi flex-column navi-hover py-2">
+        <li class="navi-header font-weight-bolder text-uppercase font-size-sm text-primary pb-2">
+            Exporter en :
+        </li>
+        <li class="navi-item">
+            <a href="{% url 'parcelle_export' %}?format=csv" class="navi-link">
+                <span class="navi-icon"><i class="la la-file-text-o"></i></span>
+                <span class="navi-text">CSV</span>
+            </a>
+        </li>
+        <li class="navi-item">
+            <a href="{% url 'parcelle_export' %}?format=excel" class="navi-link">
+                <span class="navi-icon"><i class="la la-file-excel-o"></i></span>
+                <span class="navi-text">Excel</span>
+            </a>
+        </li>
+    </ul>
+    <!--end::Navigation-->
+</div>
+	<!--end::Dropdown Menu-->
+</div>
+                <a href="#" class="btn btn-light-primary font-weight-bolder ">
+                    Nouveau
+                </a>
+				<!--end::Actions-->
+
+        </div>
+		<!--end::Toolbar-->
+    </div>
+</div>
+<!--end::Subheader-->
+
+					<!--begin::Entry-->
+<div class="d-flex flex-column-fluid">
+    <div class="container">
+        <!-- Begin::Card -->
+        <div class="card card-custom">
+            <div class="card-header">
+                <h3 class="card-title">Mettre à jour les informations</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+        <div class="row">
+            <!-- Colonne 1 -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="id_nom">Nom</label>
+                    {{ form.nom }}
+                </div>
+                <div class="form-group">
+                    <label for="id_prenom">Prénom</label>
+                    {{ form.prenom }}
+                </div>
+                <div class="form-group">
+                    <label for="id_sexe">Sexe</label>
+                    {{ form.sexe }}
+                </div>
+                <div class="form-group">
+                    <label for="id_telephone">Numéro de Téléphone</label>
+                    {{ form.telephone }}
+                </div>
+                <div class="form-group">
+                    <label for="id_date_naissance">Date de Naissance</label>
+                    {{ form.date_naissance }}
+                </div>
+                <div class="form-group">
+                    <label for="id_lieu_naissance">Lieu de Naissance</label>
+                    {{ form.lieu_naissance }}
+                </div>
+                <div class="form-group">
+                    <label for="id_photo">Photo</label>
+                    {{ form.photo }}
+                </div>
+            </div>
+
+            <!-- Colonne 2 -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="id_fonction">Fonction</label>
+                    {{ form.fonction }}
+                </div>
+                <div class="form-group">
+                    <label for="id_localite">Localité</label>
+                    {{ form.localite }}
+                </div>
+                <div class="form-group">
+                    <label for="id_nom_parcelle">Nom de la Parcelle</label>
+                    {{ form.nom_parcelle }}
+                </div>
+                <div class="form-group">
+                    <label for="id_dimension_ha">Dimension (en ha)</label>
+                    {{ form.dimension_ha }}
+                </div>
+                <div class="form-group">
+                    <label for="id_longitude">Longitude</label>
+                    {{ form.longitude }}
+                </div>
+                <div class="form-group">
+                    <label for="id_latitude">Latitude</label>
+                    {{ form.latitude }}
+                </div>
+                <div class="form-group">
+                    <label for="id_type_culture">Type de Culture</label>
+                    {{ form.type_culture }}
+                </div>
+            </div>
+
+            <!-- Colonne 3 -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="id_category">Catégorie</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group">
+                    <label for="id_nom_culture">Nom de la Culture</label>
+                    {{ form.nom_culture }}
+                </div>
+                <div class="form-group">
+                    <label for="id_description">Description</label>
+                    {{ form.description }}
+                </div>
+                <div class="form-group">
+                    <label for="id_annee_mise_en_place">Année de Mise en Place</label>
+                    {{ form.annee_mise_en_place }}
+                </div>
+                <div class="form-group">
+                    <label for="id_date_recolte">Date de Récolte</label>
+                    {{ form.date_recolte }}
+                </div>
+                <div class="form-group">
+                    <label for="id_date_derniere_recolte">Date de Dernière Récolte</label>
+                    {{ form.date_derniere_recolte }}
+                </div>
+                <div class="form-group">
+                    <label for="id_dernier_rendement_kg_ha">Dernier Rendement (kg/ha)</label>
+                    {{ form.dernier_rendement_kg_ha }}
+                </div>
+            </div>
+
+            <!-- Colonne 4 -->
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="id_pratiques_culturales">Pratiques Culturales</label>
+                    {{ form.pratiques_culturales }}
+                </div>
+                <div class="form-group row">
+                    <label class="col-8 col-form-label">Utilise des Fertilisants ?</label>
+                    <div class="col-4 col-form-label">
+                        <label class="checkbox checkbox-outline checkbox-success">
+                            {{ form.utilise_fertilisants }}
+                            <span></span>
+                            Oui
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_type_fertilisants">Type de Fertilisants</label>
+                    {{ form.type_fertilisants }}
+                </div>
+                <div class="form-group row">
+                    <label class="col-8 col-form-label">Analyse de Sol Effectuée ?</label>
+                    <div class="col-4 col-form-label">
+                        <label class="checkbox checkbox-outline checkbox-success">
+                            {{ form.analyse_sol }}
+                            <span></span>
+                            Oui
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_cultures_precedentes">Cultures Précédentes</label>
+                    {{ form.cultures_precedentes }}
+                </div>
+                <div class="form-group">
+                    <label for="id_annee_cultures_precedentes">Année des Cultures Précédentes</label>
+                    {{ form.annee_cultures_precedentes }}
+                </div>
+                <div class="form-group">
+                    <label for="id_commentaires">Commentaires</label>
+                    {{ form.commentaires }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="form-group mt-3 text-center float-right">
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{% url 'mobiledata_list' %}" class="btn btn-secondary ml-3">Annuler</a>
+        </div>
+    </div>
+</form>
+            </div>
+        </div>
+        <!-- End::Card -->
+    </div>
+</div>
+        <!--end::Entry-->
+    </div>
+
+
+
+
+
+{% endblock %}

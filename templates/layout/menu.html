@@ -41,34 +41,39 @@
                             </ul>
                         </div>
                     </li>
-                    <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover"
-                        aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
-                            class="menu-text">{% trans "Ressources" %}</span><span
-                            class="menu-desc">{% trans "Parcelles & Projets" %} </span><i
-                            class="menu-arrow"></i></a>
+                    <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover" aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle">
+                        <span class="menu-text">{% trans "Ressources" %}</span>
+                        <span class="menu-desc">{% trans "Parcelles & Projets" %} </span><i class="menu-arrow"></i></a>
                         <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                             <ul class="menu-subnav">
                                 {#                                                     <li class="menu-item " aria-haspopup="true"><a href="#" class="menu-link "><span class="menu-text">Cartographie</span><span class="menu-desc"></span></a></li>#}
-                                <li class="menu-item " aria-haspopup="true"><a href="{% url 'parcelle-list' %}"
-                                                                               class="menu-link "><span
-                                        class="menu-text">{% trans "Parcelles" %}</span><span class="menu-desc"></span></a></li>
-                                <li class="menu-item " aria-haspopup="true"><a href="{% url 'project_list' %}"
-                                                                               class="menu-link "><span
-                                        class="menu-text">{% trans "Projets" %}</span><span class="menu-desc"></span></a></li>
+                                <li class="menu-item " aria-haspopup="true"><a href="{% url 'parcelle-list' %}" class="menu-link ">
+                                    <span class="menu-text">{% trans "Parcelles" %}</span>
+                                    <span class="badge badge-secondary ml">55</span>
+                                    <span class="menu-desc"></span></a>
+                                </li>
+                                <li class="menu-item " aria-haspopup="true">
+                                    <a href="{% url 'project_list' %}" class="menu-link ">
+                                        <span class="menu-text">{% trans "Projets" %}</span>
+                                        <span class="badge badge-secondary ml">55</span>
+                                        <span class="menu-desc"></span></a></li>
+                                <li class="menu-item " aria-haspopup="true"><a href="{% url 'mobiledata_list' %}" class="menu-link ">
+                                    <span class="menu-text">{% trans "Donnees d'enquêtes " %} </span>
+                                    <span class="badge badge-success ml">55</span>
+                                    <span class="menu-desc"></span></a>
+                                </li>
                                 {#                                                     <li class="menu-item " aria-haspopup="true"><a href="#" class="menu-link "><span class="menu-text">Cultures</span><span class="menu-desc"></span></a></li>#}
 
                             </ul>
                         </div>
                     </li>
-                    <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover"
-                        aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle"><span
-                            class="menu-text">{% trans "Organisation" %}</span><span
-                            class="menu-desc"> {% trans "Cooperative & evenements" %}</span><i class="menu-arrow"></i></a>
+                    <li class="menu-item  menu-item-submenu menu-item-rel" data-menu-toggle="hover" aria-haspopup="true"><a href="javascript:;" class="menu-link menu-toggle">
+                        <span class="menu-text">{% trans "Organisation" %}</span>
+                        <span class="menu-desc"> {% trans "Cooperative & evenements" %}</span><i class="menu-arrow"></i></a>
                         <div class="menu-submenu menu-submenu-classic menu-submenu-left">
                             <ul class="menu-subnav">
-                                <li class="menu-item " aria-haspopup="true"><a href="{% url 'cooperative_list' %}"
-                                                                               class="menu-link "><span
-                                        class="menu-text">{% trans "Coopératives" %}</span><span class="menu-desc"></span></a></li>
+                                <li class="menu-item " aria-haspopup="true"><a href="{% url 'cooperative_list' %}" class="menu-link ">
+                                    <span class="menu-text">{% trans "Coopératives" %}</span><span class="menu-desc"></span></a></li>
                                 <li class="menu-item " aria-haspopup="true"><a href="{% url 'event_list' %}"
                                                                                class="menu-link "><span
                                         class="menu-text">{% trans "Evènements" %}</span><span class="menu-desc"></span></a></li>

@@ -49,7 +49,7 @@ class ProducteurAdmin(admin.ModelAdmin):
 @admin.register(Parcelle)
 class ParcelleAdmin(admin.ModelAdmin):
     list_display = ("nom", "unique_id", "dimension_ha", "producteur", "longitude", "latitude")
-    search_fields = ("nom", "producteur__nom", "producteur__prenom","unique_id")
+    search_fields = ("nom", "producteur__nom", "producteur__prenom", "unique_id")
     list_filter = ("producteur",)
     readonly_fields = ("longitude", "latitude")
 
@@ -237,6 +237,8 @@ class MobileDataAdmin(admin.ModelAdmin):
         'dernier_rendement_kg_ha',
         'nom_cooperative',
         'created_at',
+        'updated_by',
+        'validate_by',
     )
     # Champs cliquables pour accéder aux détails
     list_display_links = ('nom', 'prenom', 'nom_parcelle')
@@ -274,6 +276,7 @@ class MobileDataAdmin(admin.ModelAdmin):
             )
         }),
         ("Informations Générales", {
-            'fields': ('projet', 'created_by', 'created_at', 'updated_at','validate')
+            'fields': ('projet', 'created_by', 'created_at', 'updated_at', 'validate', 'updated_by',
+                       'validate_by')
         }),
     )

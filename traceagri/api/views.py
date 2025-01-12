@@ -3,18 +3,21 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum, Count
 from django.db.models.functions import ExtractYear
-from rest_framework import viewsets, permissions, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from traceagri.api.serializers import ProducteurSerializer, ParcelleMobileSerializer, ProducteurMobileSerializer, \
-    UserSerializer, DynamicFormSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer
+    UserSerializer, DynamicFormSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer, \
+    MobileDataSerializer
 from tracelan.models import Producteur, Parcelle, Region, DistrictSanitaire, Cooperative, DynamicForm, FormResponse, \
-    FieldResponse, Project, CooperativeMember
+    FieldResponse, Project, CooperativeMember, MobileData
 
 
 class DashboardDataAPIView(APIView):
@@ -208,3 +211,60 @@ class CooperativeViewSet(ModelViewSet):
 class CooperativeMemberViewSet(ModelViewSet):
     queryset = CooperativeMember.objects.prefetch_related('producteurs', 'cooperative')
     serializer_class = CooperativeMemberSerializer
+
+
+class MobileDataPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class MobileDataStatsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        total = MobileData.objects.count()
+        synchronised = MobileData.objects.filter(validate=True).count()
+        non_synchronised = total - synchronised
+
+        return Response({
+            "total": total,
+            "synchronised": synchronised,
+            "non_synchronised": non_synchronised
+        })
+class MobileDataViewSet(viewsets.ModelViewSet):
+    """
+    API professionnelle pour gérer les données MobileData.
+    """
+    queryset = MobileData.objects.select_related('localite', 'ville').all()
+
+    serializer_class = MobileDataSerializer
+    pagination_class = MobileDataPagination
+    permission_classes = [
+        IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['validate', 'created_by']  # Exemple: filtrer par utilisateur ou validation
+    search_fields = ['nom', 'prenom', 'telephone']  # Recherche textuelle
+    ordering_fields = ['created_at', 'updated_at']  # Tri
+    ordering = ['-created_at']  # Ordre par défaut
+
+    def create(self, request, *args, **kwargs):
+        """
+        Crée une nouvelle instance MobileData et associe l'utilisateur connecté.
+        """
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(created_by=request.user)  # Associer l'utilisateur qui crée les données
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        """
+        Met à jour une instance existante et associe l'utilisateur qui met à jour.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save(updated_by=request.user)  # Associer l'utilisateur qui met à jour
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

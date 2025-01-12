@@ -3,7 +3,7 @@ from rest_framework import serializers
 from shapely.geometry import shape
 
 from tracelan.models import Producteur, Parcelle, DynamicField, DynamicForm, Project, Ville, Cooperative, \
-    CooperativeMember
+    CooperativeMember, MobileData
 
 
 class ProducteurMobileSerializer(serializers.ModelSerializer):
@@ -100,3 +100,20 @@ class CooperativeMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = CooperativeMember
         fields = ['id', 'cooperative', 'producteurs', 'created_at', 'updated_at']
+
+
+class MobileDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MobileData
+        fields = '__all__'
+
+    def validate(self, data):
+        # Validation personnalisée pour le téléphone
+        if data.get('telephone') and not data['telephone'].isdigit():
+            raise serializers.ValidationError({"telephone": "Le numéro de téléphone doit contenir uniquement des chiffres."})
+
+        # # Validation pour les dimensions de la parcelle
+        # if data.get('dimension_ha') and data['dimension_ha'] <= 0:
+        #     raise serializers.ValidationError({"dimension_ha": "La dimension doit être supérieure à 0."})
+
+        return data

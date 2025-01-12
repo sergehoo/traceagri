@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.db import models
@@ -19,7 +20,7 @@ from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from openpyxl.workbook import Workbook
 
 from tracelan.forms import ProducteurForm, ParcelleForm, ProjectForm, TaskForm, MilestoneForm, DepenseForm, \
-    TaskProjectForm, AddMemberForm, AddInviteForm, ParcelleUpdateForm, CultureActivityForm
+    TaskProjectForm, AddMemberForm, AddInviteForm, ParcelleUpdateForm, CultureActivityForm, MobileDataForm
 from tracelan.models import Producteur, Parcelle, DistrictSanitaire, Region, Project, Task, Milestone, Event, \
     Cooperative, Ville, EventInvite, CooperativeMember, DynamicForm, DynamicField, CultureDetail, Culture, MobileData
 from tracelan.task import envoyer_email_invitation
@@ -903,17 +904,66 @@ class DynamicFieldCreateView(CreateView):
         return super().form_valid(form)
 
 
+@login_required
+def valider_mobiledata(request, pk):
+    # Récupérer les données de l'instance MobileData
+    mobiledata = get_object_or_404(MobileData, pk=pk)
+
+    try:
+        # Mettre à jour ou créer le Producteur
+        producteur, created = Producteur.objects.update_or_create(
+            nom=mobiledata.nom,
+            prenom=mobiledata.prenom,
+            defaults={
+                'sexe': mobiledata.sexe,
+                'telephone': mobiledata.telephone,
+                'date_naissance': mobiledata.date_naissance,
+                'lieu_naissance': mobiledata.lieu_naissance,
+                'photo': mobiledata.photo,
+                'fonction': mobiledata.fonction,
+            }
+        )
+
+        # Mettre à jour ou créer la Parcelle
+        parcelle, created = Parcelle.objects.update_or_create(
+            nom=mobiledata.nom_parcelle,
+            producteur=producteur,
+            defaults={
+                'localite': mobiledata.localite,
+                'dimension_ha': mobiledata.dimension_ha,
+                'longitude': mobiledata.longitude,
+                'latitude': mobiledata.latitude,
+            }
+        )
+
+        # Valider l'objet MobileData
+        mobiledata.validate = True
+        mobiledata.validate_by = request.user.employee
+        mobiledata.save()
+
+        # return JsonResponse({'message': 'Données validées avec succès', 'status': 'success'})
+        messages.success(request, 'Données validées avec succès')
+        return redirect('mobiledata_list')
+    except Exception as e:
+        # return JsonResponse({'message': f'Erreur lors de la validation: {e}', 'status': 'error'})
+        messages.error(request, f'Erreur lors de la validation: {e}')
+        return redirect('mobiledata_list')
+
+
 # ListeView
 class MobileDataListView(ListView):
     model = MobileData
     template_name = "pages/mobiledata_list.html"  # Nom du template
     context_object_name = "mobiledata_list"  # Nom utilisé dans le contexte pour accéder aux objets
     paginate_by = 10
-    ordering = "telephone"
+    ordering = ["validate","-updated_at", "created_at"]  # Corrigé en liste de champs
 
     def get_queryset(self):
         # Récupérer tous les objets au départ
         queryset = MobileData.objects.all()
+
+        # Appliquer l'ordre
+        queryset = queryset.order_by(*self.ordering)
 
         # Vérifier si un filtre est appliqué via l'URL
         filter_type = self.request.GET.get('filter', 'all')  # Par défaut, afficher toutes les données
@@ -962,15 +1012,16 @@ class MobileDataDetailView(DetailView):
 # UpdateView
 class MobileDataUpdateView(UpdateView):
     model = MobileData
-    fields = [
-        'nom', 'prenom', 'sexe', 'telephone', 'date_naissance', 'lieu_naissance', 'photo', 'fonction',
-        'localite', 'nom_parcelle', 'dimension_ha', 'longitude', 'latitude', 'type_culture', 'category',
-        'nom_culture', 'description', 'annee_mise_en_place', 'date_recolte', 'date_derniere_recolte',
-        'dernier_rendement_kg_ha', 'pratiques_culturales', 'utilise_fertilisants', 'type_fertilisants',
-        'analyse_sol', 'nom_cooperative', 'is_president'
-    ]
+    form_class = MobileDataForm
     template_name = "pages/mobiledata_form.html"  # Nom du template pour le formulaire d'édition
     success_url = reverse_lazy('mobiledata_list')  # Redirection après une mise à jour réussie
+
+    def form_valid(self, form):
+        # Mettre à jour le champ updated_by avec l'utilisateur connecté
+        instance = form.save(commit=False)
+        instance.updated_by = self.request.user.employee
+        instance.save()
+        return super().form_valid(form)
 
 
 # DeleteView

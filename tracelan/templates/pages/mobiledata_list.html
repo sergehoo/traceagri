@@ -126,7 +126,8 @@
                     <table class="table table-responsive table-bordered table-hover">
                         <thead class="thead-light">
                         <tr>
-                            <th>#</th>
+                            <th>Créé le</th>
+                             <th>Mis à Jour le</th>
                             <th>Nom</th>
                             <th>Prénom</th>
                             <th>Sexe</th>
@@ -140,22 +141,29 @@
                         </thead>
                         <tbody>
                         {% for mobiledata in mobiledata_list %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ mobiledata.nom }}</td>
-                                <td>{{ mobiledata.prenom }}</td>
+
+                                <tr>
+                                <td>{{ mobiledata.created_at|naturaltime }}</td>
+                                <td>{{ mobiledata.updated_at|naturaltime }}</td>
+{#                                <td>{{ forloop.counter }}</td>#}
+                                <td><a href="{% url 'mobiledata_detail' mobiledata.pk %}">{{ mobiledata.nom }}</a></td>
+                                <td><a href="{% url 'mobiledata_detail' mobiledata.pk %}">{{ mobiledata.prenom }}</a></td>
                                 <td>{{ mobiledata.get_sexe_display }}</td>
                                 <td>{{ mobiledata.telephone }}</td>
                                 <td>{{ mobiledata.localite }}</td>
                                 <td>{{ mobiledata.nom_parcelle }}</td>
                                 <td>{{ mobiledata.get_type_culture_display }}</td>
                                 <td>{{ mobiledata.get_category_display }}</td>
+                                {% if mobiledata.validate %}
+                                    <td content="center"><span class="badge badge-success">Validé</span></td>
+                                    {% else %}
                                 <td content="center">
-                                    <a href="{{ mobiledata.get_absolute_url }}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-check-mark text-success mr-2"></i></a>
-                                    <a href="{{ mobiledata.get_absolute_url }}" class="btn btn-icon btn-light btn-xs"><i class="flaticon-eye text-dark ml-2 mr-2 "></i></a>
+                                    <a href="{% url 'valider_mobiledata' mobiledata.pk %}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-check-mark text-success mr-2"></i></a>
+                                    <a href="{% url 'mobiledata_detail' mobiledata.pk %}" class="btn btn-icon btn-light btn-xs"><i class="flaticon-eye text-dark ml-2 mr-2 "></i></a>
                                     <a href="{% url 'mobiledata_update' mobiledata.pk %}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-edit ml-2 mr-2 text-secondary"></i></a>
                                     <a href="{% url 'mobiledata_delete' mobiledata.pk %}" class="btn btn-icon btn-light btn-xs"><i class="flaticon2-trash text-danger"></i></a>
                                 </td>
+                            {% endif %}
                             </tr>
                         {% empty %}
                             <tr>

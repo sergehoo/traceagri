@@ -5,7 +5,7 @@ from django import forms
 from django.forms import Select, NumberInput, Textarea, CheckboxInput, DateInput
 
 from tracelan.models import Producteur, Parcelle, Status_choices, Project, Task, Milestone, Deliverable, Depense, \
-    Employee, EventInvite, CultureDetail
+    Employee, EventInvite, CultureDetail, MobileData
 
 
 class ProducteurForm(forms.ModelForm):
@@ -265,7 +265,8 @@ class CultureActivityForm(forms.ModelForm):
 
         ]
         widgets = {
-            'culture': Select(attrs={'class': 'form-control select2','id': "kt_select2_2", 'name': "param", 'placeholder': 'Sélectionnez une culture'}),
+            'culture': Select(attrs={'class': 'form-control select2', 'id': "kt_select2_2", 'name': "param",
+                                     'placeholder': 'Sélectionnez une culture'}),
             'type_culture': Select(attrs={'class': 'form-control ', 'placeholder': 'Type de culture'}),
             'dernier_rendement_kg_ha': NumberInput(attrs={'class': 'form-control', 'placeholder': 'Rendement (kg/ha)'}),
             'pratiques_culturales': Textarea(attrs={'class': 'form-control', 'placeholder': 'Pratiques culturales'}),
@@ -274,6 +275,54 @@ class CultureActivityForm(forms.ModelForm):
             'date_derniere_recolte': DateInput(
                 attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Date de dernière récolte'}),
             'utilise_fertilisants': CheckboxInput(attrs={'class': 'form-check-input'}),
-            'type_fertilisants': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type de fertilisants'}),
+            'type_fertilisants': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Type de fertilisants'}),
             'analyse_sol': CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+
+class MobileDataForm(forms.ModelForm):
+    # pratiques_culturales = forms.MultipleChoiceField(
+    #     choices=[
+    #         ('agroforestry', 'Agroforesterie'),
+    #         ('intercropping', 'Intercropping'),
+    #         ('composting', 'Compostage'),
+    #     ],
+    #     widget=forms.CheckboxSelectMultiple(),
+    #     required=False
+    # )
+    class Meta:
+        model = MobileData
+        fields = [
+            'nom', 'prenom', 'sexe', 'telephone', 'date_naissance', 'lieu_naissance', 'photo', 'fonction',
+            'localite', 'nom_parcelle', 'dimension_ha', 'longitude', 'latitude', 'type_culture', 'category',
+            'nom_culture', 'description', 'annee_mise_en_place', 'date_recolte', 'date_derniere_recolte',
+            'dernier_rendement_kg_ha', 'pratiques_culturales', 'utilise_fertilisants', 'type_fertilisants',
+            'analyse_sol', 'nom_cooperative', 'is_president', 'taille_du_foyer', 'nombre_dependants',
+            'cultures_precedentes', 'annee_cultures_precedentes', 'evenements_climatiques', 'commentaires'
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 1}),
+            # 'pratiques_culturales': forms.Textarea(attrs={'rows': 1}),
+            'commentaires': forms.Textarea(attrs={'rows': 1}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Appliquer 'form-control' à tous les champs
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+
+    def clean_dimension_ha(self):
+        """Validation personnalisée pour la dimension."""
+        dimension = self.cleaned_data.get('dimension_ha')
+        if dimension and dimension <= 0:
+            raise forms.ValidationError("La dimension doit être supérieure à 0.")
+        return dimension
+
+    def clean_nom(self):
+        """Validation personnalisée pour le nom."""
+        nom = self.cleaned_data.get('nom')
+        if not nom:
+            raise forms.ValidationError("Le champ Nom est obligatoire.")
+        return nom
