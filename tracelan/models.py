@@ -1224,8 +1224,8 @@ class MobileData(models.Model):
     # Infos sur la parcelle
     nom_parcelle = models.CharField(max_length=100, null=True, blank=True)
     dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=100, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=100, decimal_places=6, null=True, blank=True)
     images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
 
     CATEGORY_CHOICES = [

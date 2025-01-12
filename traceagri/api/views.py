@@ -18,7 +18,7 @@ from traceagri.api.serializers import ProducteurSerializer, ParcelleMobileSerial
     UserSerializer, DynamicFormSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer, \
     MobileDataSerializer
 from tracelan.models import Producteur, Parcelle, Region, DistrictSanitaire, Cooperative, DynamicForm, FormResponse, \
-    FieldResponse, Project, CooperativeMember, MobileData
+    FieldResponse, Project, CooperativeMember, MobileData, Employee
 
 
 class DashboardDataAPIView(APIView):
@@ -254,7 +254,9 @@ class MobileDataViewSet(viewsets.ModelViewSet):
         Associe automatiquement l'utilisateur connecté lors de la création.
         """
         try:
-            serializer.save(created_by=self.request.user)
+            # serializer.save(created_by=self.request.user)
+            employee = Employee.objects.get(user=self.request.user)
+            serializer.save(created_by=employee)
         except Exception as e:
             raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
 
@@ -263,7 +265,9 @@ class MobileDataViewSet(viewsets.ModelViewSet):
         Associe automatiquement l'utilisateur connecté lors de la mise à jour.
         """
         try:
-            serializer.save(updated_by=self.request.user)
+            # serializer.save(updated_by=self.request.user)
+            employee = Employee.objects.get(user=self.request.user)
+            serializer.save(updated_by=employee)
         except Exception as e:
             raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
 
