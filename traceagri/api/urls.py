@@ -21,6 +21,8 @@ router.register(r'mobiledata', MobileDataViewSet, basename='mobiledata')
 urlpatterns = ([
                    path('mobile/', include((router.urls, 'mobile'), namespace='mobile')),
                    path('api/mobiledata/stats/', MobileDataStatsAPIView.as_view(), name='mobiledata-stats'),
+                   path('djoser/auth/', include('djoser.urls')),  # Endpoints Djoser par défaut
+                   path('djoser/auth/token', include('djoser.urls.authtoken')),  # Si vous utilisez TokenAuthentication
 
                    # path('auth/', include('djoser.urls.jwt')),
 

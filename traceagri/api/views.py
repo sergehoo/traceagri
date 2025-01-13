@@ -237,12 +237,11 @@ class MobileDataStatsAPIView(APIView):
 
 class MobileDataViewSet(viewsets.ModelViewSet):
     """
-    API professionnelle pour gérer les données MobileData.
     """
     queryset = MobileData.objects.select_related('localite', 'ville').all()
     serializer_class = MobileDataSerializer
     pagination_class = MobileDataPagination
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['validate', 'created_by']  # Filtres disponibles dans l'API
     search_fields = ['nom', 'prenom', 'telephone']  # Champs pour la recherche textuelle
@@ -251,7 +250,6 @@ class MobileDataViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Associe automatiquement l'utilisateur connecté lors de la création.
         """
         try:
             # serializer.save(created_by=self.request.user)
@@ -261,9 +259,7 @@ class MobileDataViewSet(viewsets.ModelViewSet):
             raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
 
     def perform_update(self, serializer):
-        """
-        Associe automatiquement l'utilisateur connecté lors de la mise à jour.
-        """
+        """        """
         try:
             # serializer.save(updated_by=self.request.user)
             employee = Employee.objects.get(user=self.request.user)
@@ -273,7 +269,6 @@ class MobileDataViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Crée une nouvelle instance MobileData et associe automatiquement l'utilisateur.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)  # Validation des données
@@ -282,7 +277,6 @@ class MobileDataViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         """
-        Met à jour une instance existante avec des données validées et associe l'utilisateur.
         """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -293,7 +287,6 @@ class MobileDataViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         """
-        Supprime une instance MobileData.
         """
         instance = self.get_object()
         try:
