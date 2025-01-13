@@ -258,14 +258,14 @@ class MobileDataViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
 
-    def perform_update(self, serializer):
-        """        """
-        try:
-            # serializer.save(updated_by=self.request.user)
-            employee = Employee.objects.get(user=self.request.user)
-            serializer.save(updated_by=employee)
-        except Exception as e:
-            raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
+    # def perform_update(self, serializer):
+    #     """        """
+    #     try:
+    #         # serializer.save(updated_by=self.request.user)
+    #         employee = Employee.objects.get(user=self.request.user)
+    #         serializer.save(updated_by=employee)
+    #     except Exception as e:
+    #         raise ValidationError({"error": f"Une erreur est survenue : {str(e)}"})
 
     def create(self, request, *args, **kwargs):
         """
@@ -275,15 +275,15 @@ class MobileDataViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def update(self, request, *args, **kwargs):
-        """
-        """
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)  # Validation des données
-        self.perform_update(serializer)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # def update(self, request, *args, **kwargs):
+    #     """
+    #     """
+    #     partial = kwargs.pop('partial', False)
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
+    #     serializer.is_valid(raise_exception=True)  # Validation des données
+    #     self.perform_update(serializer)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         """
