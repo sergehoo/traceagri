@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 
 from traceagri.api.views import ParcellesProducteurAPIView, DashboardDataAPIView, ProducteurMobileViewSet, \
     ParcelleMobileViewSet, UserViewSet, DynamicFormViewSet, ProjectViewSet, CooperativeViewSet, \
-    CooperativeMemberViewSet, ParcelleDetailAPIView, MobileDataViewSet, MobileDataStatsAPIView
+    CooperativeMemberViewSet, ParcelleDetailAPIView, MobileDataViewSet, MobileDataStatsAPIView, ImageUploadView
 
 router = DefaultRouter()
 router.register(r'producteursmobile', ProducteurMobileViewSet, basename='producteurmobile')
@@ -16,10 +16,12 @@ router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'cooperatives', CooperativeViewSet, basename='cooperative')
 router.register(r'cooperative-members', CooperativeMemberViewSet, basename='cooperative-member')
 router.register(r'mobiledata', MobileDataViewSet, basename='mobiledata')
+# router.register(r'uploadimage', ImageUploadView, basename='uploadimage')
 
 urlpatterns = ([
                    path('mobile/', include((router.urls, 'mobile'), namespace='mobile')),
                    path('api/mobiledata/stats/', MobileDataStatsAPIView.as_view(), name='mobiledata-stats'),
+                   path('uploadimage/', ImageUploadView.as_view(), name='mobiledata'),
                    path('djoser/auth/', include('djoser.urls')),  # Endpoints Djoser par défaut
                    # path('djoser/auth/token', include('djoser.urls.authtoken')),  # Si vous utilisez TokenAuthentication
                    path('auth/', include('djoser.urls.jwt')),  # Endpoints JWT pour tokens

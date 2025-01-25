@@ -1,3 +1,4 @@
+import os
 from datetime import date
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -235,13 +236,70 @@ class MobileDataStatsAPIView(APIView):
         })
 
 
+# class ImageUploadView(viewsets.ModelViewSet):
+#     parser_classes = (MultiPartParser, FormParser)
+#
+#     def post(self, request, *args, **kwargs):
+#         """
+#         Endpoint pour uploader une image uniquement.
+#         """
+#         file = request.FILES.get('file')  # Le champ 'file' doit être utilisé pour l'image
+#         if not file:
+#             return Response({"error": "Aucun fichier fourni."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         # Validation facultative de la taille ou du type du fichier
+#         if file.size > 5 * 1024 * 1024:  # Taille max : 5 Mo
+#             return Response({"error": "Fichier trop volumineux."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         # Sauvegarder l'image
+#         file_path = os.path.join(settings.MEDIA_ROOT, "uploads", file.name)
+#         with open(file_path, 'wb') as f:
+#             for chunk in file.chunks():
+#                 f.write(chunk)
+#
+#         # Retourner le chemin de l'image
+#         file_url = os.path.join(settings.MEDIA_URL, "uploads", file.name)
+#         return Response({"file_url": file_url}, status=status.HTTP_201_CREATED)
+class ImageUploadView(APIView):
+    """
+    Endpoint pour uploader une image uniquement.
+    """
+    parser_classes = (MultiPartParser, FormParser)
+
+    # permission_classes = [IsAuthenticated]  # Assurez-vous que seuls les utilisateurs authentifiés peuvent uploader
+
+    def post(self, request, *args, **kwargs):
+        # Récupérer le fichier envoyé sous le champ "file"
+        file = request.FILES.get('file')  # Assurez-vous que le frontend envoie le fichier avec ce champ
+        if not file:
+            return Response({"error": "Aucun fichier fourni."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validation facultative (exemple : taille et type de fichier)
+        if file.size > 5 * 1024 * 1024:  # Limite de taille : 5 Mo
+            return Response({"error": "Fichier trop volumineux (limite : 5 Mo)."}, status=status.HTTP_400_BAD_REQUEST)
+        if not file.content_type.startswith("image/"):
+            return Response({"error": "Le fichier doit être une image."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Chemin pour enregistrer l'image
+        upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
+        os.makedirs(upload_dir, exist_ok=True)  # Créez le dossier si nécessaire
+
+        file_path = os.path.join(upload_dir, file.name)
+        with open(file_path, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        # Générer l'URL de l'image
+        file_url = os.path.join(settings.MEDIA_URL, "uploads", file.name)
+        return Response({"file_url": file_url}, status=status.HTTP_201_CREATED)
+
+
 class MobileDataViewSet(viewsets.ModelViewSet):
     """
     API professionnelle pour gérer les données MobileData.
     """
     queryset = MobileData.objects.select_related('localite', 'ville').all()
     parser_classes = (MultiPartParser, FormParser)
-
 
     serializer_class = MobileDataSerializer
     pagination_class = MobileDataPagination
