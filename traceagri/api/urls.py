@@ -17,12 +17,12 @@ router.register(r'cooperatives', CooperativeViewSet, basename='cooperative')
 router.register(r'cooperative-members', CooperativeMemberViewSet, basename='cooperative-member')
 router.register(r'mobiledata', MobileDataViewSet, basename='mobiledata')
 
-
 urlpatterns = ([
                    path('mobile/', include((router.urls, 'mobile'), namespace='mobile')),
                    path('api/mobiledata/stats/', MobileDataStatsAPIView.as_view(), name='mobiledata-stats'),
                    path('djoser/auth/', include('djoser.urls')),  # Endpoints Djoser par défaut
-                   path('djoser/auth/token', include('djoser.urls.authtoken')),  # Si vous utilisez TokenAuthentication
+                   # path('djoser/auth/token', include('djoser.urls.authtoken')),  # Si vous utilisez TokenAuthentication
+                   path('auth/', include('djoser.urls.jwt')),  # Endpoints JWT pour tokens
 
                    # path('auth/', include('djoser.urls.jwt')),
 
@@ -30,7 +30,8 @@ urlpatterns = ([
 
                    path('parcelles/<int:producteur_id>/', ParcellesProducteurAPIView.as_view(),
                         name='parcelles-producteur-api'),
-                   path('parcelles/detail<int:parcelle_id>/', ParcelleDetailAPIView.as_view(), name='parcelles-detail-api'),
+                   path('parcelles/detail<int:parcelle_id>/', ParcelleDetailAPIView.as_view(),
+                        name='parcelles-detail-api'),
                    path('dashboard-data/', DashboardDataAPIView.as_view(), name='dashboard-data-api'),
 
                    # path('enquete/mobiledata/', MobileDataViewSet.as_view(), name='mobiledata_api'),

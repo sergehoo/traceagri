@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+
 from rest_framework import serializers
 from shapely.geometry import shape
 
@@ -111,6 +112,8 @@ class MobileDataSerializer(serializers.ModelSerializer):
         # Validation personnalisée pour le téléphone
         if data.get('telephone') and not data['telephone'].isdigit():
             raise serializers.ValidationError({"telephone": "Le numéro de téléphone doit contenir uniquement des chiffres."})
+        # if value.size > 5 * 1024 * 1024:  # Limite de 5 MB
+        #     raise serializers.ValidationError("L'image est trop volumineuse.")
 
         # # Validation pour les dimensions de la parcelle
         # if data.get('dimension_ha') and data['dimension_ha'] <= 0:

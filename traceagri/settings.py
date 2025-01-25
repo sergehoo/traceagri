@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_unicorn',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'django_filters',
     'djoser',
     'simple_history',
@@ -148,22 +149,14 @@ REST_FRAMEWORK = {
 
 }
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # this is default
     # 'guardian.backends.ObjectPermissionBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
     "djoser.auth_backends.LoginFieldBackend",
 )
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -235,7 +228,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 1
-USE_L10N = True
+# USE_L10N = True
 
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "landing"
@@ -258,4 +251,12 @@ DJOSER = {
         'user_create': 'djoser.serializers.UserCreateSerializer',
         'user': 'djoser.serializers.UserSerializer',
     },
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
