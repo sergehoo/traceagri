@@ -10,7 +10,7 @@ from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -300,12 +300,11 @@ class MobileDataViewSet(viewsets.ModelViewSet):
     API professionnelle pour gérer les données MobileData.
     """
     queryset = MobileData.objects.select_related('localite', 'ville').all()
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     serializer_class = MobileDataSerializer
     pagination_class = MobileDataPagination
-    permission_classes = [
-        IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['validate', 'created_by']  # Exemple: filtrer par utilisateur ou validation
     search_fields = ['nom', 'prenom', 'telephone']  # Recherche textuelle
