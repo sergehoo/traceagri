@@ -262,28 +262,44 @@ class MobileDataStatsAPIView(APIView):
 #         file_url = os.path.join(settings.MEDIA_URL, "uploads", file.name)
 #         return Response({"file_url": file_url}, status=status.HTTP_201_CREATED)
 class ImageUploadView(APIView):
-    """
-    Endpoint pour uploader une image uniquement.
-    """
     parser_classes = (MultiPartParser, FormParser)
 
-    # permission_classes = [IsAuthenticated]  # Assurez-vous que seuls les utilisateurs authentifiés peuvent uploader
-
     def post(self, request, *args, **kwargs):
-        # Récupérer le fichier envoyé sous le champ "file"
-        file = request.FILES.get('file')  # Assurez-vous que le frontend envoie le fichier avec ce champ
+        file = request.FILES.get('photo')  # Assurez-vous que le frontend envoie le fichier avec ce champ
+
         if not file:
             return Response({"error": "Aucun fichier fourni."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validation facultative (exemple : taille et type de fichier)
-        if file.size > 5 * 1024 * 1024:  # Limite de taille : 5 Mo
-            return Response({"error": "Fichier trop volumineux (limite : 5 Mo)."}, status=status.HTTP_400_BAD_REQUEST)
-        if not file.content_type.startswith("image/"):
-            return Response({"error": "Le fichier doit être une image."}, status=status.HTTP_400_BAD_REQUEST)
+        # Validation de la taille du fichier
+        if file.size > 25 * 1024 * 1024:  # Limite de taille : 25 Mo
+            return Response({"error": "Fichier trop volumineux (limite : 25 Mo)."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validation du type MIME
+        ALLOWED_IMAGE_TYPES = [
+            "image/jpeg",  # JPEG
+            "image/png",   # PNG
+            "image/gif",   # GIF
+            "image/bmp",   # BMP
+            "image/webp",  # WebP
+        ]
+        if file.content_type not in ALLOWED_IMAGE_TYPES:
+            return Response(
+                {"error": f"Type de fichier non supporté : {file.content_type}. Seuls les formats {', '.join(ALLOWED_IMAGE_TYPES)} sont acceptés."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validation de l'extension
+        ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"]
+        ext = os.path.splitext(file.name)[-1].lower()
+        if ext not in ALLOWED_EXTENSIONS:
+            return Response(
+                {"error": f"Extension non supportée : {ext}. Seules les extensions {', '.join(ALLOWED_EXTENSIONS)} sont acceptées."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Chemin pour enregistrer l'image
         upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
-        os.makedirs(upload_dir, exist_ok=True)  # Créez le dossier si nécessaire
+        os.makedirs(upload_dir, exist_ok=True)
 
         file_path = os.path.join(upload_dir, file.name)
         with open(file_path, 'wb') as f:
@@ -291,7 +307,7 @@ class ImageUploadView(APIView):
                 f.write(chunk)
 
         # Générer l'URL de l'image
-        file_url = os.path.join(settings.MEDIA_URL, "uploads", file.name)
+        file_url = f"{settings.MEDIA_URL}uploads/{file.name}"
         return Response({"file_url": file_url}, status=status.HTTP_201_CREATED)
 
 
@@ -304,7 +320,8 @@ class MobileDataViewSet(viewsets.ModelViewSet):
 
     serializer_class = MobileDataSerializer
     pagination_class = MobileDataPagination
-    permission_classes = [IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
+    permission_classes = [
+        IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['validate', 'created_by']  # Exemple: filtrer par utilisateur ou validation
     search_fields = ['nom', 'prenom', 'telephone']  # Recherche textuelle
