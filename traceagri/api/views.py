@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum, Count
 from django.db.models.functions import ExtractYear
+from django.http import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
@@ -312,12 +313,14 @@ class MobileDataViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']  # Ordre par défaut
 
     def create(self, request, *args, **kwargs):
-        """
-        Crée une nouvelle instance MobileData et associe l'utilisateur connecté.
-        """
-        serializer = self.get_serializer(data=request.data)
+        if isinstance(request.data, QueryDict):  # Multipart
+            data = request.data.dict()  # Convertir QueryDict en dict
+        else:  # JSON
+            data = request.data
+
+        serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user.employee)  # Associer l'utilisateur qui crée les données
+            serializer.save(created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

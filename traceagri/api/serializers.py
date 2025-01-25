@@ -120,3 +120,9 @@ class MobileDataSerializer(serializers.ModelSerializer):
         #     raise serializers.ValidationError({"dimension_ha": "La dimension doit être supérieure à 0."})
 
         return data
+
+    def validate_longitude(self, value):
+        return value or 0.0
+
+    def validate_latitude(self, value):
+        return value or 0.0
