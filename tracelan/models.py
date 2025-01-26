@@ -1333,7 +1333,7 @@ class MobileData(models.Model):
                                     verbose_name=_("Type de Culture"))
     category = models.CharField(max_length=50, null=True, blank=True, choices=CATEGORY_CHOICES,
                                 verbose_name=_("Catégorie"))
-    nom_culture = models.CharField(max_length=200, null=True, blank=True, choices=CATEGORY_CHOICES,
+    nom_culture = models.CharField(max_length=200, null=True, blank=True,
                                    verbose_name=_("Nom de la Culture"))
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,

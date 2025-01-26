@@ -18,9 +18,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from traceagri.api.serializers import ProducteurSerializer, ParcelleMobileSerializer, ProducteurMobileSerializer, \
     UserSerializer, DynamicFormSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer, \
-    MobileDataSerializer
+    MobileDataSerializer, VilleSerializer
 from tracelan.models import Producteur, Parcelle, Region, DistrictSanitaire, Cooperative, DynamicForm, FormResponse, \
-    FieldResponse, Project, CooperativeMember, MobileData
+    FieldResponse, Project, CooperativeMember, MobileData, Ville
 
 
 class DashboardDataAPIView(APIView):
