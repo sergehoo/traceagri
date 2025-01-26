@@ -328,23 +328,23 @@ class MobileDataViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']  # Ordre par défaut
 
     def create(self, request, *args, **kwargs):
-        # Si 'photo' est fourni, vérifiez sa validité. Sinon, continuez sans photo.
+        # Si la photo est présente, utilisez-la ; sinon, ignorez
         photo = request.FILES.get('photo')
 
-        if isinstance(request.data, QueryDict):  # Multipart
-            data = request.data.dict()  # Convertir QueryDict en dict
-        else:  # JSON
+        if isinstance(request.data, QueryDict):
+            data = request.data.dict()
+        else:
             data = request.data
 
+        # Ajout conditionnel de la photo si elle est disponible
         if photo:
-            data['photo'] = photo  # Ajouter le fichier photo uniquement s'il est fourni
+            data['photo'] = photo
 
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             serializer.save(created_by=request.user.employee)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     def update(self, request, *args, **kwargs):
         """
@@ -357,3 +357,13 @@ class MobileDataViewSet(viewsets.ModelViewSet):
             serializer.save(updated_by=request.user.employee)  # Associer l'utilisateur qui met à jour
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LocaliteListView(APIView):
+    """
+    Endpoint pour récupérer les localités.
+    """
+    def get(self, request, *args, **kwargs):
+        localites = Ville.objects.all()
+        serializer = VilleSerializer(localites, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

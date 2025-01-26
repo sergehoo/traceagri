@@ -39,7 +39,7 @@ urlpatterns = i18n_patterns(
     path('api/', include('traceagri.api.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('auth/', include('djoser.urls')),
-    path('auth/tablette/', include('djoser.urls.jwt')),
+    path('auth/tablette/', include('djoser.urls.authtoken')),
 
     path('dashboard', HomePageView.as_view(), name='home'),
     path('', LandingView.as_view(), name='landing'),

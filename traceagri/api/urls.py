@@ -6,7 +6,8 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from traceagri.api.views import ParcellesProducteurAPIView, DashboardDataAPIView, ProducteurMobileViewSet, \
     ParcelleMobileViewSet, UserViewSet, DynamicFormViewSet, ProjectViewSet, CooperativeViewSet, \
-    CooperativeMemberViewSet, ParcelleDetailAPIView, MobileDataViewSet, MobileDataStatsAPIView, ImageUploadView
+    CooperativeMemberViewSet, ParcelleDetailAPIView, MobileDataViewSet, MobileDataStatsAPIView, ImageUploadView, \
+    LocaliteListView
 
 router = DefaultRouter()
 router.register(r'producteursmobile', ProducteurMobileViewSet, basename='producteurmobile')
@@ -25,6 +26,7 @@ urlpatterns = ([
                    path('uploadimage/', ImageUploadView.as_view(), name='mobiledata'),
                    path('djoser/auth/', include('djoser.urls')),  # Endpoints Djoser par défaut
                    path('auth/tablette/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+                   path('localites/', LocaliteListView.as_view(), name='localite-list'),
 
                    # path('djoser/auth/token', include('djoser.urls.authtoken')),  # Si vous utilisez TokenAuthentication
                    path('auth/', include('djoser.urls.jwt')),  # Endpoints JWT pour tokens

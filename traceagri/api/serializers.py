@@ -111,7 +111,8 @@ class MobileDataSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # Validation personnalisée pour le téléphone
         if data.get('telephone') and not data['telephone'].isdigit():
-            raise serializers.ValidationError({"telephone": "Le numéro de téléphone doit contenir uniquement des chiffres."})
+            raise serializers.ValidationError(
+                {"telephone": "Le numéro de téléphone doit contenir uniquement des chiffres."})
         # if value.size > 5 * 1024 * 1024:  # Limite de 5 MB
         #     raise serializers.ValidationError("L'image est trop volumineuse.")
 
@@ -126,3 +127,19 @@ class MobileDataSerializer(serializers.ModelSerializer):
 
     def validate_latitude(self, value):
         return value or 0.0
+
+    def validate_localite(self, value):
+        if not isinstance(value, int):
+            raise serializers.ValidationError("La localité doit être une clé primaire (entier).")
+        return value
+
+    def validate_photo(self, value):
+        if value and not hasattr(value, 'name'):
+            raise serializers.ValidationError("Le fichier transmis n'est pas valide.")
+        return value
+
+
+class VilleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ville
+        fields = ['id', 'nom']  # Incluez les champs nécessaires
