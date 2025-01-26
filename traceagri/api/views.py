@@ -328,20 +328,23 @@ class MobileDataViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']  # Ordre par défaut
 
     def create(self, request, *args, **kwargs):
-        # photo = request.FILES.get('photo')  # Assurez-vous que 'photo' est le bon champ
-        # if not photo:
-        #     return Response({"photo": ["Aucun fichier fourni."]}, status=400)
+        # Si 'photo' est fourni, vérifiez sa validité. Sinon, continuez sans photo.
+        photo = request.FILES.get('photo')
 
         if isinstance(request.data, QueryDict):  # Multipart
             data = request.data.dict()  # Convertir QueryDict en dict
         else:  # JSON
             data = request.data
 
+        if photo:
+            data['photo'] = photo  # Ajouter le fichier photo uniquement s'il est fourni
+
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             serializer.save(created_by=request.user.employee)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def update(self, request, *args, **kwargs):
         """
