@@ -328,6 +328,10 @@ class MobileDataViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']  # Ordre par défaut
 
     def create(self, request, *args, **kwargs):
+        photo = request.FILES.get('photo')  # Assurez-vous que 'photo' est le bon champ
+        if not photo:
+            return Response({"photo": ["Aucun fichier fourni."]}, status=400)
+
         if isinstance(request.data, QueryDict):  # Multipart
             data = request.data.dict()  # Convertir QueryDict en dict
         else:  # JSON

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from traceagri.api.views import ParcellesProducteurAPIView, DashboardDataAPIView, ProducteurMobileViewSet, \
     ParcelleMobileViewSet, UserViewSet, DynamicFormViewSet, ProjectViewSet, CooperativeViewSet, \
@@ -23,12 +24,14 @@ urlpatterns = ([
                    path('api/mobiledata/stats/', MobileDataStatsAPIView.as_view(), name='mobiledata-stats'),
                    path('uploadimage/', ImageUploadView.as_view(), name='mobiledata'),
                    path('djoser/auth/', include('djoser.urls')),  # Endpoints Djoser par défaut
+                   path('auth/tablette/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
                    # path('djoser/auth/token', include('djoser.urls.authtoken')),  # Si vous utilisez TokenAuthentication
                    path('auth/', include('djoser.urls.jwt')),  # Endpoints JWT pour tokens
 
                    # path('auth/', include('djoser.urls.jwt')),
 
-                   # path('api-auth/', include('rest_framework.urls')),
+                   path('api-auth/', include('rest_framework.urls')),
 
                    path('parcelles/<int:producteur_id>/', ParcellesProducteurAPIView.as_view(),
                         name='parcelles-producteur-api'),
