@@ -320,8 +320,7 @@ class MobileDataViewSet(viewsets.ModelViewSet):
 
     serializer_class = MobileDataSerializer
     pagination_class = MobileDataPagination
-    permission_classes = [
-        IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
+    # permission_classes = [IsAuthenticatedOrReadOnly]  # Accessible à tous pour la lecture, mais restreinte pour l'écriture
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['validate', 'created_by']  # Exemple: filtrer par utilisateur ou validation
     search_fields = ['nom', 'prenom', 'telephone']  # Recherche textuelle
