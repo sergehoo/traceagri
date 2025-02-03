@@ -230,11 +230,11 @@ class MobileDataAdmin(admin.ModelAdmin):
         'sexe',
         'telephone',
         'nom_parcelle',
-        'type_culture',
+        'cultureType',
         'category',
         'nom_culture',
         'annee_mise_en_place',
-        'dernier_rendement_kg_ha',
+
         'nom_cooperative',
         'created_at',
         'updated_by',
@@ -245,7 +245,7 @@ class MobileDataAdmin(admin.ModelAdmin):
     # Champs de recherche
     search_fields = ('nom', 'prenom', 'telephone', 'nom_parcelle', 'nom_culture')
     # Filtres dans la liste
-    list_filter = ('projet', 'sexe', 'category', 'type_culture', 'nom_culture', 'utilise_fertilisants', 'analyse_sol')
+    list_filter = ('projet', 'sexe', 'category', 'cultureType', 'nom_culture', 'utilise_fertilisants', 'analyse_sol')
     # Champs en lecture seule
     readonly_fields = ('created_at', 'updated_at')
     # Organisation des champs dans le formulaire

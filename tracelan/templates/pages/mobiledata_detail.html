@@ -97,167 +97,92 @@
 					<!--begin::Entry-->
 <div class="d-flex flex-column-fluid">
     <div class="container">
-        <!-- Begin::Card -->
-        <div class="card card-custom">
-            <div class="card-header">
-                <h3 class="card-title">Mettre à jour les informations</h3>
-                                                    <a href="{% url 'mobiledata_update' mobiledata.pk %}" class="btn btn-icon btn-light"><i class="flaticon2-edit ml-2 mr-2 text-secondary"></i></a>
-
-            </div>
-            <div class="d-flex flex-column-fluid">
-    <div class="container">
-        <!-- Begin::Card -->
-        <div class="card card-custom">
-            <div class="card-header">
-                <h3 class="card-title">Détails de MobileData</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <th>Nom</th>
-                            <td>{{ mobiledata.nom }}</td>
-                        </tr>
-                        <tr>
-                            <th>Prénom</th>
-                            <td>{{ mobiledata.prenom }}</td>
-                        </tr>
-                        <tr>
-                            <th>Sexe</th>
-                            <td>{{ mobiledata.get_sexe_display }}</td>
-                        </tr>
-                        <tr>
-                            <th>Numéro de Téléphone</th>
-                            <td>{{ mobiledata.telephone }}</td>
-                        </tr>
-                        <tr>
-                            <th>Date de Naissance</th>
-                            <td>{{ mobiledata.date_naissance }}</td>
-                        </tr>
-                        <tr>
-                            <th>Lieu de Naissance</th>
-                            <td>{{ mobiledata.lieu_naissance }}</td>
-                        </tr>
-                        <tr>
-                            <th>Photo</th>
-                            <td>
-                                {% if mobiledata.photo %}
-                                    <img src="{{ mobiledata.photo.url }}" alt="Photo" class="img-thumbnail" width="150">
-                                {% else %}
-                                    Pas de photo
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Fonction</th>
-                            <td>{{ mobiledata.fonction }}</td>
-                        </tr>
-                        <tr>
-                            <th>Localité</th>
-                            <td>{{ mobiledata.localite }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nom de la Parcelle</th>
-                            <td>{{ mobiledata.nom_parcelle }}</td>
-                        </tr>
-                        <tr>
-                            <th>Dimension (ha)</th>
-                            <td>{{ mobiledata.dimension_ha }}</td>
-                        </tr>
-                        <tr>
-                            <th>Longitude</th>
-                            <td>{{ mobiledata.longitude }}</td>
-                        </tr>
-                        <tr>
-                            <th>Latitude</th>
-                            <td>{{ mobiledata.latitude }}</td>
-                        </tr>
-                        <tr>
-                            <th>Type de Culture</th>
-                            <td>{{ mobiledata.get_type_culture_display }}</td>
-                        </tr>
-                        <tr>
-                            <th>Catégorie</th>
-                            <td>{{ mobiledata.get_category_display }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nom de la Culture</th>
-                            <td>{{ mobiledata.get_nom_culture_display }}</td>
-                        </tr>
-                        <tr>
-                            <th>Description</th>
-                            <td>{{ mobiledata.description }}</td>
-                        </tr>
-                        <tr>
-                            <th>Année de Mise en Place</th>
-                            <td>{{ mobiledata.annee_mise_en_place }}</td>
-                        </tr>
-                        <tr>
-                            <th>Date de Récolte</th>
-                            <td>{{ mobiledata.date_recolte }}</td>
-                        </tr>
-                        <tr>
-                            <th>Date de Dernière Récolte</th>
-                            <td>{{ mobiledata.date_derniere_recolte }}</td>
-                        </tr>
-                        <tr>
-                            <th>Dernier Rendement (kg/ha)</th>
-                            <td>{{ mobiledata.dernier_rendement_kg_ha }}</td>
-                        </tr>
-                        <tr>
-                            <th>Pratiques Culturales</th>
-                            <td>{{ mobiledata.pratiques_culturales }}</td>
-                        </tr>
-                        <tr>
-                            <th>Utilise des Fertilisants ?</th>
-                            <td>{{ mobiledata.utilise_fertilisants|yesno:"Oui,Non" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Type de Fertilisants</th>
-                            <td>{{ mobiledata.type_fertilisants }}</td>
-                        </tr>
-                        <tr>
-                            <th>Analyse de Sol Effectuée ?</th>
-                            <td>{{ mobiledata.analyse_sol|yesno:"Oui,Non" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Commentaires</th>
-                            <td>{{ mobiledata.commentaires }}</td>
-                        </tr>
-                        <tr>
-                            <th>Enregistré le</th>
-                            <td>{{ mobiledata.created_at }}</td>
-                            <td>{{ mobiledata.created_by }}</td>
-                        </tr>
-                         <tr>
-                            <th>Dernière mise à jour</th>
-
-                              <td>{{ mobiledata.updated_at|naturaltime }}</td>
-                             <td>{{ mobiledata.updated_by  }}</td>
-                        </tr>
-{#                        <tr>#}
-{#                            <th>Dernière mise à jour</th>#}
-{#                            <td>{{ mobiledata.updated_at }}</td>#}
-{#                        </tr>#}
-{#                    <tr>#}
-{#                            <th>Mise à jour par</th>#}
-{#                            <td>{{ mobiledata.updated_by }}</td>#}
-{#                        </tr>#}
-                     <tr>
-                            <th>Valider par</th>
-                            <td>{{ mobiledata.validate_by  }}</td>
-                            <td>{{ mobiledata.validate_by }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- Begin::Card -->
+    <div class="card card-custom mb-5">
+        <div class="card-header">
+            <h3 class="card-title">Détails des Données Enquêtes Saisies</h3>
+            <a href="{% url 'mobiledata_update' mobiledata.pk %}" class="btn btn-icon btn-light">
+                <i class="flaticon2-edit ml-2 mr-2 text-secondary"></i>
+            </a>
         </div>
-        <!-- End::Card -->
+        <div class="card-body">
+
+            <!-- Section A: Informations Producteur -->
+            <h4 class="mb-4">Section A : Informations Producteur</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr><th>Nom</th><td>{{ mobiledata.nom }}</td></tr>
+                    <tr><th>Prénom</th><td>{{ mobiledata.prenom }}</td></tr>
+                    <tr><th>Sexe</th><td>{{ mobiledata.get_sexe_display }}</td></tr>
+                    <tr><th>Numéro de Téléphone</th><td>{{ mobiledata.telephone }}</td></tr>
+                    <tr><th>Date de Naissance</th><td>{{ mobiledata.date_naissance }}</td></tr>
+                    <tr><th>Lieu de Naissance</th><td>{{ mobiledata.lieu_naissance }}</td></tr>
+                    <tr>
+                        <th>Photo</th>
+                        <td>
+                            {% if mobiledata.photo %}
+                                <img src="{{ mobiledata.photo.url }}" alt="Photo" class="img-thumbnail" width="150">
+                            {% else %}
+                                Pas de photo
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section B: Informations sur la Parcelle -->
+            <h4 class="mt-5 mb-4">Section B : Informations sur la Parcelle</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr><th>Nom de la Parcelle</th><td>{{ mobiledata.nom_parcelle }}</td></tr>
+                    <tr><th>Localité</th><td>{{ mobiledata.localite }}</td></tr>
+                    <tr><th>Dimension (ha)</th><td>{{ mobiledata.dimension_ha }}</td></tr>
+                    <tr><th>Longitude</th><td>{{ mobiledata.longitude }}</td></tr>
+                    <tr><th>Latitude</th><td>{{ mobiledata.latitude }}</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Section C: Détails sur la Culture -->
+            <h4 class="mt-5 mb-4">Section C : Détails sur la Culture</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr><th>Type de Culture</th><td>{{ mobiledata.get_type_culture_display }}</td></tr>
+                    <tr><th>Catégorie</th><td>{{ mobiledata.get_category_display }}</td></tr>
+                    <tr><th>Nom de la Culture</th><td>{{ mobiledata.get_nom_culture_display }}</td></tr>
+                    <tr><th>Année de Mise en Place</th><td>{{ mobiledata.annee_mise_en_place }}</td></tr>
+                    <tr><th>Date de Récolte</th><td>{{ mobiledata.date_recolte }}</td></tr>
+                    <tr><th>Date de Dernière Récolte</th><td>{{ mobiledata.date_derniere_recolte }}</td></tr>
+                    <tr><th>Dernier Rendement (kg/ha)</th><td>{{ mobiledata.dernier_rendement_kg_ha }}</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Section D: Pratiques et Techniques -->
+            <h4 class="mt-5 mb-4">Section D : Pratiques et Techniques</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr><th>Pratiques Culturales</th><td>{{ mobiledata.pratiques_culturales }}</td></tr>
+                    <tr><th>Utilise des Fertilisants ?</th><td>{{ mobiledata.utilise_fertilisants|yesno:"Oui,Non" }}</td></tr>
+                    <tr><th>Type de Fertilisants</th><td>{{ mobiledata.type_fertilisants }}</td></tr>
+                    <tr><th>Analyse de Sol Effectuée ?</th><td>{{ mobiledata.analyse_sol|yesno:"Oui,Non" }}</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Section E: Commentaires et Métadonnées -->
+            <h4 class="mt-5 mb-4">Section E : Commentaires et Métadonnées</h4>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr><th>Commentaires</th><td>{{ mobiledata.commentaires }}</td></tr>
+                    <tr><th>Enregistré le</th><td>{{ mobiledata.created_at }}</td><td>{{ mobiledata.created_by }}</td></tr>
+                    <tr><th>Dernière mise à jour</th><td>{{ mobiledata.updated_at|naturaltime }}</td><td>{{ mobiledata.updated_by }}</td></tr>
+                    <tr><th>Validé par</th><td>{{ mobiledata.validate_by }}</td></tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
+    <!-- End::Card -->
 </div>
-        </div>
-        <!-- End::Card -->
-    </div>
+
 </div>
         <!--end::Entry-->
     </div>

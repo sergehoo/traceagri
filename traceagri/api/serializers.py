@@ -142,4 +142,4 @@ class MobileDataSerializer(serializers.ModelSerializer):
 class VilleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ville
-        fields = ['id', 'nom']  # Incluez les champs nécessaires
+        fields = ['id', 'name']  # Incluez les champs nécessaires

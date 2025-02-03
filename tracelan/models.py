@@ -519,7 +519,8 @@ class Producteur(models.Model):
     date_naissance = models.DateField(blank=True, null=True)
     lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
-    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,blank=True)
+    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,
+                                    blank=True)
     fonction = models.CharField(max_length=100, null=True, blank=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
@@ -1187,174 +1188,70 @@ class FieldResponse(models.Model):
 
 
 class MobileData(models.Model):
-    # Événements climatiques
-    EVENEMENTS_CLIMATIQUES = [
-        ('drought', _('Sécheresse')),
-        ('floods', _('Inondations')),
-        ('crop_lodging', _('Chute des cultures')),
-        ('heat_stress', _('Stress thermique')),
-        ('pests_diseases', _('Ravageurs et maladies')),
-        ('none', _('Aucun')),
-        ('other', _('Autres')),
-    ]
-    #Infos sur le proucteur
+    uid = models.CharField(max_length=100, null=True, blank=True)
+
     nom = models.CharField(max_length=100, null=True, blank=True)
     prenom = models.CharField(max_length=500, null=True, blank=True)
     sexe = models.CharField(max_length=1, null=True, blank=True, choices=[('M', 'Masculin'), ('F', 'Féminin')])
     telephone = models.CharField(max_length=20, blank=True, null=True)
     date_naissance = models.DateField(blank=True, null=True)
+
     lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
-    photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
     fonction = models.CharField(max_length=100, null=True, blank=True)
     localite = models.ForeignKey(Ville, null=True, blank=True, on_delete=models.CASCADE,
                                  related_name="localite_producteur")
     # Infos sur le foyer
-    taille_du_foyer = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Taille du foyer"))
-    nombre_dependants = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
+    nbre_personne_foyer = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Taille du foyer"))
+    nbre_personne_charge = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
+    revenue_derniere_recolte = models.PositiveIntegerField(null=True, blank=True,
+                                                           verbose_name=_("Nombre de dépendants"))
+    handicap = models.CharField(max_length=100, null=True, blank=True)
+
     # Historique des cultures
+    cultureType = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type de Culture"))
+    nom_culture = models.CharField(max_length=200, null=True, blank=True, verbose_name=_("Nom de la Culture"))
+    annee_mise_en_place = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Année de mise en place"))
+    date_derniere_recolte = models.DateField(null=True, blank=True,
+                                             verbose_name=_("Date de dernière récolte (pérenne)"))
+    rendement_approximatif = models.CharField(max_length=50, null=True, blank=True,
+                                              verbose_name=_("Rendement approximatif "))
+    Culture_intercalaire = models.CharField(max_length=50, null=True, blank=True,
+                                            verbose_name=_("Culture Intercalaire "))
+    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+
     cultures_precedentes = models.CharField(null=True, max_length=200, blank=True,
                                             verbose_name=_("Cultures précédentes"))
     annee_cultures_precedentes = models.CharField(null=True, blank=True,
                                                   verbose_name=_("Année des cultures précédentes"))
-    evenements_climatiques = models.CharField(max_length=50, null=True, blank=True, choices=EVENEMENTS_CLIMATIQUES)
+    evenements_climatiques = models.CharField(max_length=50, null=True, blank=True)
 
     # Commentaires généraux
     commentaires = models.TextField(null=True, blank=True, verbose_name=_("Commentaires"))
 
     # Infos sur la parcelle
     nom_parcelle = models.CharField(max_length=100, null=True, blank=True)
-    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+
     longitude = models.DecimalField(max_digits=300, decimal_places=100, null=True, blank=True)
     latitude = models.DecimalField(max_digits=300, decimal_places=100, null=True, blank=True)
     images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
-
-    CATEGORY_CHOICES = [
-        ('vivriere', _('Culture Vivrière')),
-        ('industrial', _('Culture Industrielle')),
-        ('rente', _('Culture de Rente')),
-        ('maraichere', _('Culture Maraîchère')),
-        ('fruitiere', _('Culture Fruitière')),
-        ('specialisee', _('Culture Spécialisée')),
-        ('florale', _('Culture Florale et Ornementale')),
-        ('emergente', _('Culture Émergente')),
-    ]
-    CULTURE_TYPE_CHOICES = [
-        ('perennial', _('Culture Pérenne')),
-        ('seasonal', _('Culture Saisonnière')),
-    ]
-    CULTURE_CHOICES = [
-        # Cultures Pérennes (de rente)
-        ('cacao', _('Cacao')),
-        ('cafe', _('Café')),
-        ('hevea', _('Hévéa')),
-        ('palmier_huile', _('Palmier à huile')),
-        ('cajou', _('Noix de cajou (Anacarde)')),
-        ('cocotier', _('Cocotier')),
-
-        # Cultures Vivrières
-        ('manioc', _('Manioc')),
-        ('igname', _('Igname')),
-        ('taro', _('Taro')),
-        ('patate_douce', _('Patate douce')),
-        ('riz', _('Riz')),
-        ('mais', _('Maïs')),
-        ('sorgho', _('Sorgho')),
-        ('mil', _('Mil')),
-        ('banane_plantain', _('Banane plantain')),
-
-        # Cultures Maraîchères (légumes)
-        ('aubergine', _('Aubergine africaine')),
-        ('tomate', _('Tomate')),
-        ('gombo', _('Gombo')),
-        ('piment', _('Piment')),
-        ('oignon', _('Oignon')),
-        ('chou', _('Chou')),
-        ('carotte', _('Carotte')),
-        ('poivron', _('Poivron')),
-        ('concombre', _('Concombre')),
-        ('laitue', _('Laitue')),
-
-        # Cultures Fruitières
-        ('ananas', _('Ananas')),
-        ('orange', _('Orange')),
-        ('banane', _('Banane dessert')),
-        ('papaye', _('Papaye')),
-        ('mangue', _('Mangue')),
-        ('avocat', _('Avocat')),
-        ('goyave', _('Goyave')),
-        ('citron', _('Citron')),
-        ('corossol', _('Corossol')),
-        ('pasteque', _('Pastèque')),
-        ('melon', _('Melon')),
-
-        # Cultures Industrielles
-        ('coton', _('Coton')),
-        ('canne_sucre', _('Canne à sucre')),
-        ('tabac', _('Tabac')),
-
-        # Cultures Spécifiques (émergentes ou niches)
-        ('gingembre', _('Gingembre')),
-        ('curcuma', _('Curcuma')),
-        ('sesame', _('Sésame')),
-        ('soja', _('Soja')),
-        ('arachide', _('Arachide')),
-        ('pois_angole', _('Pois d’Angole')),
-        ('haricot_niebe', _('Haricot niébé')),
-    ]
-    PRATIQUE_CULTURALE_CHOICE = [
-        ('agroforestry', _('Agroforesterie')),
-        ('intercropping', _('Intercropping')),
-        ('composting', _('Compostage')),
-        ('crop_rotation', _('Rotation des cultures')),
-        ('mulching', _('Paillage')),
-        ('cover_cropping', _('Culture de couverture')),
-        ('conservation_tillage', _('Labour de conservation')),
-        ('organic_farming', _('Agriculture biologique')),
-        ('precision_farming', _('Agriculture de précision')),
-        ('irrigation_management', _('Gestion de l’irrigation')),
-        ('pest_management', _('Gestion des ravageurs')),
-        ('fertilizer_management', _('Gestion des fertilisants')),
-        ('soil_testing', _('Analyse du sol')),
-        ('drip_irrigation', _('Irrigation goutte à goutte')),
-        ('no_tillage', _('Sans labour')),
-        ('mixed_cropping', _('Culture mixte')),
-        ('integrated_farming', _('Agriculture intégrée')),
-        ('green_manuring', _('Engrais verts')),
-        ('companion_planting', _('Plantes compagnes')),
-        ('agroecology', _('Agroécologie')),
-        ('permaculture', _('Permaculture')),
-        ('biocontrol', _('Biocontrôle')),
-        ('hydroponics', _('Hydroponie')),
-        ('aquaponics', _('Aquaponie')),
-    ]
-
-    # Infos sur les cultures de la parcelle
-    type_culture = models.CharField(max_length=50, null=True, blank=True, choices=CULTURE_TYPE_CHOICES,
-                                    verbose_name=_("Type de Culture"))
-    category = models.CharField(max_length=50, null=True, blank=True, choices=CATEGORY_CHOICES,
+    category = models.CharField(max_length=50, null=True, blank=True,
                                 verbose_name=_("Catégorie"))
-    nom_culture = models.CharField(max_length=200, null=True, blank=True,
-                                   verbose_name=_("Nom de la Culture"))
+
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
                                           related_name="localite_parcelle")
-    annee_mise_en_place = models.PositiveIntegerField(null=True, blank=True,
-                                                      verbose_name=_("Année de mise en place"))
-    date_recolte = models.DateField(null=True, blank=True, verbose_name=_("Date de récolte (saisonnière)"))
-    date_derniere_recolte = models.DateField(null=True, blank=True,
-                                             verbose_name=_("Date de dernière récolte (pérenne)"))
-    dernier_rendement_kg_ha = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
-                                                  verbose_name=_("Dernier rendement (kg/ha)"))
-    pratiques_culturales = models.CharField(null=True, choices=PRATIQUE_CULTURALE_CHOICE, max_length=100, blank=True,
-                                            verbose_name=_("Pratiques culturales"))
-    utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
-    type_fertilisants = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Type de fertilisants"))
-    analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
-    autre_culture = models.CharField(max_length=50, null=True, blank=True, choices=CULTURE_TYPE_CHOICES,
-                                     verbose_name=_("Type"))
-    autre_culture_nom = models.CharField(max_length=200, choices=CATEGORY_CHOICES, null=True, blank=True)
-    autre_culture_volume_ha = models.IntegerField(null=True, blank=True)
 
+    annee_premiere_recole = models.DateField(null=True, blank=True, verbose_name=_("Date de récolte (saisonnière)"))
+
+    utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
+    fertilizerType = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Type de fertilisants"))
+
+    analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
+    autre_culture = models.CharField(max_length=50, null=True, blank=True,
+                                     verbose_name=_("Type"))
+    autre_culture_nom = models.CharField(max_length=200,  null=True, blank=True)
+    autre_culture_volume_ha = models.IntegerField(null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
     # Infos sur la cooperative
     nom_cooperative = models.CharField(max_length=100, null=True, blank=True)
     ville = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
@@ -1363,11 +1260,14 @@ class MobileData(models.Model):
     is_president = models.BooleanField(default=False, verbose_name=_("President ?"))
 
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
+
+    createdDate= models.CharField(max_length=100, null=True, blank=True)
     created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
     updated_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='updatedby')
-    validate_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='validateby')
+    validate_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL,
+                                    related_name='validateby')
     validate = models.BooleanField(default=False)
 
     def __str__(self):
