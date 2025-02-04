@@ -33,7 +33,7 @@ urlpatterns = ([
 
                    # path('auth/', include('djoser.urls.jwt')),
 
-                   path('api-auth/', include('rest_framework.urls')),
+                   # path('api-auth/', include('rest_framework.urls')),
 
                    path('parcelles/<int:producteur_id>/', ParcellesProducteurAPIView.as_view(),
                         name='parcelles-producteur-api'),

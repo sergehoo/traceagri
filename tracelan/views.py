@@ -110,6 +110,7 @@ class ProducteurCreateView(LoginRequiredMixin, CreateView):
         prenom = form.cleaned_data['prenom'].upper()
         date_naissance = form.cleaned_data['date_naissance']
         telephone = form.cleaned_data['telephone']
+        cooperative = form.cleaned_data.get('cooperative')
 
         # Vérification des doublons
         if Producteur.objects.filter(nom__iexact=nom, prenom__iexact=prenom, date_naissance=date_naissance).exists():
@@ -127,6 +128,11 @@ class ProducteurCreateView(LoginRequiredMixin, CreateView):
         producteur.save()
         logger.info(f"Producteur {producteur.nom} créé avec succès.")
 
+        if cooperative:
+            cooperative_member, created = CooperativeMember.objects.get_or_create(cooperative=cooperative)
+            cooperative_member.producteurs.add(producteur)  # Ajouter le producteur à la coopérative
+            logger.info(f"Producteur {producteur.nom} ajouté à la coopérative {cooperative.nom}.")
+
         messages.success(self.request, 'Producteur créé avec succès!')
         return redirect(self.success_url)
 
@@ -139,8 +145,62 @@ class ProducteurCreateView(LoginRequiredMixin, CreateView):
 class ProducteurUpdateView(LoginRequiredMixin, UpdateView):
     model = Producteur
     template_name = "pages/producteur_form.html"
-    fields = ["nom", "prenom", "sexe", "telephone", "date_naissance", "lieu_naissance", "cooperative"]
-    success_url = reverse_lazy("producteur_list")
+    form_class = ProducteurForm
+    # fields = ["nom", "prenom", "sexe", "telephone", "date_naissance", "lieu_naissance", "cooperative"]
+    success_url = reverse_lazy("producteurs-list")
+
+    def form_valid(self, form):
+        # Récupération des données nettoyées
+        nom = form.cleaned_data['nom'].upper()
+        prenom = form.cleaned_data['prenom'].upper()
+        date_naissance = form.cleaned_data['date_naissance']
+        telephone = form.cleaned_data['telephone']
+        cooperative = form.cleaned_data.get('cooperative')  # Récupérer la coopérative du formulaire
+
+        # Vérification des doublons (sauf pour l'instance actuelle)
+        producteur = self.get_object()
+        if Producteur.objects.filter(nom__iexact=nom, prenom__iexact=prenom, date_naissance=date_naissance).exclude(
+                pk=producteur.pk).exists():
+            logger.warning("Tentative de mise à jour vers un producteur existant.")
+            messages.error(self.request, 'Ce Producteur existe déjà.')
+            return self.form_invalid(form)
+
+        if Producteur.objects.filter(telephone=telephone).exclude(pk=producteur.pk).exists():
+            logger.warning("Numéro de téléphone déjà utilisé.")
+            messages.error(self.request, 'Un Producteur avec ce contact existe déjà.')
+            return self.form_invalid(form)
+
+        # Sauvegarde du producteur
+        producteur = form.save(commit=False)
+        producteur.save()
+        logger.info(f"Producteur {producteur.nom} mis à jour avec succès.")
+
+        # Gestion de la coopérative
+        if cooperative:
+            # Si le producteur était déjà dans une coopérative, le retirer de l'ancienne
+            old_cooperative_members = CooperativeMember.objects.filter(producteurs=producteur)
+            for old_member in old_cooperative_members:
+                old_member.producteurs.remove(producteur)
+                logger.info(f"Producteur {producteur.nom} retiré de la coopérative {old_member.cooperative.nom}.")
+
+            # Ajouter le producteur à la nouvelle coopérative
+            cooperative_member, created = CooperativeMember.objects.get_or_create(cooperative=cooperative)
+            cooperative_member.producteurs.add(producteur)
+            logger.info(f"Producteur {producteur.nom} ajouté à la coopérative {cooperative.nom}.")
+        else:
+            # Si aucune coopérative n'est sélectionnée, retirer le producteur de toutes les coopératives
+            old_cooperative_members = CooperativeMember.objects.filter(producteurs=producteur)
+            for old_member in old_cooperative_members:
+                old_member.producteurs.remove(producteur)
+                logger.info(f"Producteur {producteur.nom} retiré de la coopérative {old_member.cooperative.nom}.")
+
+        messages.success(self.request, 'Producteur mis à jour avec succès!')
+        return redirect(self.success_url)
+
+    def form_invalid(self, form):
+        logger.error(f"Erreur dans le formulaire : {form.errors}")
+        messages.error(self.request, 'Une erreur est survenue. Veuillez vérifier vos données.')
+        return super().form_invalid(form)
 
 
 class ProducteurExportView(LoginRequiredMixin, View):
@@ -229,19 +289,19 @@ class ParcelleExportView(LoginRequiredMixin, View):
 
         writer = csv.writer(response)
         writer.writerow([
-            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
+            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude','geojson', 'Status',
             'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
         ])
 
         for parcelle in parcelles:
             producteur = f"{parcelle.producteur.nom} {parcelle.producteur.prenom}" if parcelle.producteur else "N/A"
             cultures_perennes = ", ".join(
-                culture_detail.culture.nom
+                culture_detail.culture.name
                 for culture_detail in parcelle.cultures.all()
                 if culture_detail.type_culture == 'perennial'
             )
             cultures_saisonnieres = ", ".join(
-                culture_detail.culture.nom
+                culture_detail.culture.name
                 for culture_detail in parcelle.cultures.all()
                 if culture_detail.type_culture == 'seasonal'
             )
@@ -254,6 +314,7 @@ class ParcelleExportView(LoginRequiredMixin, View):
                 parcelle.dimension_ha,
                 parcelle.longitude,
                 parcelle.latitude,
+                parcelle.geojson,
                 parcelle.status,
                 producteur,
                 cultures_perennes,
@@ -268,7 +329,7 @@ class ParcelleExportView(LoginRequiredMixin, View):
         sheet.title = "Parcelles"
 
         headers = [
-            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'Status',
+            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude','geojson', 'Status',
             'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
         ]
         sheet.append(headers)
@@ -276,16 +337,17 @@ class ParcelleExportView(LoginRequiredMixin, View):
         for parcelle in parcelles:
             producteur = f"{parcelle.producteur.nom} {parcelle.producteur.prenom}" if parcelle.producteur else "N/A"
             cultures_perennes = ", ".join(
-                culture_detail.culture.nom
+                culture_detail.culture.name
                 for culture_detail in parcelle.cultures.all()
                 if culture_detail.type_culture == 'perennial'
             )
             cultures_saisonnieres = ", ".join(
-                culture_detail.culture.nom
+                culture_detail.culture.name
                 for culture_detail in parcelle.cultures.all()
                 if culture_detail.type_culture == 'seasonal'
             )
-
+            # Convertir le champ geojson en une chaîne JSON
+            geojson_str = json.dumps(parcelle.geojson) if parcelle.geojson else ""
             sheet.append([
                 parcelle.unique_id,
                 parcelle.nom,
@@ -294,6 +356,7 @@ class ParcelleExportView(LoginRequiredMixin, View):
                 parcelle.dimension_ha,
                 parcelle.longitude,
                 parcelle.latitude,
+                geojson_str,
                 parcelle.status,
                 producteur,
                 cultures_perennes,

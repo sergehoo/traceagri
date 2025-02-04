@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from tracelan.models import Cooperative, Producteur, Parcelle, Ville, DistrictSanitaire, Region, Project, Task, \
     Milestone, Deliverable, Employee, Depense, Event, EventInvite, DynamicField, \
-    DynamicForm, FieldResponse, FormResponse, CultureDetail, Culture, MobileData
+    DynamicForm, FieldResponse, FormResponse, CultureDetail, Culture, MobileData, CooperativeMember
 
 admin.site.site_header = 'TRACAFRIC BACK-END CONTROLER'
 admin.site.site_title = 'TRACAFRIC Super Admin Pannel'
@@ -280,3 +280,14 @@ class MobileDataAdmin(admin.ModelAdmin):
                        'validate_by')
         }),
     )
+
+
+@admin.register(CooperativeMember)
+class CooperativeMemberAdmin(admin.ModelAdmin):
+    list_display = ('id', 'cooperative', 'created_by', 'created_at', 'updated_at')  # Champs à afficher dans la liste
+    list_filter = ('cooperative', 'created_at', 'updated_at')  # Filtres latéraux
+    search_fields = ('cooperative__name', 'created_by__name')  # Recherche par nom de la coopérative ou de l'employé
+    autocomplete_fields = ('cooperative', 'created_by', 'producteurs')  # Ajoute la recherche rapide dans les FK/M2M
+    filter_horizontal = ('producteurs',)  # Ajoute une interface de sélection pour les relations M2M
+    ordering = ('-created_at',)  # Tri des résultats par date de création décroissante
+    readonly_fields = ('created_at', 'updated_at')  # Champs en lecture seule

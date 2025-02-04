@@ -45,7 +45,7 @@ urlpatterns = i18n_patterns(
     path('', LandingView.as_view(), name='landing'),
     path('Producteurs', ProducteurListView.as_view(), name='producteurs-list'),
     path('Producteurs/create', ProducteurCreateView.as_view(), name='producteurs-create'),
-    path('Producteurs/update', ProducteurUpdateView.as_view(), name='producteurs-create'),
+    path('Producteurs/update/<int:pk>', ProducteurUpdateView.as_view(), name='producteurs-update'),
     path('Producteurs/details<int:pk>', ProducteurDetailView.as_view(), name='producteurs-details'),
 
     path('export/producteurs/', ProducteurExportView.as_view(), name='producteur_export'),

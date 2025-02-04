@@ -19,7 +19,7 @@ class ProducteurForm(forms.ModelForm):
             "date_naissance",
             "lieu_naissance",
             "cooperative",
-            "photo"
+
         ]
         widgets = {
             "nom": forms.TextInput(attrs={"class": "form-control", "placeholder": "Entrez le nom"}),
@@ -30,7 +30,7 @@ class ProducteurForm(forms.ModelForm):
             "lieu_naissance": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Entrez le lieu de naissance"}),
             "cooperative": forms.Select(attrs={"class": "form-control"}),
-            "photo": forms.ClearableFileInput(attrs={"class": "form-control-file"})
+            # "photo": forms.ClearableFileInput(attrs={"class": "form-control-file"})
         }
 
 
