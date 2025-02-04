@@ -1210,7 +1210,7 @@ class MobileData(models.Model):
     # Historique des cultures
     cultureType = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type de Culture"))
     nom_culture = models.CharField(max_length=200, null=True, blank=True, verbose_name=_("Nom de la Culture"))
-    annee_mise_en_place = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Année de mise en place"))
+    annee_mise_en_place = models.CharField(null=True, blank=True, verbose_name=_("Année de mise en place"))
     date_derniere_recolte = models.DateField(null=True, blank=True,
                                              verbose_name=_("Date de dernière récolte (pérenne)"))
     rendement_approximatif = models.CharField(max_length=50, null=True, blank=True,
@@ -1241,7 +1241,7 @@ class MobileData(models.Model):
     localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
                                           related_name="localite_parcelle")
 
-    annee_premiere_recole = models.DateField(null=True, blank=True, verbose_name=_("Date de récolte (saisonnière)"))
+    annee_premiere_recole = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Date de récolte (saisonnière)"))
 
     utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
     fertilizerType = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Type de fertilisants"))
