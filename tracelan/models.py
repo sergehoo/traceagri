@@ -1231,8 +1231,8 @@ class MobileData(models.Model):
     # Infos sur la parcelle
     nom_parcelle = models.CharField(max_length=100, null=True, blank=True)
 
-    longitude = models.DecimalField(max_digits=300, decimal_places=100, null=True, blank=True)
-    latitude = models.DecimalField(max_digits=300, decimal_places=100, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
     category = models.CharField(max_length=50, null=True, blank=True,
                                 verbose_name=_("Catégorie"))
@@ -1247,9 +1247,8 @@ class MobileData(models.Model):
     fertilizerType = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Type de fertilisants"))
 
     analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
-    autre_culture = models.CharField(max_length=50, null=True, blank=True,
-                                     verbose_name=_("Type"))
-    autre_culture_nom = models.CharField(max_length=200,  null=True, blank=True)
+    autre_culture = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type"))
+    autre_culture_nom = models.CharField(max_length=200, null=True, blank=True)
     autre_culture_volume_ha = models.IntegerField(null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
     # Infos sur la cooperative
@@ -1261,7 +1260,7 @@ class MobileData(models.Model):
     ville_enquette = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("ville de l'enquête "))
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
 
-    createdDate= models.CharField(max_length=100, null=True, blank=True)
+    createdDate = models.CharField(max_length=100, null=True, blank=True)
     created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))

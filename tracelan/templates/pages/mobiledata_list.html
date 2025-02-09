@@ -128,6 +128,7 @@
                         <tr>
                             <th>Créé le</th>
                              <th>Mis à Jour le</th>
+                            <th>Id Enquete</th>
                             <th>Nom</th>
                             <th>Prénom</th>
                             <th>Sexe</th>
@@ -146,13 +147,14 @@
                                 <td>{{ mobiledata.created_at|naturaltime }}</td>
                                 <td>{{ mobiledata.updated_at|naturaltime }}</td>
 {#                                <td>{{ forloop.counter }}</td>#}
+                                <td><a href="{% url 'mobiledata_detail' mobiledata.pk %}">{{ mobiledata.uid }}</a></td>
                                 <td><a href="{% url 'mobiledata_detail' mobiledata.pk %}">{{ mobiledata.nom }}</a></td>
                                 <td><a href="{% url 'mobiledata_detail' mobiledata.pk %}">{{ mobiledata.prenom }}</a></td>
                                 <td>{{ mobiledata.get_sexe_display }}</td>
                                 <td>{{ mobiledata.telephone }}</td>
                                 <td>{{ mobiledata.ville_enquette }}</td>
                                 <td>{{ mobiledata.nom_parcelle }}</td>
-                                <td>{{ mobiledata.get_type_culture_display }}</td>
+                                <td>{{ mobiledata.cultureType }}</td>
                                 <td>{{ mobiledata.get_category_display }}</td>
                                 {% if mobiledata.validate %}
                                     <td content="center"><span class="badge badge-success">Validé</span></td>

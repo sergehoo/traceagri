@@ -1059,5 +1059,56 @@
         chart.render();
     });
 </script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var lat = parseFloat("{{ mobiledata.latitude|default:"0"|floatformat:"6" }}".replace(",", "."));
+        var lon = parseFloat("{{ mobiledata.longitude|default:"0"|floatformat:"6" }}".replace(",", "."));
+
+        console.log("Latitude:", lat, "Longitude:", lon);
+
+        // Vérification des coordonnées valides
+        if (isNaN(lat) || isNaN(lon) || lat === 0 || lon === 0) {
+            console.error("⚠️ Erreur : Latitude ou Longitude non valides !");
+            return;
+        }
+
+        // Initialisation de la carte Leaflet
+        var map = L.map('mapenquete').setView([lat, lon], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker = L.marker([lat, lon]).addTo(map)
+            .bindPopup("<b>UID: {{ mobiledata.uid }}</b><br>Latitude: " + lat + "<br>Longitude: " + lon)
+            .openPopup();
+
+        // Fonction pour obtenir le nom de la ville depuis les coordonnées
+        function getCityFromCoordinates(lat, lon) {
+            var url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address) {
+                        let city = data.address.city || data.address.town || data.address.village || "Localisation inconnue";
+                        document.getElementById("city-name").innerText = city;
+                        console.log("Ville trouvée :", city);
+                    } else {
+                        document.getElementById("city-name").innerText = "Ville non trouvée";
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la récupération de la ville :", error);
+                    document.getElementById("city-name").innerText = "Erreur de localisation";
+                });
+        }
+
+        // Appel de la fonction pour obtenir la ville
+        getCityFromCoordinates(lat, lon);
+    });
+</script>
 </body>
 </html>

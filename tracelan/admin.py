@@ -263,10 +263,9 @@ class MobileDataAdmin(admin.ModelAdmin):
         }),
         ("Informations sur la Culture", {
             'fields': (
-                'type_culture', 'category', 'nom_culture', 'description',
-                'localite_parcelle', 'annee_mise_en_place', 'date_recolte',
-                'date_derniere_recolte', 'dernier_rendement_kg_ha', 'pratiques_culturales',
-                'utilise_fertilisants', 'type_fertilisants', 'analyse_sol',
+                 'category', 'nom_culture', 'description',
+                'localite_parcelle', 'annee_mise_en_place',
+                'utilise_fertilisants', 'analyse_sol',
                 'autre_culture', 'autre_culture_nom', 'autre_culture_volume_ha',
             )
         }),
