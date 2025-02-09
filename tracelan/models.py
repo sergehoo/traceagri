@@ -1258,7 +1258,7 @@ class MobileData(models.Model):
                               related_name="adresse_cooperative")
     specialites = models.ForeignKey('Culture', on_delete=models.CASCADE, null=True, blank=True)
     is_president = models.BooleanField(default=False, verbose_name=_("President ?"))
-
+    ville_enquette = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("ville de l'enquête "))
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
 
     createdDate= models.CharField(max_length=100, null=True, blank=True)
