@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import User
 
 from rest_framework import serializers
@@ -123,10 +125,32 @@ class MobileDataSerializer(serializers.ModelSerializer):
         return data
 
     def validate_longitude(self, value):
-        return value or 0.0
+        """
+        Vérifie que la longitude est valide (entre -180 et 180) et convertit en Decimal.
+        """
+        try:
+            value = float(value)  # Conversion en float
+        except ValueError:
+            raise serializers.ValidationError("Longitude invalide. Doit être un nombre.")
+
+        if not (-180 <= value <= 180):
+            raise serializers.ValidationError("La longitude doit être comprise entre -180 et 180 degrés.")
+
+        return round(Decimal(value), 6)  # Arrondi à 6 décimales
 
     def validate_latitude(self, value):
-        return value or 0.0
+        """
+        Vérifie que la latitude est valide (entre -90 et 90) et convertit en Decimal.
+        """
+        try:
+            value = float(value)
+        except ValueError:
+            raise serializers.ValidationError("Latitude invalide. Doit être un nombre.")
+
+        if not (-90 <= value <= 90):
+            raise serializers.ValidationError("La latitude doit être comprise entre -90 et 90 degrés.")
+
+        return round(Decimal(value), 6)  # Arrondi à 6 décimales
 
     def validate_localite(self, value):
         if not isinstance(value, int):
