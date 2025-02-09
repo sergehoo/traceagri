@@ -134,9 +134,9 @@
                             <th>Sexe</th>
                             <th>Numéro de Téléphone</th>
                             <th>Localité</th>
-                            <th>Nom de la Parcelle</th>
+
                             <th>Type de Culture</th>
-                            <th>Catégorie</th>
+
                             <th content="center" width="150px">Actions</th>
                         </tr>
                         </thead>
@@ -153,9 +153,9 @@
                                 <td>{{ mobiledata.get_sexe_display }}</td>
                                 <td>{{ mobiledata.telephone }}</td>
                                 <td>{{ mobiledata.ville_enquette }}</td>
-                                <td>{{ mobiledata.nom_parcelle }}</td>
+
                                 <td>{{ mobiledata.cultureType }}</td>
-                                <td>{{ mobiledata.get_category_display }}</td>
+
                                 {% if mobiledata.validate %}
                                     <td content="center"><span class="badge badge-success">Validé</span></td>
                                     {% else %}
