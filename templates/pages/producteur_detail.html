@@ -101,9 +101,8 @@
                                 <!--begin::Contact-->
                                 <div class="mb-10">
                                     <ul class="list-group text-left">
-                                        <li class="list-group-item">
-                                            <strong>Coopérative :</strong> {{ producteurdetails.cooperative.nom }}
-                                        </li>
+                                        <li class="list-group-item"><strong>Id-Enquete :</strong> {{ producteurdetails.enquete_uid }}</li>
+                                        <li class="list-group-item"><strong>Coopérative :</strong> {{ producteurdetails.cooperative.nom }}</li>
                                         <li class="list-group-item">
                                             <strong>Sexe :</strong>
                                             {% if producteurdetails.sexe == 'M' %}
@@ -281,7 +280,7 @@
                                                 <tr data-parcelle-id="{{ parcelle.id }}">
                                                     <td class="pl-0">
                                                         <a href="#"
-                                                           class="text-dark-75 font-weight-bolder text-hover-primary font-size-lg">{{ parcelle.code|truncatechars:6 }}</a>
+                                                           class="text-dark-75 font-weight-bolder text-hover-primary font-size-lg">{{ parcelle.enquete_uid }}</a>
                                                     </td>
                                                     <td>
             <span class="text-dark-75 font-weight-bolder d-block font-size-lg">

@@ -267,7 +267,15 @@ class ProducteurExportView(LoginRequiredMixin, View):
 class ProducteurDeleteView(LoginRequiredMixin, DeleteView):
     model = Producteur
     template_name = "pages/producteur_confirm_delete.html"
-    success_url = reverse_lazy("producteur_list")
+    success_url = reverse_lazy("producteurs-list")
+
+    def get_success_url(self):
+        # Assurez-vous que self.producteur a un ID valide
+        messages.success(self.request, "La parcelle a été supprimée avec succès.")
+        return reverse('producteurs-list')
+
+
+
 
 
 class ParcelleExportView(LoginRequiredMixin, View):
@@ -289,7 +297,8 @@ class ParcelleExportView(LoginRequiredMixin, View):
 
         writer = csv.writer(response)
         writer.writerow([
-            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude','geojson', 'Status',
+            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'geojson',
+            'Status',
             'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
         ])
 
@@ -329,7 +338,8 @@ class ParcelleExportView(LoginRequiredMixin, View):
         sheet.title = "Parcelles"
 
         headers = [
-            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude','geojson', 'Status',
+            'unique_id', 'Nom Parcelle', 'Code', 'Localité', 'Dimension (ha)', 'Longitude', 'Latitude', 'geojson',
+            'Status',
             'Producteur', 'Cultures Pérènes', 'Cultures Saisonnières'
         ]
         sheet.append(headers)
@@ -967,14 +977,78 @@ class DynamicFieldCreateView(CreateView):
         return super().form_valid(form)
 
 
+# @login_required
+# def valider_mobiledata(request, pk):
+#     # Récupérer les données de l'instance MobileData
+#     mobiledata = get_object_or_404(MobileData, pk=pk)
+#
+#     try:
+#         # Mettre à jour ou créer le Producteur
+#         producteur, created = Producteur.objects.update_or_create(
+#             nom=mobiledata.nom,
+#             prenom=mobiledata.prenom,
+#             defaults={
+#                 'sexe': mobiledata.sexe,
+#                 'telephone': mobiledata.telephone,
+#                 'date_naissance': mobiledata.date_naissance,
+#                 'lieu_naissance': mobiledata.lieu_naissance,
+#                 'photo': mobiledata.photo,
+#                 'fonction': mobiledata.fonction,
+#             }
+#         )
+#
+#         # Mettre à jour ou créer la Parcelle
+#         parcelle, created = Parcelle.objects.update_or_create(
+#             nom=mobiledata.nom_parcelle,
+#             producteur=producteur,
+#             defaults={
+#                 'localite': mobiledata.localite,
+#                 'dimension_ha': mobiledata.dimension_ha,
+#                 'longitude': mobiledata.longitude,
+#                 'latitude': mobiledata.latitude,
+#             }
+#         )
+#
+#         # Valider l'objet MobileData
+#         mobiledata.validate = True
+#         mobiledata.validate_by = request.user.employee
+#         mobiledata.save()
+#
+#         # return JsonResponse({'message': 'Données validées avec succès', 'status': 'success'})
+#         messages.success(request, 'Données validées avec succès')
+#         return redirect('mobiledata_list')
+#     except Exception as e:
+#         # return JsonResponse({'message': f'Erreur lors de la validation: {e}', 'status': 'error'})
+#         messages.error(request, f'Erreur lors de la validation: {e}')
+#         return redirect('mobiledata_list')
+
+
+# ListeView
+
 @login_required
 def valider_mobiledata(request, pk):
     # Récupérer les données de l'instance MobileData
     mobiledata = get_object_or_404(MobileData, pk=pk)
 
     try:
+        # Vérifier si la coopérative existe ou la créer
+        cooperative = None
+        if mobiledata.nom_cooperative:
+            cooperative, _ = Cooperative.objects.get_or_create(nom=mobiledata.nom_cooperative)
+
+        # Vérifier si le projet existe
+        projet = None
+        if mobiledata.projet:
+            projet = mobiledata.projet  # Associer directement le projet existant
+
+        # Vérifier si la ville (localité) existe, sinon la créer
+        localite = None
+        if mobiledata.ville_enquette:
+            localite, _ = Ville.objects.get_or_create(name=mobiledata.ville_enquette)
+
         # Mettre à jour ou créer le Producteur
         producteur, created = Producteur.objects.update_or_create(
+            enquete_uid=mobiledata.uid,
             nom=mobiledata.nom,
             prenom=mobiledata.prenom,
             defaults={
@@ -984,18 +1058,25 @@ def valider_mobiledata(request, pk):
                 'lieu_naissance': mobiledata.lieu_naissance,
                 'photo': mobiledata.photo,
                 'fonction': mobiledata.fonction,
+                'cooperative': cooperative,
+                'projet': projet,
+                'created_by': request.user.employee,  # Assignation de l'employé qui valide
             }
         )
 
         # Mettre à jour ou créer la Parcelle
         parcelle, created = Parcelle.objects.update_or_create(
+            enquete_uid=mobiledata.uid,
             nom=mobiledata.nom_parcelle,
             producteur=producteur,
             defaults={
-                'localite': mobiledata.localite,
+                'localite': localite,  # Correction : ville_enquette assignée à localite
                 'dimension_ha': mobiledata.dimension_ha,
                 'longitude': mobiledata.longitude,
                 'latitude': mobiledata.latitude,
+                'status': 'Validé',
+                'projet': projet,
+                'created_by': request.user.employee,
             }
         )
 
@@ -1004,22 +1085,20 @@ def valider_mobiledata(request, pk):
         mobiledata.validate_by = request.user.employee
         mobiledata.save()
 
-        # return JsonResponse({'message': 'Données validées avec succès', 'status': 'success'})
-        messages.success(request, 'Données validées avec succès')
+        messages.success(request, 'Données validées avec succès.')
         return redirect('mobiledata_list')
+
     except Exception as e:
-        # return JsonResponse({'message': f'Erreur lors de la validation: {e}', 'status': 'error'})
         messages.error(request, f'Erreur lors de la validation: {e}')
         return redirect('mobiledata_list')
 
 
-# ListeView
 class MobileDataListView(ListView):
     model = MobileData
     template_name = "pages/mobiledata_list.html"  # Nom du template
     context_object_name = "mobiledata_list"  # Nom utilisé dans le contexte pour accéder aux objets
     paginate_by = 10
-    ordering = ["validate","-updated_at", "created_at"]  # Corrigé en liste de champs
+    ordering = ["validate", "-updated_at", "created_at"]  # Corrigé en liste de champs
 
     def get_queryset(self):
         # Récupérer tous les objets au départ

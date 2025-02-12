@@ -281,16 +281,8 @@ class CultureActivityForm(forms.ModelForm):
         }
 
 
+
 class MobileDataForm(forms.ModelForm):
-    # pratiques_culturales = forms.MultipleChoiceField(
-    #     choices=[
-    #         ('agroforestry', 'Agroforesterie'),
-    #         ('intercropping', 'Intercropping'),
-    #         ('composting', 'Compostage'),
-    #     ],
-    #     widget=forms.CheckboxSelectMultiple(),
-    #     required=False
-    # )
     class Meta:
         model = MobileData
         fields = [
@@ -302,7 +294,7 @@ class MobileDataForm(forms.ModelForm):
             'date_naissance',
             'lieu_naissance',
             'fonction',
-            'localite',
+            'ville_enquette',
             'nbre_personne_foyer',
             'nbre_personne_charge',
             'revenue_derniere_recolte',

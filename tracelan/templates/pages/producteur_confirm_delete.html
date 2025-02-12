@@ -1,0 +1,36 @@
+{% extends "layout/alert_base.html" %}
+{% load static %}
+{% block content %}
+    <style>
+        .confirmation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+        }
+        .confirmation-container img {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .confirmation-buttons {
+            margin-top: 20px;
+
+        }
+    </style>
+
+        <div class="confirmation-container">
+            <img src="{% static 'assets/media/error/danger.gif' %}" alt="Attention">
+            <h1 class="text-danger display-1">Attention !</h1>
+            <h2 class="text-danger">Confirmer la suppression</h2>
+            <h3>Êtes-vous sûr de vouloir supprimer le Producteur <strong>{{ parcelle.nom }}</strong> ?</h3>
+
+            <form method="post" class="confirmation-buttons">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-lg me-3 mr-10">Oui, supprimer</button>
+                <a href="{% url 'producteurs-list'%}" class="btn btn-secondary btn-lg">Annuler</a>
+            </form>
+        </div>
+
+{% endblock %}

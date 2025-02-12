@@ -77,7 +77,7 @@
                                                 </a>
                                             </li>
                                             <li class="navi-item">
-                                                <a href="{% url 'producteurs-details' producteur.id %}" class="navi-link">
+                                                <a href="{% url 'producteurs-delete' producteur.id %}" class="navi-link">
                                                     <span class="navi-text">Supprimer</span>
                                                 </a>
                                             </li>
@@ -107,7 +107,11 @@
                                 </div>
                             </div>
                             <!-- Parcelles Info -->
-                            <p class="mb-7">
+{#                         <p class="mb-1">#}
+{#                                <strong>Identifiant enquete: </strong>#}
+{#                                <span class="badge badge-primary float-right">{{ producteur.enquete_uid }}</span>#}
+{#                            </p>#}
+                            <p class="mb-3">
                                 <strong>Nombre Parcelles:</strong>
                                 <span class="badge badge-primary float-right">{{ producteur.parcelle_count }}</span>
                             </p>
@@ -118,7 +122,7 @@
                                 </span>
                             </p>
                             <!-- Téléphone et Localité -->
-                            <div class="mb-7">
+                            <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="text-dark-75 font-weight-bolder mr-2">Téléphone:</span>
                                     <a href="#" class="text-muted text-hover-primary">{{ producteur.telephone }}</a>

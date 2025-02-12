@@ -512,6 +512,7 @@ class CooperativeMember(models.Model):
 
 
 class Producteur(models.Model):
+    enquete_uid = models.CharField(max_length=20, unique=True, null=True, editable=True, blank=True, verbose_name="Identifiant de l'enquete ")
     nom = models.CharField(max_length=100, null=True, blank=True)
     prenom = models.CharField(max_length=500, null=True, blank=True)
     sexe = models.CharField(max_length=1, choices=[('M', 'Masculin'), ('F', 'Féminin')])
@@ -519,8 +520,7 @@ class Producteur(models.Model):
     date_naissance = models.DateField(blank=True, null=True)
     lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
-    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,
-                                    blank=True)
+    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,  blank=True)
     fonction = models.CharField(max_length=100, null=True, blank=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
@@ -608,6 +608,7 @@ class CultureDetail(models.Model):
 
 
 class Parcelle(models.Model):
+    enquete_uid = models.CharField(max_length=20, unique=True, null=True, editable=True, blank=True, verbose_name="Identifiant de l'enquete ")
     unique_id = models.CharField(max_length=20, unique=True, null=True, editable=False, blank=True,
                                  verbose_name="Identifiant Unique")
     producteur = models.ForeignKey(Producteur, on_delete=models.CASCADE, related_name="parcelles")
@@ -1188,41 +1189,32 @@ class FieldResponse(models.Model):
 
 
 class MobileData(models.Model):
-    uid = models.CharField(max_length=100, null=True, blank=True)
-
+    uid = models.CharField(max_length=100, null=False, blank=False)
     nom = models.CharField(max_length=100, null=True, blank=True)
     prenom = models.CharField(max_length=500, null=True, blank=True)
     sexe = models.CharField(max_length=1, null=True, blank=True, choices=[('M', 'Masculin'), ('F', 'Féminin')])
     telephone = models.CharField(max_length=20, blank=True, null=True)
     date_naissance = models.DateField(blank=True, null=True)
-
     lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
     fonction = models.CharField(max_length=100, null=True, blank=True)
-    localite = models.ForeignKey(Ville, null=True, blank=True, on_delete=models.CASCADE,
-                                 related_name="localite_producteur")
+    localite = models.ForeignKey(Ville, null=True, blank=True, on_delete=models.CASCADE, related_name="localite_producteur")
     # Infos sur le foyer
     nbre_personne_foyer = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Taille du foyer"))
     nbre_personne_charge = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
-    revenue_derniere_recolte = models.PositiveIntegerField(null=True, blank=True,
-                                                           verbose_name=_("Nombre de dépendants"))
+    revenue_derniere_recolte = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
     handicap = models.CharField(max_length=100, null=True, blank=True)
 
     # Historique des cultures
     cultureType = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type de Culture"))
     nom_culture = models.CharField(max_length=200, null=True, blank=True, verbose_name=_("Nom de la Culture"))
     annee_mise_en_place = models.CharField(null=True, blank=True, verbose_name=_("Année de mise en place"))
-    date_derniere_recolte = models.DateField(null=True, blank=True,
-                                             verbose_name=_("Date de dernière récolte (pérenne)"))
-    rendement_approximatif = models.CharField(max_length=50, null=True, blank=True,
-                                              verbose_name=_("Rendement approximatif "))
-    Culture_intercalaire = models.CharField(max_length=50, null=True, blank=True,
-                                            verbose_name=_("Culture Intercalaire "))
+    date_derniere_recolte = models.DateField(null=True, blank=True, verbose_name=_("Date de dernière récolte (pérenne)"))
+    rendement_approximatif = models.CharField(max_length=50, null=True, blank=True,  verbose_name=_("Rendement approximatif "))
+    Culture_intercalaire = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Culture Intercalaire "))
     dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
 
-    cultures_precedentes = models.CharField(null=True, max_length=200, blank=True,
-                                            verbose_name=_("Cultures précédentes"))
-    annee_cultures_precedentes = models.CharField(null=True, blank=True,
-                                                  verbose_name=_("Année des cultures précédentes"))
+    cultures_precedentes = models.CharField(null=True, max_length=200, blank=True,   verbose_name=_("Cultures précédentes"))
+    annee_cultures_precedentes = models.CharField(null=True, blank=True,  verbose_name=_("Année des cultures précédentes"))
     evenements_climatiques = models.CharField(max_length=50, null=True, blank=True)
 
     # Commentaires généraux
@@ -1235,8 +1227,7 @@ class MobileData(models.Model):
     latitude = models.DecimalField(max_digits=10, decimal_places=8, null=True, blank=True)
 
     images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
-    category = models.CharField(max_length=50, null=True, blank=True,
-                                verbose_name=_("Catégorie"))
+    category = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Catégorie"))
 
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
@@ -1271,4 +1262,4 @@ class MobileData(models.Model):
     validate = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.nom} ({self.projet.name})"
+        return f"{self.nom} ({self.projet})"

@@ -225,6 +225,7 @@ class MobileDataAdmin(admin.ModelAdmin):
     # Champs à afficher dans la liste d'administration
     list_display = (
         'projet',
+        'uid',
         'nom',
         'prenom',
         'sexe',
@@ -252,8 +253,8 @@ class MobileDataAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Informations sur le Producteur", {
             'fields': (
-                'nom', 'prenom', 'sexe', 'telephone', 'date_naissance',
-                'lieu_naissance', 'photo', 'fonction', 'localite',
+                'uid','ville_enquette','nom', 'prenom', 'sexe', 'telephone', 'date_naissance',
+                'lieu_naissance', 'photo', 'fonction', 'localite'
             )
         }),
         ("Informations sur la Parcelle", {
