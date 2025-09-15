@@ -50,8 +50,7 @@ services:
       - "traefik.http.middlewares.traceagri-sec.headers.forceSTSHeader=true"
       - "traefik.http.middlewares.traceagri-sec.headers.frameDeny=true"
       - "traefik.http.middlewares.traceagri-sec.headers.contentTypeNosniff=true"
-      - "traefik.http.routers.traceagri.middlewares==sec-headers@docker,compress@docker,ratelimit@docker"
-
+      - "traefik.http.routers.traceagri.middlewares=traceagri-compress,traceagri-sec"
 
 
   agridb:
