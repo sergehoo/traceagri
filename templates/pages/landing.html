@@ -234,10 +234,19 @@
 <!-- Hero Section -->
 <section class="hero">
     <!-- Video Background -->
- <video autoplay muted loop playsinline class="video-background">
-        <source src="/static/assets/media/agriculture-bg.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas les vidéos HTML5.
-    </video>
+{# <video autoplay muted loop playsinline class="video-background">#}
+{#        <source src="/static/assets/media/agriculture-bg.mp4" type="video/mp4">#}
+{#        Votre navigateur ne supporte pas les vidéos HTML5.#}
+{#    </video>#}
+    
+    <video autoplay muted loop playsinline preload="auto" class="video-background" poster="/static/assets/media/bg/addparcelle.jpg">
+  <!-- modern -->
+  <source src="/static/assets/media/agriculture-bg.webm" type="video/webm; codecs=av01.0.05M.08">
+  <source src="/static/assets/media/agriculture-bg.webm" type="video/webm; codecs=vp9,opus">
+  <!-- fallback universel -->
+  <source src="/static/assets/media/agriculture-bg.mp4" type="video/mp4">
+  Votre navigateur ne supporte pas la vidéo HTML5.
+</video>
     
     <!-- Overlay -->
     <div class="overlay"></div>
