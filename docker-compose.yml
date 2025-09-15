@@ -36,6 +36,7 @@ services:
       - default
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       # Router HTTPS principal
       - "traefik.http.routers.traceagri.rule=Host(`traceagri.com`)"
       - "traefik.http.routers.traceagri.entrypoints=websecure"
@@ -49,7 +50,9 @@ services:
       - "traefik.http.middlewares.traceagri-sec.headers.forceSTSHeader=true"
       - "traefik.http.middlewares.traceagri-sec.headers.frameDeny=true"
       - "traefik.http.middlewares.traceagri-sec.headers.contentTypeNosniff=true"
-      - "traefik.http.routers.traceagri.middlewares=traceagri-compress,traceagri-sec"
+      - "traefik.http.routers.traceagri.middlewares==sec-headers@docker,compress@docker,ratelimit@docker"
+
+
 
   agridb:
     image: postgis/postgis:13-3.1
