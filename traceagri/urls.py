@@ -37,7 +37,7 @@ urlpatterns = i18n_patterns(
     path('unicorn/', include('django_unicorn.urls')),
     path('accounts/', include('allauth.urls')),
     path('api/', include('traceagri.api.urls')),
-    path('api-auth/', include('rest_framework.urls')),
+    # path('api-auth/', include('rest_framework.urls')),
     path('auth/', include('djoser.urls')),
     path('auth/tablette/', include('djoser.urls.authtoken')),
 
