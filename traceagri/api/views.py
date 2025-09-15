@@ -17,10 +17,10 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from traceagri.api.serializers import ProducteurSerializer, ParcelleMobileSerializer, ProducteurMobileSerializer, \
-    UserSerializer, DynamicFormSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer, \
-    MobileDataSerializer, VilleSerializer
+    UserSerializer, ProjectSerializer, CooperativeSerializer, CooperativeMemberSerializer, \
+    MobileDataSerializer, VilleSerializer, FormSubmissionSerializer, SubmissionImageSerializer
 from tracelan.models import Producteur, Parcelle, Region, DistrictSanitaire, Cooperative, DynamicForm, FormResponse, \
-    FieldResponse, Project, CooperativeMember, MobileData, Ville
+    FieldResponse, Project, CooperativeMember, MobileData, Ville, SubmissionImage
 
 
 class DashboardDataAPIView(APIView):
@@ -180,11 +180,11 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
-class DynamicFormViewSet(ReadOnlyModelViewSet):
-    queryset = DynamicForm.objects.prefetch_related('fields')
-    serializer_class = DynamicFormSerializer
-    permission_classes = [IsAuthenticated]
-
+# class DynamicFormViewSet(ReadOnlyModelViewSet):
+#     queryset = DynamicForm.objects.prefetch_related('fields')
+#     serializer_class = DynamicFormSerializer
+#     permission_classes = [IsAuthenticated]
+#
 
 class SubmitFormResponse(APIView):
     def post(self, request, form_id):
@@ -367,3 +367,57 @@ class LocaliteListView(APIView):
         localites = Ville.objects.all()
         serializer = VilleSerializer(localites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+#------API formulaire dynamique
+
+# class FormTemplateViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = FormTemplate.objects.filter(is_active=True).prefetch_related('fields')
+#     serializer_class = FormTemplateSerializer
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#
+#     def list(self, request, *args, **kwargs):
+#         # Retourne seulement les templates actifs
+#         queryset = self.filter_queryset(self.get_queryset())
+#         serializer = self.get_serializer(queryset, many=True)
+#         return Response({
+#             'forms': serializer.data,
+#             'server_version': 1  # Incrémenter à chaque modification
+#         })
+
+
+# class FormSubmissionViewSet(viewsets.ModelViewSet):
+#     queryset = FormSubmission.objects.all()
+#     serializer_class = FormSubmissionSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#
+#     parser_classes = [MultiPartParser]  # Pour accepter les fichiers
+#
+#     @action(detail=True, methods=['post'])
+#     def upload_image(self, request, pk=None):
+#         submission = self.get_object()
+#         image_file = request.FILES.get('image')
+#         field_label = request.data.get('field_label')
+#
+#         if not image_file:
+#             return Response({'error': 'No image provided'}, status=400)
+#
+#         image = SubmissionImage.objects.create(
+#             submission=submission,
+#             image=image_file,
+#             field_label=field_label
+#         )
+#
+#         return Response(SubmissionImageSerializer(image).data, status=201)
+#
+#     def create(self, request, *args, **kwargs):
+#         # Gérer les soumissions multiples pour le cas offline
+#         if isinstance(request.data, list):
+#             serializer = self.get_serializer(data=request.data, many=True)
+#         else:
+#             serializer = self.get_serializer(data=request.data)
+#
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         headers = self.get_success_headers(serializer.data)
+#         return Response(serializer.data, status=201, headers=headers)

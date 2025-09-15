@@ -275,9 +275,6 @@ class ProducteurDeleteView(LoginRequiredMixin, DeleteView):
         return reverse('producteurs-list')
 
 
-
-
-
 class ParcelleExportView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         export_format = request.GET.get('format', 'csv')  # Par défaut, CSV
@@ -440,6 +437,12 @@ class ParcelleDetailView(LoginRequiredMixin, DetailView):
         context['cultureform'] = CultureActivityForm()  # Assurez-vous que `affectations` est renseigné
 
         return context
+
+
+def get_cultures(request):
+    """Retourne la liste des cultures actives enregistrées"""
+    cultures = Culture.objects.filter(is_active=True).values_list('name', flat=True).distinct()
+    return JsonResponse(list(cultures), safe=False)
 
 
 class ParcelleCreateView(LoginRequiredMixin, CreateView):

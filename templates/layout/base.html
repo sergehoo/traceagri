@@ -71,6 +71,9 @@
     <link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css"/>
     <!--end::Global Theme Styles-->
 
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+   
+
     <!--begin::Layout Themes(used by all pages)-->
     <!--end::Layout Themes-->
 
@@ -752,7 +755,7 @@
 <script src="{% static 'assets/plugins/custom/fullcalendar/fullcalendar.bundle.js' %}"></script>
 <script src="{% static 'assets/js/pages/widgets.js' %}"></script>
 <script src="{% static 'assets/js/pages/crud/ktdatatable/base/html-table.js' %}"></script>
-<script src="{% static 'assets/js/pages/crud/forms/widgets/tagify.js' %}"></script>
+{#<script src="{% static 'assets/js/pages/crud/forms/widgets/tagify.js' %}"></script>#}
 <script src="{% static 'assets/js/pages/features/miscellaneous/sweetalert2.js' %}"></script>
 {% if messages %}
     {% for message in messages %}
@@ -1110,5 +1113,37 @@
         getCityFromCoordinates(lat, lon);
     });
 </script>
+<script>
+        function autocompleteCulture() {
+            return {
+                query: "{{ form.culture.value|default:'' }}", // Préremplir avec la valeur du formulaire
+                showSuggestions: false,
+                suggestions: [],
+                filteredSuggestions: [],
+
+                async fetchData() {
+                    const response = await fetch("/look/cultures/");
+                    this.suggestions = await response.json();
+                },
+
+                filterSuggestions() {
+                    this.filteredSuggestions = this.suggestions.filter(culture =>
+                        culture.toLowerCase().includes(this.query.toLowerCase())
+                    );
+                },
+
+                selectSuggestion(culture) {
+                    this.query = culture;
+                    this.showSuggestions = false;
+                },
+
+                hideSuggestionsWithDelay() {
+                    setTimeout(() => {
+                        this.showSuggestions = false
+                    }, 200);
+                }
+            }
+        }
+    </script>
 </body>
 </html>

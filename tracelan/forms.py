@@ -55,21 +55,25 @@ class ParcelleForm(forms.ModelForm):
             # "carracteristic": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
             "status": forms.Select(choices=Status_choices,
                                    attrs={"class": "form-control select2", 'id': 'kt_select2_1_2', 'name': 'param'}),
-            "culture": forms.TextInput(
-                attrs={"class": "form-control tagify", 'id': 'kt_tagify_1', 'name': 'tags'}),
+            "culture": forms.TextInput(attrs={
+                "class": "form-control",
+                "x-data": "autocompleteCulture()",
+                "x-model": "query",
+                "@input": "filterSuggestions",
+                "@focus": "showSuggestions = true",
+                "@blur": "hideSuggestionsWithDelay",
+                "placeholder": "Saisissez une culture..."
+            }),
             "images": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
         }
 
         def clean_culture(self):
-            """Valider que le champ culture contient un JSON valide et extraire la première valeur."""
-            culture_data = self.cleaned_data['culture']
-            try:
-                # Convertit la chaîne en liste d'objets JSON
-                cultures = json.loads(culture_data)
+            """Valider et extraire une seule valeur du champ JSON."""
+            culture_data = self.cleaned_data.get('culture', '')
 
-                # Vérifie que chaque élément est un dictionnaire contenant une clé "value"
+            try:
+                cultures = json.loads(culture_data)
                 if all(isinstance(item, dict) and "value" in item for item in cultures):
-                    # Retourne uniquement la première valeur
                     return cultures[0]["value"] if cultures else ""
                 else:
                     raise forms.ValidationError("Chaque élément doit contenir une clé 'value'.")
@@ -281,7 +285,6 @@ class CultureActivityForm(forms.ModelForm):
         }
 
 
-
 class MobileDataForm(forms.ModelForm):
     class Meta:
         model = MobileData
@@ -323,7 +326,6 @@ class MobileDataForm(forms.ModelForm):
             'nom_cooperative',
             'ville',
             'createdDate',
-
 
         ]
         widgets = {

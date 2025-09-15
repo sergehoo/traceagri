@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from traceagri.api.views import ParcellesProducteurAPIView, DashboardDataAPIView, ProducteurMobileViewSet, \
-    ParcelleMobileViewSet, UserViewSet, DynamicFormViewSet, ProjectViewSet, CooperativeViewSet, \
+    ParcelleMobileViewSet, UserViewSet, ProjectViewSet, CooperativeViewSet, \
     CooperativeMemberViewSet, ParcelleDetailAPIView, MobileDataViewSet, MobileDataStatsAPIView, ImageUploadView, \
     LocaliteListView
 

@@ -9,16 +9,19 @@ from io import BytesIO
 from django.contrib.auth.models import User
 from django.contrib.gis.gdal import SpatialReference, CoordTransform
 from django.contrib.gis.geos import Point, GEOSGeometry
+from django.core.files.storage import default_storage
 from django.db import models
 from django.contrib.gis.db import models
 from django.db.models import Sum, Max
 from django.utils.timezone import now
 from fastkml import kml
-from shapely.geometry import mapping, shape
+
+from shapely.geometry import mapping, shape, Polygon
 from django.utils.translation import gettext_lazy as _
 from shapely.ops import unary_union
 from simple_history.models import HistoricalRecords
 from unidecode import unidecode
+from pyproj import Proj, transform, Transformer
 
 Status_choices = [
     ('En projet', 'En projet'),
@@ -512,7 +515,8 @@ class CooperativeMember(models.Model):
 
 
 class Producteur(models.Model):
-    enquete_uid = models.CharField(max_length=20, unique=True, null=True, editable=True, blank=True, verbose_name="Identifiant de l'enquete ")
+    enquete_uid = models.CharField(max_length=20, unique=True, null=True, editable=True, blank=True,
+                                   verbose_name="Identifiant de l'enquete ")
     nom = models.CharField(max_length=100, null=True, blank=True)
     prenom = models.CharField(max_length=500, null=True, blank=True)
     sexe = models.CharField(max_length=1, choices=[('M', 'Masculin'), ('F', 'Féminin')])
@@ -520,7 +524,8 @@ class Producteur(models.Model):
     date_naissance = models.DateField(blank=True, null=True)
     lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
-    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,  blank=True)
+    cooperative = models.ForeignKey(Cooperative, on_delete=models.CASCADE, related_name="producteurs", null=True,
+                                    blank=True)
     fonction = models.CharField(max_length=100, null=True, blank=True)
     projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
@@ -607,8 +612,58 @@ class CultureDetail(models.Model):
         return f"{self.culture.name} ({self.parcelle.nom}) - {self.get_type_culture_display()}"
 
 
+# def calculate_area_hectares(polygon):
+#     """Convertit un polygone de WGS84 en projection métrique et calcule sa surface en hectares."""
+#     wgs84 = Proj("epsg:4326")  # Coordonnées géographiques (lat/lon)
+#     metric_proj = Proj("epsg:3857")  # Projection métrique pour le calcul
+#
+#     # Transformation des coordonnées (ignorer l'altitude si présente)
+#     projected_coords = []
+#     for coord in polygon.exterior.coords:
+#         lon, lat = coord[:2]  # Ignorer altitude si présente
+#         x, y = transform(wgs84, metric_proj, lon, lat)
+#         projected_coords.append((x, y))
+#
+#     # Création du polygone projeté
+#     projected_polygon = Polygon(projected_coords)
+#
+#     # Calcul de la surface en hectares (1 hectare = 10 000 m²)
+#     return projected_polygon.area / 10000
+
+def calculate_area_hectares(polygon):
+    """
+    Convertit un polygone de WGS84 en projection métrique et calcule sa surface en hectares.
+    Cette version est mise à jour pour gérer tous les types de fichiers KMZ.
+    """
+    # Création du transformateur de coordonnées (EPSG:4326 -> EPSG:3857)
+    transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
+
+    # Transformation des coordonnées (ignorer l'altitude si présente)
+    projected_coords = [transformer.transform(lon, lat) for lon, lat, *_ in polygon.exterior.coords]
+
+    # Vérifier que le polygone transformé est valide avant de calculer l'aire
+    if len(projected_coords) < 3:
+        print("⚠️ Polygone invalide (moins de 3 points). Impossible de calculer la superficie.")
+        return 0
+
+    # Création du polygone projeté
+    projected_polygon = Polygon(projected_coords)
+
+    # Vérifier si le polygone est valide avant le calcul
+    if not projected_polygon.is_valid:
+        print("⚠️ Géométrie invalide après transformation. Vérifiez les coordonnées.")
+        return 0
+
+    # Calcul de la surface en hectares (1 hectare = 10 000 m²)
+    area_hectares = projected_polygon.area / 10000
+
+    # Retourner la superficie calculée
+    return round(area_hectares, 4)  # Arrondi à 4 décimales pour plus de précision
+
+
 class Parcelle(models.Model):
-    enquete_uid = models.CharField(max_length=20, unique=True, null=True, editable=True, blank=True, verbose_name="Identifiant de l'enquete ")
+    enquete_uid = models.CharField(max_length=20, unique=True, null=True, editable=True, blank=True,
+                                   verbose_name="Identifiant de l'enquete ")
     unique_id = models.CharField(max_length=20, unique=True, null=True, editable=False, blank=True,
                                  verbose_name="Identifiant Unique")
     producteur = models.ForeignKey(Producteur, on_delete=models.CASCADE, related_name="parcelles")
@@ -659,35 +714,53 @@ class Parcelle(models.Model):
             self.geojson = self.kmz_to_geojson()
 
         # Calculer la surface et les coordonnées si un GeoJSON valide est disponible
-        if self.geojson:
+
+        # Vérification du GeoJSON
+        if self.geojson and "features" in self.geojson:
             try:
-                # Combiner les géométries pour obtenir une surface unique
+                print("✅ GeoJSON extrait avec succès, calcul de la superficie...")
                 geometries = [shape(feature["geometry"]) for feature in self.geojson["features"]]
                 combined_geometry = unary_union(geometries)
 
-                # Vérifier si la géométrie combinée est valide
                 if combined_geometry.is_valid:
-                    # Reprojection pour calcul précis (EPSG:4326 vers EPSG:3857)
-                    srid_target = SpatialReference(3857)  # Système métrique
-                    srid_source = SpatialReference(4326)  # Système source (KMZ)
-                    transform = CoordTransform(srid_source, srid_target)
-
-                    # Convertir la géométrie en EPSG:3857
-                    gdal_geometry = GEOSGeometry(json.dumps(mapping(combined_geometry)), srid=4326)
-                    gdal_geometry.transform(transform)
-
-                    # Calculer la surface en hectares
-                    self.dimension_ha = round(gdal_geometry.area / 10000, 4)
-
-                    # Centroid pour la localisation
-                    centroid = combined_geometry.centroid
-                    self.longitude = round(centroid.x, 6)
-                    self.latitude = round(centroid.y, 6)
-                    self.geom = Point(centroid.x, centroid.y, srid=4326)
+                    self.dimension_ha = calculate_area_hectares(combined_geometry)
+                    print(f"📏 Superficie calculée: {self.dimension_ha} hectares")
                 else:
-                    print("Géométrie invalide détectée dans le fichier KMZ.")
+                    print("❌ La géométrie combinée est invalide.")
             except Exception as e:
-                print(f"Erreur lors du calcul de la dimension ou des coordonnées : {e}")
+                print(f"⚠️ Erreur lors du calcul de la dimension : {e}")
+
+        else:
+            print("⚠️ Aucun GeoJSON valide trouvé pour le calcul.")
+        # if self.geojson:
+        #     try:
+        #         # Combiner les géométries pour obtenir une surface unique
+        #         geometries = [shape(feature["geometry"]) for feature in self.geojson["features"]]
+        #         combined_geometry = unary_union(geometries)
+        #
+        #         # Vérifier si la géométrie combinée est valide
+        #         if combined_geometry.is_valid:
+        #             # Reprojection pour calcul précis (EPSG:4326 vers EPSG:3857)
+        #             srid_target = SpatialReference(3857)  # Système métrique
+        #             srid_source = SpatialReference(4326)  # Système source (KMZ)
+        #             transform = CoordTransform(srid_source, srid_target)
+        #
+        #             # Convertir la géométrie en EPSG:3857
+        #             gdal_geometry = GEOSGeometry(json.dumps(mapping(combined_geometry)), srid=4326)
+        #             gdal_geometry.transform(transform)
+        #
+        #             # Calculer la surface en hectares
+        #             self.dimension_ha = round(gdal_geometry.area / 10000, 4)
+        #
+        #             # Centroid pour la localisation
+        #             centroid = combined_geometry.centroid
+        #             self.longitude = round(centroid.x, 6)
+        #             self.latitude = round(centroid.y, 6)
+        #             self.geom = Point(centroid.x, centroid.y, srid=4326)
+        #         else:
+        #             print("Géométrie invalide détectée dans le fichier KMZ.")
+        #     except Exception as e:
+        #         print(f"Erreur lors du calcul de la dimension ou des coordonnées : {e}")
 
         super().save(*args, **kwargs)
 
@@ -1136,15 +1209,101 @@ class EventInvite(models.Model):
         # Use get_invite_type_display() to get the human-readable name of the invite_type field
         return f"{self.get_invite()} ({self.get_invite_type_display()})"
 
+class MobileData(models.Model):
+    uid = models.CharField(max_length=100, null=False, blank=False)
+    nom = models.CharField(max_length=100, null=True, blank=True)
+    prenom = models.CharField(max_length=500, null=True, blank=True)
+    sexe = models.CharField(max_length=1, null=True, blank=True, choices=[('M', 'Masculin'), ('F', 'Féminin')])
+    telephone = models.CharField(max_length=20, blank=True, null=True)
+    date_naissance = models.DateField(blank=True, null=True)
+    lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
+    fonction = models.CharField(max_length=100, null=True, blank=True)
+    localite = models.ForeignKey(Ville, null=True, blank=True, on_delete=models.CASCADE,
+                                 related_name="localite_producteur")
+    # Infos sur le foyer
+    nbre_personne_foyer = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Taille du foyer"))
+    nbre_personne_charge = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
+    revenue_derniere_recolte = models.PositiveIntegerField(null=True, blank=True,
+                                                           verbose_name=_("Nombre de dépendants"))
+    handicap = models.CharField(max_length=100, null=True, blank=True)
 
+    # Historique des cultures
+    cultureType = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type de Culture"))
+    nom_culture = models.CharField(max_length=200, null=True, blank=True, verbose_name=_("Nom de la Culture"))
+    annee_mise_en_place = models.CharField(null=True, blank=True, verbose_name=_("Année de mise en place"))
+    date_derniere_recolte = models.DateField(null=True, blank=True,
+                                             verbose_name=_("Date de dernière récolte (pérenne)"))
+    rendement_approximatif = models.CharField(max_length=50, null=True, blank=True,
+                                              verbose_name=_("Rendement approximatif "))
+    Culture_intercalaire = models.CharField(max_length=50, null=True, blank=True,
+                                            verbose_name=_("Culture Intercalaire "))
+    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+
+    cultures_precedentes = models.CharField(null=True, max_length=200, blank=True,
+                                            verbose_name=_("Cultures précédentes"))
+    annee_cultures_precedentes = models.CharField(null=True, blank=True,
+                                                  verbose_name=_("Année des cultures précédentes"))
+    evenements_climatiques = models.CharField(max_length=50, null=True, blank=True)
+
+    # Commentaires généraux
+    commentaires = models.TextField(null=True, blank=True, verbose_name=_("Commentaires"))
+
+    # Infos sur la parcelle
+    nom_parcelle = models.CharField(max_length=100, null=True, blank=True)
+
+    longitude = models.DecimalField(max_digits=11, decimal_places=8, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=8, null=True, blank=True)
+
+    images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
+    category = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Catégorie"))
+
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
+                                          related_name="localite_parcelle")
+
+    annee_premiere_recole = models.CharField(null=True, blank=True, max_length=200,
+                                             verbose_name=_("Date de récolte (saisonnière)"))
+
+    utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
+    fertilizerType = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Type de fertilisants"))
+
+    analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
+    autre_culture = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type"))
+    autre_culture_nom = models.CharField(max_length=200, null=True, blank=True)
+    autre_culture_volume_ha = models.IntegerField(null=True, blank=True)
+    photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
+    # Infos sur la cooperative
+    nom_cooperative = models.CharField(max_length=100, null=True, blank=True)
+    ville = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
+                              related_name="adresse_cooperative")
+    specialites = models.ForeignKey('Culture', on_delete=models.CASCADE, null=True, blank=True)
+    is_president = models.BooleanField(default=False, verbose_name=_("President ?"))
+    ville_enquette = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("ville de l'enquête "))
+    projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
+
+    createdDate = models.CharField(max_length=100, null=True, blank=True)
+    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
+    updated_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='updatedby')
+    validate_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL,
+                                    related_name='validateby')
+    validate = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.nom} ({self.projet})"
+
+#formulaire dynamique
 class DynamicForm(models.Model):
     project = models.ForeignKey(Project, related_name="forms", on_delete=models.CASCADE, verbose_name="Projet")
     name = models.CharField(max_length=255, verbose_name="Nom du Formulaire")
     description = models.TextField(blank=True, null=True, verbose_name="Description")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
-
     created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
+    is_active = models.BooleanField(default=True)
+    allows_images = models.BooleanField(default=False)
+    requires_gps = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} ({self.project.name})"
@@ -1186,80 +1345,26 @@ class FieldResponse(models.Model):
     response = models.ForeignKey(FormResponse, related_name="field_responses", on_delete=models.CASCADE)
     field = models.ForeignKey(DynamicField, on_delete=models.CASCADE)
     value = models.TextField()
+    device_id = models.CharField(max_length=255)  # Identifiant unique du device
+    submitted_data = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_synced = models.BooleanField(default=False)  # Pour le cas offline
+    submission_date = models.DateTimeField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
 
-class MobileData(models.Model):
-    uid = models.CharField(max_length=100, null=False, blank=False)
-    nom = models.CharField(max_length=100, null=True, blank=True)
-    prenom = models.CharField(max_length=500, null=True, blank=True)
-    sexe = models.CharField(max_length=1, null=True, blank=True, choices=[('M', 'Masculin'), ('F', 'Féminin')])
-    telephone = models.CharField(max_length=20, blank=True, null=True)
-    date_naissance = models.DateField(blank=True, null=True)
-    lieu_naissance = models.CharField(max_length=100, null=True, blank=True)
-    fonction = models.CharField(max_length=100, null=True, blank=True)
-    localite = models.ForeignKey(Ville, null=True, blank=True, on_delete=models.CASCADE, related_name="localite_producteur")
-    # Infos sur le foyer
-    nbre_personne_foyer = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Taille du foyer"))
-    nbre_personne_charge = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
-    revenue_derniere_recolte = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Nombre de dépendants"))
-    handicap = models.CharField(max_length=100, null=True, blank=True)
+class SubmissionImage(models.Model):
+    submission = models.ForeignKey(FormResponse, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='submissions/%Y/%m/%d/')
+    field_label = models.CharField(max_length=255)  # Pour identifier à quel champ du formulaire l'image est associée
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    # Historique des cultures
-    cultureType = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type de Culture"))
-    nom_culture = models.CharField(max_length=200, null=True, blank=True, verbose_name=_("Nom de la Culture"))
-    annee_mise_en_place = models.CharField(null=True, blank=True, verbose_name=_("Année de mise en place"))
-    date_derniere_recolte = models.DateField(null=True, blank=True, verbose_name=_("Date de dernière récolte (pérenne)"))
-    rendement_approximatif = models.CharField(max_length=50, null=True, blank=True,  verbose_name=_("Rendement approximatif "))
-    Culture_intercalaire = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Culture Intercalaire "))
-    dimension_ha = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    def delete(self, *args, **kwargs):
+        """Supprime le fichier physique lors de la suppression de l'objet"""
+        if self.image:
+            default_storage.delete(self.image.name)
+        super().delete(*args, **kwargs)
 
-    cultures_precedentes = models.CharField(null=True, max_length=200, blank=True,   verbose_name=_("Cultures précédentes"))
-    annee_cultures_precedentes = models.CharField(null=True, blank=True,  verbose_name=_("Année des cultures précédentes"))
-    evenements_climatiques = models.CharField(max_length=50, null=True, blank=True)
 
-    # Commentaires généraux
-    commentaires = models.TextField(null=True, blank=True, verbose_name=_("Commentaires"))
 
-    # Infos sur la parcelle
-    nom_parcelle = models.CharField(max_length=100, null=True, blank=True)
-
-    longitude = models.DecimalField(max_digits=11, decimal_places=8, null=True, blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=8, null=True, blank=True)
-
-    images = models.ImageField(upload_to="parcelles/", blank=True, null=True)
-    category = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Catégorie"))
-
-    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
-    localite_parcelle = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
-                                          related_name="localite_parcelle")
-
-    annee_premiere_recole = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Date de récolte (saisonnière)"))
-
-    utilise_fertilisants = models.BooleanField(default=False, verbose_name=_("Utilise des fertilisants ?"))
-    fertilizerType = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("Type de fertilisants"))
-
-    analyse_sol = models.BooleanField(default=False, verbose_name=_("Analyse de sol effectuée ?"))
-    autre_culture = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Type"))
-    autre_culture_nom = models.CharField(max_length=200, null=True, blank=True)
-    autre_culture_volume_ha = models.IntegerField(null=True, blank=True)
-    photo = models.ImageField(null=True, blank=True, upload_to="products/%Y/%m/%d/")
-    # Infos sur la cooperative
-    nom_cooperative = models.CharField(max_length=100, null=True, blank=True)
-    ville = models.ForeignKey(Ville, on_delete=models.CASCADE, null=True, blank=True,
-                              related_name="adresse_cooperative")
-    specialites = models.ForeignKey('Culture', on_delete=models.CASCADE, null=True, blank=True)
-    is_president = models.BooleanField(default=False, verbose_name=_("President ?"))
-    ville_enquette = models.CharField(null=True, blank=True, max_length=200, verbose_name=_("ville de l'enquête "))
-    projet = models.ForeignKey('Project', on_delete=models.CASCADE, null=True, blank=True)
-
-    createdDate = models.CharField(max_length=100, null=True, blank=True)
-    created_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL)
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de Création"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Date de Mise à Jour"))
-    updated_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='updatedby')
-    validate_by = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name='validateby')
-    validate = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.nom} ({self.projet})"

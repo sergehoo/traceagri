@@ -29,7 +29,7 @@ from tracelan.views import HomePageView, ProducteurListView, ProducteurDetailVie
     add_invites_and_send_emails, confirm_presence, CooperativeListView, CooperativeCreateView, CooperativeUpdateView, \
     CooperativeDeleteView, CooperativeDetailView, ParcelleExportView, ProducteurExportView, MobileDataListView, \
     MobileDataDetailView, MobileDataUpdateView, MobileDataDeleteView, LandingView, add_culture_activity, \
-    ProducteurUpdateView, valider_mobiledata, ProducteurDeleteView
+    ProducteurUpdateView, valider_mobiledata, ProducteurDeleteView, get_cultures
 
 urlpatterns = i18n_patterns(
     path('admin/', admin.site.urls),
@@ -55,6 +55,8 @@ urlpatterns = i18n_patterns(
     path('parcelle/<int:parcelle_id>/add_culture_activity/', add_culture_activity, name="add_culture_activity"),
 
     path("parcelles/<int:pk>/", ParcelleDetailView.as_view(), name="parcelle-detail"),
+    path("look/cultures/", get_cultures, name="look_cultures"),
+
     path("parcelles/create/<int:producteur_id>", ParcelleCreateView.as_view(), name="parcelle-create"),
     path("parcelles/<int:pk>/update/", ParcelleUpdateView.as_view(), name="parcelle-update"),
     path("parcelles/<int:producteur_id>/delete/<int:pk>", ParcelleDeleteView.as_view(), name="parcelle-delete"),

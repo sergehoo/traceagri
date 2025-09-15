@@ -1,3 +1,125 @@
+networks:
+  proxy:
+    external: true
+
+volumes:
+  traefik_letsencrypt: {}   # déjà utilisé par traefik
+  pgdata:
+    driver: local
+  static_volume: {}
+  staticfiles_volume: {}
+  media_volume: {}
+
+services:
+  traceagriweb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn traceagri.wsgi:application --bind 0.0.0.0:8000"
+    # ⛔️ plus de mapping de port: Traefik s’en charge
+    volumes:
+      - .:/app
+      - static_volume:/traceagri-app/static
+      - staticfiles_volume:/traceagri-app/staticfiles
+      - media_volume:/traceagri-app/media
+    env_file:
+      - ./.env
+    depends_on:
+      - agridb
+      - redis
+    restart: always
+    networks:
+      - proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      # Router HTTPS principal
+      - "traefik.http.routers.traceagri.rule=Host(`traceagri.com`)"
+      - "traefik.http.routers.traceagri.entrypoints=websecure"
+      - "traefik.http.routers.traceagri.tls.certresolver=lets"
+      # Service applicatif (port interne Gunicorn)
+      - "traefik.http.services.traceagri.loadbalancer.server.port=8000"
+      # (Optionnel) compress + headers de base
+      - "traefik.http.middlewares.traceagri-compress.compress=true"
+      - "traefik.http.middlewares.traceagri-sec.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.traceagri-sec.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.traceagri-sec.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.traceagri-sec.headers.frameDeny=true"
+      - "traefik.http.middlewares.traceagri-sec.headers.contentTypeNosniff=true"
+      - "traefik.http.routers.traceagri.middlewares=traceagri-compress,traceagri-sec"
+
+  agridb:
+    image: postgis/postgis:13-3.1
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  agriadminer:
+    image: adminer
+    restart: always
+    # ⛔️ plus de ports exposés
+    environment:
+      - ADMINER_DEFAULT_SERVER=agridb
+    networks:
+      - proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`${ADMINER_HOST}`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls.certresolver=lets"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+      # (Fortement recommandé) Basic Auth sur Adminer
+      # Génère un user htpasswd et remplace la valeur ci-dessous
+      # Exemple: htpasswd -nbB admin 'motdepasse' -> admin:$$2y$$...
+      - "traefik.http.middlewares.adminer-auth.basicauth.users=${ADMINER_BASIC_AUTH}"
+      - "traefik.http.routers.adminer.middlewares=adminer-auth"
+
+  redis:
+    image: redis:6
+    # ⛔️ pas besoin d’exposer de port en externe
+    restart: always
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A traceagri worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - agridb
+    environment:
+      # ✅ bon port interne docker: 6379
+      CELERY_BROKER_URL: redis://redis:6379/0
+    restart: always
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A traceagri beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - agridb
+    environment:
+      # ✅ bon port interne docker: 6379
+      CELERY_BROKER_URL: redis://redis:6379/0
+    restart: always
 #services:
 #  traceagriweb:
 #    build:
@@ -15,10 +137,11 @@
 #      - staticfiles_volume:/traceagri-app/staticfiles
 #      - media_volume:/traceagri-app/media
 #    env_file:
-#      - .env
+#      - ./.env
 #    depends_on:
 #      - agridb
 #      - redis
+#    restart: always
 #
 #  agridb:
 #    image: postgis/postgis:13-3.1
@@ -27,10 +150,24 @@
 #      POSTGRES_USER: ${DB_USER}
 #      POSTGRES_PASSWORD: ${DB_PASSWORD}
 #
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#
+#    restart: always
+#
+#  agriadminer:
+#    image: adminer
+#    restart: always
+#    ports:
+#      - 2611:8080  # Port mapping for Adminer
+#    environment:
+#      - ADMINER_DEFAULT_SERVER=agridb  # Default DB server in Adminer
+#
 #  redis:
 #    image: redis:6
 #    ports:
-#      - "2624:6379"
+#      - "6380:6379"  # Redirection directe pour éviter la confusion
+#    restart: always
 #
 #  celery:
 #    build:
@@ -44,6 +181,9 @@
 #    depends_on:
 #      - redis
 #      - agridb
+#    environment:
+#      CELERY_BROKER_URL: redis://redis:6380/0  # Utilisation du nom du service Docker
+#    restart: always
 #
 #  celery-beat:
 #    build:
@@ -57,96 +197,13 @@
 #    depends_on:
 #      - redis
 #      - agridb
+#    environment:
+#      CELERY_BROKER_URL: redis://redis:6380/0  # Utilisation du nom du service Docker
+#    restart: always
 #
 #volumes:
+#  pgdata:
+#    driver: local
 #  static_volume:
 #  staticfiles_volume:
 #  media_volume:
-
-services:
-  traceagriweb:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn traceagri.wsgi:application --bind 0.0.0.0:8000"
-    ports:
-      - "2610:8000"
-    volumes:
-      - .:/app
-      - static_volume:/traceagri-app/static
-      - staticfiles_volume:/traceagri-app/staticfiles
-      - media_volume:/traceagri-app/media
-    env_file:
-      - ./.env
-    depends_on:
-      - agridb
-      - redis
-    restart: always
-
-  agridb:
-    image: postgis/postgis:13-3.1
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-    restart: always
-
-  agriadminer:
-    image: adminer
-    restart: always
-    ports:
-      - 2611:8080  # Port mapping for Adminer
-    environment:
-      - ADMINER_DEFAULT_SERVER=agridb  # Default DB server in Adminer
-
-  redis:
-    image: redis:6
-    ports:
-      - "6380:6379"  # Redirection directe pour éviter la confusion
-    restart: always
-
-  celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A traceagri worker --loglevel=info
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - agridb
-    environment:
-      CELERY_BROKER_URL: redis://redis:6380/0  # Utilisation du nom du service Docker
-    restart: always
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A traceagri beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - agridb
-    environment:
-      CELERY_BROKER_URL: redis://redis:6380/0  # Utilisation du nom du service Docker
-    restart: always
-
-volumes:
-  pgdata:
-    driver: local
-  static_volume:
-  staticfiles_volume:
-  media_volume:

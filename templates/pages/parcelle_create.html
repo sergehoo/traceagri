@@ -112,7 +112,33 @@
                                                 {% for field in form %}
                                                     <div class="form-group">
                                                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                        {{ field }}
+
+                                                        <!-- Vérifier si le champ est "culture" pour appliquer Alpine.js -->
+                                                        {% if field.name == "culture" %}
+                                                            <div x-data="autocompleteCulture()">
+                                                                <input type="text" class="form-control"
+                                                                       x-model="query" @input="filterSuggestions"
+                                                                       @focus="showSuggestions = true"
+                                                                       @blur="hideSuggestionsWithDelay"
+                                                                       name="{{ field.name }}"
+                                                                       id="{{ field.id_for_label }}"
+                                                                       placeholder="Saisissez une culture..."
+                                                                       value="{{ field.value|default:'' }}">
+
+                                                                <!-- Liste des suggestions -->
+                                                                <ul x-show="showSuggestions && filteredSuggestions.length > 0"
+                                                                    class="suggestions-list">
+                                                                    <template x-for="suggestion in filteredSuggestions"
+                                                                              :key="suggestion">
+                                                                        <li @click="selectSuggestion(suggestion)"
+                                                                            x-text="suggestion"></li>
+                                                                    </template>
+                                                                </ul>
+                                                            </div>
+                                                        {% else %}
+                                                            {{ field }}
+                                                        {% endif %}
+
                                                         {% if field.errors %}
                                                             <div class="text-danger">
                                                                 <ul>
@@ -124,6 +150,9 @@
                                                         {% endif %}
                                                     </div>
                                                 {% endfor %}
+                                                <!-- Ajout de l'input avec autocomplétion -->
+
+
 
                                                 <button type="submit" class="btn btn-primary btn-block">Créer</button>
                                             </form>
@@ -152,5 +181,24 @@
             <!--end::Entry-->
         </div>
     </div>
+<style>
+    .suggestions-list {
+        background: white;
+        border: 1px solid #ccc;
+        position: absolute;
+        width: 100%;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+    .suggestions-list li {
+        padding: 8px;
+        cursor: pointer;
+    }
+    .suggestions-list li:hover {
+        background: #f0f0f0;
+    }
+</style>
+    
 
 {% endblock %}

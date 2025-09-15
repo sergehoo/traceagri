@@ -6,7 +6,7 @@ from rest_framework import serializers
 from shapely.geometry import shape
 
 from tracelan.models import Producteur, Parcelle, DynamicField, DynamicForm, Project, Ville, Cooperative, \
-    CooperativeMember, MobileData
+    CooperativeMember, MobileData, SubmissionImage, FieldResponse, FormResponse
 
 
 class ProducteurMobileSerializer(serializers.ModelSerializer):
@@ -48,18 +48,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'username', 'email', 'is_staff']
 
 
-class DynamicFieldSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DynamicField
-        fields = ['label', 'field_type', 'required', 'options', 'order']
-
-
-class DynamicFormSerializer(serializers.ModelSerializer):
-    fields = DynamicFieldSerializer(many=True)
-
-    class Meta:
-        model = DynamicForm
-        fields = ['id', 'name', 'description', 'fields']
+# class DynamicFormSerializer(serializers.ModelSerializer):
+#     fields = DynamicFieldSerializer(many=True)
+#
+#     class Meta:
+#         model = DynamicForm
+#         fields = ['id', 'name', 'description', 'fields']
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -167,3 +161,84 @@ class VilleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ville
         fields = ['id', 'name']  # Incluez les champs nécessaires
+
+
+#serializer des forms dynamique
+
+
+class SubmissionImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubmissionImage
+        fields = ['id', 'image', 'field_label']
+
+
+# class FieldResponseSerializer(serializers.ModelSerializer):
+#     field = DynamicFieldSerializer(read_only=True)
+#
+#     class Meta:
+#         model = FieldResponse
+#         fields = '__all__'
+
+
+# class FormResponseSerializer(serializers.ModelSerializer):
+#     field_responses = FieldResponseSerializer(many=True, read_only=True)
+#     images = SubmissionImageSerializer(many=True, read_only=True)
+#
+#     class Meta:
+#         model = FormResponse
+#         fields = '__all__'
+
+
+class DynamicFieldSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        field_type = data.get('field_type')
+        options = data.get('options')
+
+        if field_type in ['select', 'checkbox', 'radio'] and not options:
+            raise serializers.ValidationError(
+                "Options are required for select, checkbox and radio fields"
+            )
+        return data
+
+    class Meta:
+        model = DynamicField
+        fields = '__all__'
+
+
+class FormSubmissionSerializer(serializers.ModelSerializer):
+    field_responses = serializers.JSONField()
+    images = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        write_only=True
+    )
+
+    def create(self, validated_data):
+        images = validated_data.pop('images', [])
+        field_responses = validated_data.pop('field_responses')
+
+        # Create form response
+        response = FormResponse.objects.create(**validated_data)
+
+        # Create field responses
+        for field_id, value in field_responses.items():
+            field = DynamicField.objects.get(id=field_id)
+            FieldResponse.objects.create(
+                response=response,
+                field=field,
+                value=str(value)
+            )
+
+        # Handle images
+        for image_data in images:
+            SubmissionImage.objects.create(
+                submission=response,
+                image=image_data['file'],
+                field_label=image_data['field_label']
+            )
+
+        return response
+
+    class Meta:
+        model = FormResponse
+        fields = ['form', 'submitted_at', 'field_responses', 'images']
